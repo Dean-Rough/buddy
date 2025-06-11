@@ -33,19 +33,24 @@ npx prisma db push
 npx prisma db seed
 ```
 
-### 🔐 Authentication Foundation
+### 🔐 Two-Tier Authentication Foundation
 ```bash
-# Task: Configure Clerk for Next.js 14
+# Task: Configure Clerk for Next.js 14 (Parent accounts only)
 # File: middleware.ts
 # Content: Protect /parent routes, allow /pin and /chat
 
 # Task: Create Clerk webhook handler
 # File: app/api/webhooks/clerk/route.ts
-# Content: Sync parent accounts to database
+# Content: Sync parent accounts to database, no child accounts
 
-# Task: Build PIN authentication service
+# Task: Build child profile management
+# File: app/api/auth/child/create/route.ts
+# Content: Parent creates child sub-profiles with PIN
+
+# Task: Build PIN authentication service  
 # File: lib/auth.ts
-# Functions: verifyPin(), createChildSession(), validateSession()
+# Functions: verifyPin(), createChildSession(), validateParentOwnership()
+# Note: Children access sub-profiles, not independent Clerk accounts
 ```
 
 ## Core Chat System (Week 3-4)
@@ -137,8 +142,8 @@ npx prisma db seed
 ```bash
 # Task: Create parent dashboard overview
 # File: app/(parent)/dashboard/page.tsx
-# Data: Child activity summaries, recent alerts, mood trends
-# Components: ActivityCard, AlertCenter, MoodChart
+# Data: Child profile management, activity summaries, recent alerts, mood trends
+# Components: ChildProfileCreator, ActivityCard, AlertCenter, MoodChart
 
 # Task: Build alert management system
 # File: app/(parent)/alerts/page.tsx

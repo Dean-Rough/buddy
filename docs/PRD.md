@@ -39,7 +39,7 @@ The children's interface will prioritize extreme simplicity and emotional safety
   - Let the child choose and name their AI chat buddy
   - Offer a small set of pre-designed persona characters (e.g., friendly raccoon, chill robot, wise jellyfish)
   - The name and character are used throughout the chat to create a sense of connection and consistency
-- Children access the app using a simple 4-digit PIN which they choose themselves. This PIN is auto-sent to the parent on setup. PIN-based login allows personalization without requiring usernames or passwords.
+- Children access the app using a simple 4-digit PIN managed by their parent account. Parents create and manage child profiles as sub-accounts under their main Clerk authentication. PIN-based login allows personalization while maintaining COPPA compliance by ensuring all child data legally belongs to the parent account.
 - During onboarding, the child’s age will be entered or inferred, allowing the system to adjust language complexity, tone, and default chat style. Further research will define age-appropriate response patterns for MVP launch. Neurodivergent support will be explored in a future phase.
 - Include playful prompts to encourage light-hearted reflection (e.g., “What was your favourite dinner last week?” or “Any birthday parties coming up?”). These can also serve as a subtle channel to collect wish-related data that can be shared with parents in the weekly summary, with a clear opt-in mechanism during onboarding.
 
@@ -48,10 +48,10 @@ The children's interface will prioritize extreme simplicity and emotional safety
 ### 🧭 User Journey & Core Flows (MVP)
 
 #### Onboarding
-1. Child enters PIN or sets one up (parent notified)
-2. Selects or creates buddy persona
-3. Enters age or age inferred
-4. Age-specific tone + language model activated
+1. Parent creates child profile in dashboard and sets PIN
+2. Child enters PIN to access their profile
+3. Child selects or creates buddy persona (within parent-approved options)
+4. Age-specific tone + language model activated based on parent-entered age
 
 #### Chat Session
 1. Child selects chat mode (e.g. Normal, Whisper)
@@ -252,8 +252,8 @@ This product is designed for use by children and must comply with key data prote
 #### 📜 Regulatory Commitments
 
 - **COPPA (Children’s Online Privacy Protection Act - USA)**  
-  - Obtain verifiable parental consent before collecting any personal data.
-  - Provide clear privacy disclosures in kid-friendly language.
+  - Two-tier authentication ensures parents have full legal control over child data
+  - Child profiles are sub-accounts under parent Clerk accounts (not independent users)
   - Allow parents to review or delete their child’s data at any time.
 
 - **GDPR-K (General Data Protection Regulation for Kids - EU/UK)**  
@@ -263,9 +263,11 @@ This product is designed for use by children and must comply with key data prote
 
 #### 🔐 Technical Implementation
 
-- **PIN-Based Identity System**
-  - Children log in using a parent-linked PIN.
-  - No usernames, emails, or open identifiers are stored.
+- **Two-Tier Authentication System**
+  - Parents authenticate via standard Clerk authentication (email/password with MFA)
+  - Children are sub-profiles under parent accounts, accessed via PIN
+  - Child profiles are not direct Clerk users for COPPA compliance
+  - All child data legally belongs to parent account
 
 - **Data Encryption & Access**
   - All chat data and metadata stored encrypted at rest and in transit.
@@ -383,7 +385,8 @@ Future versions will include a transparent Privacy Policy and Consent Workflow t
 
 #### Phase 1: Core Safety MVP (Weeks 1-6)
 **Must Have:**
-- PIN-based authentication system (Clerk integration)
+- Two-tier authentication system (Parent Clerk accounts + child sub-profiles with PIN access)
+- Parent dashboard for child profile management
 - Basic chat interface (text only, single persona)
 - Dual-layer AI safety (primary agent + real-time monitor)
 - Level 3 escalation system (immediate danger detection)
@@ -436,7 +439,7 @@ Future versions will include a transparent Privacy Policy and Consent Workflow t
 
 #### Technical Stack (Confirmed)
 - **Platform & Deployment:** Vercel
-- **Auth:** Clerk (PIN-based login with parent-linked visibility)
+- **Auth:** Clerk (Parent accounts with child sub-profiles using PIN-based access)
 - **Database:** NeonDB
 - **Frontend:** React (via Next.js framework)
 - **Voice (TTS):** Cartesia

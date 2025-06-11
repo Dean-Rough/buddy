@@ -19,11 +19,13 @@ npx prisma db seed
 
 ### Key Relationships
 ```
-Parent 1:N Child 1:N Conversation 1:N Message
+Parent (Clerk User) 1:N Child Profile 1:N Conversation 1:N Message
 Parent 1:N ParentNotification
-Child 1:N SafetyEvent 1:N Message
-Child 1:N ChildMemory
+Child Profile 1:N SafetyEvent 1:N Message
+Child Profile 1:N ChildMemory
 SafetyEvent N:1 Moderator
+
+Note: Child profiles are sub-accounts, not independent Clerk users (COPPA compliance)
 ```
 
 ### Essential Queries
@@ -55,12 +57,13 @@ const safetyEvent = await prisma.safetyEvent.create({
 
 ### Data Operations
 ```typescript
-// PIN authentication
+// PIN authentication (validates child sub-profile)
 const child = await prisma.child.findFirst({
   where: { 
     pinHash: await bcrypt.hash(pin, 10),
     accountStatus: 'active'
-  }
+  },
+  include: { parent: true } // Include parent for legal data ownership
 });
 
 // Log conversation with safety analysis
@@ -96,12 +99,17 @@ await prisma.childMemory.upsert({
 ```
 
 ## COPPA/GDPR Utilities
+
+### Two-Tier Authentication Compliance
+The two-tier system ensures COPPA compliance by making parents the legal owners of all child data. Child profiles are sub-accounts that cannot exist independently of parent Clerk accounts.
 ```typescript
-// Data export for child (GDPR compliance)
-async function exportChildData(childId: string) {
+// Data export for child (GDPR compliance - parent-initiated only)
+async function exportChildData(childId: string, parentId: string) {
+  // Verify parent owns child profile
   return await prisma.child.findUnique({
-    where: { id: childId },
+    where: { id: childId, parentId },
     include: {
+      parent: true, // Include parent info for legal compliance
       conversations: {
         include: { messages: true }
       },
@@ -111,8 +119,15 @@ async function exportChildData(childId: string) {
   });
 }
 
-// Complete data deletion (right to erasure)
-async function deleteChildData(childId: string) {
+// Complete data deletion (right to erasure - parent-initiated only)
+async function deleteChildData(childId: string, parentId: string) {
+  // Verify parent owns child profile before deletion
+  const child = await prisma.child.findUnique({ 
+    where: { id: childId, parentId }
+  });
+  
+  if (!child) throw new Error('Child profile not found or not owned by parent');
+  
   await prisma.$transaction([
     prisma.childMemory.deleteMany({ where: { childId } }),
     prisma.safetyEvent.deleteMany({ where: { childId } }),

@@ -31,16 +31,18 @@
 
 ### 2. Authentication & Authorization (`/app/(auth)/`)
 
-#### Clerk Integration
-- **Child PIN System**: 4-digit PINs linked to parent accounts
-- **Parent Account Management**: Standard email/password with MFA
-- **Session Management**: Secure session handling with child privacy focus
-- **Family Structure**: Parent-child account linking with privacy boundaries
+#### Two-Tier Clerk Integration
+- **Parent Authentication**: Full Clerk accounts with email/password and MFA
+- **Child Sub-Profiles**: Managed under parent accounts, not independent Clerk users
+- **PIN Access System**: 4-digit PINs for child profile access (COPPA compliant)
+- **Session Management**: Secure session handling with parent-controlled privacy boundaries
+- **Legal Data Ownership**: All child data legally belongs to parent account
 
 #### Access Control Matrix
 ```
-Child (PIN):     Read/Write own conversations only
-Parent:          Read summaries + alerts (per visibility settings)
+Child (PIN):     Read/Write own conversations via parent sub-profile
+Parent:          Full legal ownership and control of child data
+                 Read summaries + alerts (per visibility settings)
 Moderator:       Read flagged content + escalation workflows
 Admin:           Full system access for safety/compliance
 ```
@@ -51,8 +53,9 @@ Admin:           Full system access for safety/compliance
 ```
 /api/
 ├── auth/
-│   ├── pin/verify
-│   └── parent/session
+│   ├── pin/verify          # Child PIN authentication
+│   ├── parent/session      # Parent Clerk session
+│   └── child/create        # Parent creates child profile
 ├── chat/
 │   ├── message
 │   ├── session
@@ -96,18 +99,20 @@ Child Input → Safety Monitor → Primary Agent → Safety Monitor → Response
 ### 5. Data Layer (NeonDB PostgreSQL)
 
 #### Core Data Entities
-- **Children**: PIN, age, persona preferences, language level
-- **Conversations**: Messages, sentiment analysis, safety flags
-- **Parents**: Account details, notification preferences, visibility settings
+- **Parents**: Clerk user accounts, notification preferences, child management settings
+- **Child Profiles**: Sub-accounts under parents, PIN access, persona preferences, language level
+- **Conversations**: Messages, sentiment analysis, safety flags (owned by parent account)
 - **Safety Events**: Escalation logs, moderation decisions, pattern tracking
 - **System Metrics**: Performance data, safety accuracy, usage analytics
 
 #### Data Relationships
 ```
-Parent (1) ←→ (N) Child
-Child (1) ←→ (N) Conversation
+Parent (Clerk User) (1) ←→ (N) Child Profile
+Child Profile (1) ←→ (N) Conversation
 Conversation (1) ←→ (N) Message
 Message (1) ←→ (N) SafetyEvent
+
+Note: All child data legally belongs to parent account
 ```
 
 ### 6. External Service Integrations

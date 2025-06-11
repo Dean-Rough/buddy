@@ -54,6 +54,7 @@ model Child {
   conversations Conversation[]
   safetyEvents  SafetyEvent[]
   memories      ChildMemory[]
+  notifications ParentNotification[]
   
   @@unique([parentId, pinHash])
   @@map("children")

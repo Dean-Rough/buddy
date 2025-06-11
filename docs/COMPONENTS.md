@@ -5,13 +5,14 @@
 ### Authentication Components (`/components/auth/`)
 
 #### `PinEntry`
-Child PIN authentication interface.
+Child PIN access for sub-profiles (not independent authentication).
 ```tsx
 interface PinEntryProps {
   onPinSubmit: (pin: string) => Promise<void>;
   loading?: boolean;
   error?: string;
   maxAttempts?: number;
+  parentId?: string; // For logging/tracking parent ownership
 }
 ```
 **Features:**
@@ -19,15 +20,32 @@ interface PinEntryProps {
 - Visual feedback for each digit
 - Shake animation on error
 - Accessibility support with screen reader announcements
+- Clear indication this accesses a sub-profile, not independent account
 
 #### `ParentLogin`
-Standard email/password login for parents.
+Full Clerk authentication for parent accounts (legal data owners).
 ```tsx
 interface ParentLoginProps {
   onLogin: (credentials: LoginCredentials) => Promise<void>;
   redirectTo?: string;
+  onChildCreate?: () => void; // Navigate to child profile creation
 }
 ```
+
+#### `ChildProfileCreator`
+Parent interface for creating child sub-profiles.
+```tsx
+interface ChildProfileCreatorProps {
+  onProfileCreate: (childData: ChildProfileData) => Promise<void>;
+  maxChildren?: number;
+  existingChildren: ChildProfile[];
+}
+```
+**Features:**
+- Child name and age input
+- PIN creation with confirmation
+- Privacy settings selection
+- Clear COPPA compliance messaging
 
 ### Chat Interface Components (`/components/chat/`)
 
@@ -221,23 +239,32 @@ interface ChildFriendlyButtonProps {
 ### Authentication Services
 
 #### `PinAuthService`
-Child PIN authentication and session management.
+Child sub-profile PIN access and session management.
 ```typescript
 class PinAuthService {
   async verifyPin(pin: string, deviceId: string): Promise<AuthResult>
-  async createChildSession(childId: string): Promise<SessionToken>
+  async createChildSession(childId: string, parentId: string): Promise<SessionToken>
   async validateSession(token: string): Promise<ChildSession>
   async logoutChild(sessionId: string): Promise<void>
+  
+  // COPPA compliance helper
+  async validateParentOwnership(childId: string, parentId: string): Promise<boolean>
 }
 ```
 
 #### `ParentAuthService`
-Parent authentication via Clerk integration.
+Parent Clerk authentication and child profile management.
 ```typescript
 class ParentAuthService {
   async authenticateParent(clerkUserId: string): Promise<ParentSession>
-  async linkChildToParent(parentId: string, childData: ChildData): Promise<Child>
+  async createChildProfile(parentId: string, childData: ChildData): Promise<Child>
+  async updateChildProfile(childId: string, parentId: string, updates: ChildUpdates): Promise<Child>
+  async deleteChildProfile(childId: string, parentId: string): Promise<void>
   async getParentChildren(parentId: string): Promise<Child[]>
+  
+  // COPPA compliance methods
+  async exportChildData(childId: string, parentId: string): Promise<ChildDataExport>
+  async verifyParentalConsent(parentId: string): Promise<ConsentStatus>
 }
 ```
 

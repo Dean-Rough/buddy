@@ -3,7 +3,7 @@
 ## Tech Stack
 - **Frontend**: Next.js 14 + React 18 + TailwindCSS + TypeScript
 - **Database**: NeonDB (PostgreSQL) + Prisma ORM
-- **Auth**: Clerk (PIN-based child auth + parent accounts)
+- **Auth**: Clerk (Parent accounts + child sub-profiles with PIN access)
 - **AI**: OpenAI GPT-4/Anthropic Claude via proxy + safety layer
 - **Voice**: Cartesia TTS
 - **Deploy**: Vercel
@@ -77,8 +77,8 @@ npm run type-check   # TypeScript validation
 buddy/
 ├── app/
 │   ├── (auth)/
-│   │   ├── pin/page.tsx           # Child PIN login
-│   │   └── parent/page.tsx        # Parent auth
+│   │   ├── pin/page.tsx           # Child PIN access to sub-profile
+│   │   └── parent/page.tsx        # Parent Clerk authentication
 │   ├── (chat)/
 │   │   ├── page.tsx               # Main chat interface
 │   │   └── whisper/page.tsx       # Whisper mode

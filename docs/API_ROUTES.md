@@ -3,8 +3,10 @@
 ## Core Endpoints
 
 ### Auth
-- `POST /api/auth/pin/verify` - Child PIN login
-- `POST /api/auth/parent/login` - Parent Clerk auth
+- `POST /api/auth/pin/verify` - Child PIN access to sub-profile
+- `POST /api/auth/parent/login` - Parent Clerk authentication
+- `POST /api/auth/child/create` - Parent creates child sub-profile
+- `PUT /api/auth/child/{id}` - Parent updates child profile settings
 
 ### Chat  
 - `POST /api/chat/message` - Send message, get AI response
@@ -20,7 +22,7 @@
 
 ## Implementation Examples
 
-### PIN Authentication
+### PIN Authentication (Child Sub-Profile Access)
 ```typescript
 // app/api/auth/pin/verify/route.ts
 import { NextRequest } from 'next/server';
@@ -30,9 +32,17 @@ import { prisma } from '@/lib/db';
 export async function POST(request: NextRequest) {
   const { pin, deviceId } = await request.json();
   
+  // Find child sub-profile by PIN
   const child = await prisma.child.findFirst({
-    where: { pinHash: await bcrypt.hash(pin, 10) },
-    include: { parent: true }
+    where: { 
+      pinHash: await bcrypt.hash(pin, 10),
+      accountStatus: 'active'
+    },
+    include: { 
+      parent: {
+        select: { id: true, email: true } // Parent owns this data legally
+      }
+    }
   });
   
   if (!child) {
@@ -41,7 +51,53 @@ export async function POST(request: NextRequest) {
   
   return Response.json({
     success: true,
-    child: { id: child.id, name: child.name, persona: child.persona }
+    child: { 
+      id: child.id, 
+      name: child.name, 
+      persona: child.persona,
+      parentId: child.parentId // Track parent ownership
+    }
+  });
+}
+```
+
+### Parent Child Profile Creation
+```typescript
+// app/api/auth/child/create/route.ts
+import { auth } from '@clerk/nextjs';
+import { prisma } from '@/lib/db';
+import bcrypt from 'bcrypt';
+
+export async function POST(request: NextRequest) {
+  const { userId } = auth();
+  if (!userId) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const { name, age, pin } = await request.json();
+  
+  // Find parent account
+  const parent = await prisma.parent.findUnique({
+    where: { clerkUserId: userId }
+  });
+  
+  if (!parent) {
+    return Response.json({ error: 'Parent account not found' }, { status: 404 });
+  }
+  
+  // Create child sub-profile
+  const child = await prisma.child.create({
+    data: {
+      name,
+      age,
+      pinHash: await bcrypt.hash(pin, 10),
+      parentId: parent.id
+    }
+  });
+  
+  return Response.json({
+    success: true,
+    child: { id: child.id, name: child.name }
   });
 }
 ```
