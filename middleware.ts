@@ -54,10 +54,13 @@ export default authMiddleware({
           return;
         }
         
-        // For other routes, redirect to onboarding to complete setup
-        if (url.pathname === "/" || url.pathname === "/sign-in") {
+        // For sign-in route, redirect to onboarding to complete setup
+        if (url.pathname === "/sign-in") {
           return Response.redirect(new URL("/onboarding", req.url));
         }
+        
+        // DO NOT redirect root path - let users see landing page even if logged in without metadata
+        // They can complete onboarding by clicking "GET STARTED"
       }
     }
     
