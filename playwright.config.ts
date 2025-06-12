@@ -20,7 +20,7 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.NODE_ENV === 'production' 
       ? 'https://buddy-dean-roughs-projects.vercel.app'
-      : 'http://localhost:3000',
+      : 'http://localhost:4288',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -73,7 +73,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:4288',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

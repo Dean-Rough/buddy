@@ -1,0 +1,63 @@
+# Human-Like Typing Animation Code (TypeScript/React)
+
+This is the TypeScript/React implementation of human-like typing simulation from the Humate project.
+Originally based on the typetype jQuery plugin (https://github.com/iamdanfox/typetype).
+
+## Core Algorithm Features:
+- Realistic typing errors with backspacing
+- Variable typing speed based on character type
+- Audio feedback for keystrokes and backspaces
+- Punctuation pauses (periods, commas, etc.)
+- Character-specific delays and error patterns
+
+## Key Functions:
+
+### useTypetype Hook
+Main typing simulation hook with these parameters:
+- t: Base interval between keypresses (default: 100ms)
+- e: Error rate (default: 0.02)
+- callback: Function called when typing complete
+- keypress: Function called after each keystroke
+
+### Character Timing Rules:
+- Same as previous char: 1.6x delay
+- Period/exclamation/question: 12x delay
+- Comma/semicolon/colon: 8x delay
+- Space: 3x delay
+- Regular characters: 2x delay
+
+### Error Simulation Types:
+1. Type 4 characters ahead, then backspace (30% chance)
+2. Uppercase previous + 4 chars ahead, backspace (70% chance)
+3. Type next character instead, backspace (50% chance)
+4. Swap current and next character, backspace (100% chance)
+5. Type lowercase instead of uppercase, backspace (50% chance)
+
+### Audio Integration:
+- Reduced frequency audio (every other keystroke)
+- Always plays backspace sounds
+- Uses separate audio manager for sound effects
+
+## Usage Example:
+```typescript
+const { displayText, isTyping, isComplete } = useTypetype(
+  "Your message here",
+  {
+    t: 100,        // 100ms base delay
+    e: 0.02,       // 2% error rate
+    callback: () => console.log('Done typing!')
+  }
+);
+```
+
+## Component Usage:
+```tsx
+<AIMessageTyping 
+  content="Hello, how are you today?"
+  speed="normal"
+  onComplete={() => console.log('Finished!')}
+  showCursor={true}
+/>
+```
+
+This creates incredibly realistic human-like typing with natural errors, corrections, and timing variations that make AI responses feel more conversational and human.

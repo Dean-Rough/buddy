@@ -8,6 +8,8 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import "./globals.css";
+import "../styles/fonts.css";
+import "../styles/brutalist.css";
 
 export const metadata: Metadata = {
   title: "Buddy - Safe AI Companion for Children",
@@ -23,20 +25,6 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <header className="p-4 bg-white shadow-sm">
-            <div className="max-w-6xl mx-auto flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-blue-600">Buddy</h1>
-              <div>
-                <SignedOut>
-                  <SignInButton />
-                  <SignUpButton />
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </div>
-            </div>
-          </header>
           <main>{children}</main>
         </body>
       </html>

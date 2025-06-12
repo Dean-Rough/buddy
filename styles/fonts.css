@@ -1,0 +1,111 @@
+/* Neuething Sans Font Family + Monigue for Buttons */
+
+/* Headers - Neuething Sans Extra Bold Ultra Expanded */
+@font-face {
+  font-family: 'NeuethingHeaders';
+  src: url('/fonts/NeuethingSans-ExtraBoldUltraExpanded.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Titles - Neuething Sans Bold */
+@font-face {
+  font-family: 'NeuethingTitles';
+  src: url('/fonts/NeuethingSans-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Body - Neuething Sans Regular */
+@font-face {
+  font-family: 'NeuethingBody';
+  src: url('/fonts/NeuethingSans-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Buttons - Monigue Condensed */
+@font-face {
+  font-family: 'Monigue';
+  src: url('/fonts/Monigue.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Chat font - CasualHuman for personality */
+@font-face {
+  font-family: 'CasualHuman';
+  src: url('/fonts/CasualHuman.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CasualHuman';
+  src: url('/fonts/CasualHuman-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font Stack Fallbacks */
+.font-headers {
+  font-family: 'NeuethingHeaders', 'Arial Black', 'Helvetica Neue', sans-serif;
+}
+
+.font-titles {
+  font-family: 'NeuethingTitles', 'Arial', 'Helvetica Neue', sans-serif;
+}
+
+.font-body {
+  font-family: 'NeuethingBody', 'Arial', 'Helvetica Neue', sans-serif;
+}
+
+.font-buttons {
+  font-family: 'Monigue', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+}
+
+.font-chat {
+  font-family: 'CasualHuman', 'Comic Sans MS', cursive;
+}
+
+/* Neo-Brutalist Typography Styles with New Fonts */
+.brutal-title {
+  font-family: 'NeuethingHeaders', 'Arial Black', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+.brutal-subtitle {
+  font-family: 'NeuethingTitles', 'Arial', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.0;
+}
+
+.brutal-text {
+  font-family: 'NeuethingBody', 'Arial', sans-serif;
+  font-weight: normal;
+  line-height: 1.3;
+}
+
+.brutal-button-text {
+  font-family: 'Monigue', 'Arial Narrow', sans-serif;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.handwritten-chat {
+  font-family: 'CasualHuman', 'Comic Sans MS', cursive;
+  font-weight: normal;
+  line-height: 1.4;
+}

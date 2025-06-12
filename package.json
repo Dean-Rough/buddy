@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "lsof -ti:4288 | xargs kill -9 2>/dev/null || true && next dev -p 4288",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,7 +34,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.294.0",
-    "next": "14.0.3",
+    "next": "14.2.29",
     "openai": "^4.20.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -54,7 +54,7 @@
     "@vitest/ui": "^3.2.3",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.53.0",
-    "eslint-config-next": "14.0.3",
+    "eslint-config-next": "14.2.29",
     "jsdom": "^26.1.0",
     "postcss": "^8.4.31",
     "prettier": "^3.1.0",
@@ -62,7 +62,7 @@
     "tailwindcss": "^3.3.5",
     "tsx": "^4.1.2",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
+    "vitest": "^3.2.3"
   },
   "engines": {
     "node": ">=18.0.0"

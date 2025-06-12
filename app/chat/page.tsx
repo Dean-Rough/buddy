@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import ChatInterface from "@/components/chat/ChatInterface";
+import { useEffect, useState } from "react";
+import BrutalChatInterface from "@/components/chat/BrutalChatInterface";
 
 interface ChildProfile {
   id: string;
@@ -11,46 +12,44 @@ interface ChildProfile {
 }
 
 export default function ChatPage() {
+  const { user, isLoaded } = useUser();
   const [childProfile, setChildProfile] = useState<ChildProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check for valid child session
-    const sessionToken = localStorage.getItem('childSession');
-    const profileData = localStorage.getItem('childProfile');
-
-    if (!sessionToken || !profileData) {
-      router.push('/pin');
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      
-      // Validate session token (basic check)
-      const sessionData = JSON.parse(atob(sessionToken));
-      const isExpired = Date.now() - sessionData.timestamp > 24 * 60 * 60 * 1000; // 24 hours
-      
-      if (isExpired) {
-        localStorage.removeItem('childSession');
-        localStorage.removeItem('childProfile');
-        router.push('/pin');
+    if (isLoaded) {
+      if (!user) {
+        // Not authenticated, redirect to landing page
+        router.push('/');
         return;
       }
 
-      setChildProfile(profile);
-    } catch (error) {
-      console.error('Invalid session data:', error);
-      localStorage.removeItem('childSession');
-      localStorage.removeItem('childProfile');
-      router.push('/pin');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+      // Check if this is a child account
+      const userType = user.unsafeMetadata?.userType;
+      
+      if (userType !== 'child') {
+        // Not a child account, redirect based on user type
+        if (userType === 'parent') {
+          router.push('/parent');
+        } else {
+          router.push('/');
+        }
+        return;
+      }
 
-  if (loading) {
+      // Extract child profile from Clerk user data
+      const profile: ChildProfile = {
+        id: user.id,
+        name: user.firstName || user.username || 'Young Explorer',
+        age: (user.unsafeMetadata?.age as number) || 8
+      };
+
+      setChildProfile(profile);
+    }
+  }, [isLoaded, user, router]);
+
+  // Loading state
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
@@ -61,9 +60,18 @@ export default function ChatPage() {
     );
   }
 
-  if (!childProfile) {
-    return null; // Router will redirect
+  // Not authenticated or wrong user type
+  if (!user || !childProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🔒</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Redirecting...</h2>
+          <p className="text-gray-600">Taking you to the right place</p>
+        </div>
+      </div>
+    );
   }
 
-  return <ChatInterface childProfile={childProfile} />;
+  return <BrutalChatInterface childProfile={childProfile} />;
 }

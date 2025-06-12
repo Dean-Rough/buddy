@@ -1,0 +1,372 @@
+/* Neo-Brutalist Design System */
+
+/* Core Brutalist Colors */
+:root {
+  /* Primary Brutal Palette */
+  --brutal-black: #000000;
+  --brutal-white: #ffffff;
+  --brutal-yellow: #FFE500;
+  --brutal-pink: #FF69B4;
+  --brutal-blue: #00BFFF;
+  --brutal-green: #32CD32;
+  --brutal-orange: #FF6347;
+  --brutal-purple: #9966CC;
+  --brutal-red: #FF3030;
+  
+  /* Shadows & Offsets */
+  --brutal-shadow: 4px 4px 0px var(--brutal-black);
+  --brutal-shadow-large: 6px 6px 0px var(--brutal-black);
+  --brutal-shadow-small: 2px 2px 0px var(--brutal-black);
+  
+  /* Border */
+  --brutal-border: 3px solid var(--brutal-black);
+  --brutal-border-thick: 5px solid var(--brutal-black);
+  
+  /* Paper texture */
+  --paper-bg: url('/textures/paper.png');
+}
+
+/* Base Brutal Utilities */
+.brutal-border {
+  border: var(--brutal-border);
+}
+
+.brutal-border-thick {
+  border: var(--brutal-border-thick);
+}
+
+.brutal-shadow {
+  box-shadow: var(--brutal-shadow);
+}
+
+.brutal-shadow-large {
+  box-shadow: var(--brutal-shadow-large);
+}
+
+.brutal-shadow-small {
+  box-shadow: var(--brutal-shadow-small);
+}
+
+/* No rounded corners - pure brutalism */
+.brutal-square {
+  border-radius: 0 !important;
+}
+
+/* Brutal Button Base */
+.brutal-btn {
+  font-family: 'Monigue', 'Arial Narrow', system-ui, sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: var(--brutal-border);
+  border-radius: 0;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  position: relative;
+  background: var(--brutal-white);
+  color: var(--brutal-black);
+  box-shadow: var(--brutal-shadow);
+}
+
+.brutal-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--brutal-black);
+}
+
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--brutal-black);
+}
+
+/* Brutal Button Variants */
+.brutal-btn-yellow {
+  background: var(--brutal-yellow);
+  color: var(--brutal-black);
+}
+
+.brutal-btn-pink {
+  background: var(--brutal-pink);
+  color: var(--brutal-black);
+}
+
+.brutal-btn-blue {
+  background: var(--brutal-blue);
+  color: var(--brutal-black);
+}
+
+.brutal-btn-green {
+  background: var(--brutal-green);
+  color: var(--brutal-black);
+}
+
+.brutal-btn-orange {
+  background: var(--brutal-orange);
+  color: var(--brutal-black);
+}
+
+.brutal-btn-red {
+  background: var(--brutal-red);
+  color: var(--brutal-white);
+}
+
+/* Brutal Card */
+.brutal-card {
+  border: var(--brutal-border);
+  border-radius: 0;
+  background: var(--brutal-white);
+  box-shadow: var(--brutal-shadow);
+  padding: 20px;
+  position: relative;
+}
+
+.brutal-card-colored {
+  border: var(--brutal-border-thick);
+  box-shadow: var(--brutal-shadow-large);
+}
+
+.brutal-card-yellow {
+  background: var(--brutal-yellow);
+}
+
+.brutal-card-pink {
+  background: var(--brutal-pink);
+}
+
+.brutal-card-blue {
+  background: var(--brutal-blue);
+}
+
+/* Brutal Input */
+.brutal-input {
+  border: var(--brutal-border);
+  border-radius: 0;
+  padding: 12px 16px;
+  font-family: 'NeuethingBody', 'Arial', system-ui, sans-serif;
+  font-weight: normal;
+  font-size: 16px;
+  background: var(--brutal-white);
+  color: var(--brutal-black);
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.1);
+  outline: none;
+}
+
+.brutal-input:focus {
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.2), 0 0 0 3px var(--brutal-yellow);
+}
+
+.brutal-input::placeholder {
+  color: #666;
+  font-weight: 400;
+}
+
+/* Brutal Chat Bubble */
+.brutal-bubble {
+  border: var(--brutal-border);
+  border-radius: 0;
+  padding: 16px 20px;
+  margin: 8px 0;
+  position: relative;
+  font-family: 'CasualHuman', 'Comic Sans MS', cursive;
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.brutal-bubble-user {
+  background: var(--brutal-blue);
+  color: var(--brutal-black);
+  box-shadow: var(--brutal-shadow);
+  margin-left: auto;
+  border-left: 6px solid var(--brutal-black);
+}
+
+.brutal-bubble-ai {
+  background: var(--brutal-yellow);
+  color: var(--brutal-black);
+  box-shadow: var(--brutal-shadow);
+  margin-right: auto;
+  border-right: 6px solid var(--brutal-black);
+}
+
+/* Brutal Typography */
+.brutal-h1 {
+  font-family: 'NeuethingHeaders', 'Arial Black', sans-serif;
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  color: var(--brutal-black);
+  margin: 0;
+}
+
+.brutal-h2 {
+  font-family: 'NeuethingTitles', 'Arial', sans-serif;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--brutal-black);
+  margin: 0;
+}
+
+.brutal-h3 {
+  font-family: 'NeuethingTitles', 'Arial', sans-serif;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--brutal-black);
+  margin: 0;
+}
+
+.brutal-text {
+  font-family: 'NeuethingBody', 'Arial', sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--brutal-black);
+}
+
+.brutal-text-large {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+/* Paper Background */
+.paper-bg {
+  background-image: url('/textures/squared-paper-texture_1154-677.avif');
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  background-attachment: fixed;
+}
+
+/* Brutal Container */
+.brutal-container {
+  border: var(--brutal-border-thick);
+  background: var(--brutal-white);
+  box-shadow: var(--brutal-shadow-large);
+  padding: 0;
+  margin: 20px;
+}
+
+/* Brutal Header Bar */
+.brutal-header {
+  background: var(--brutal-black);
+  color: var(--brutal-white);
+  padding: 16px 24px;
+  border-bottom: var(--brutal-border);
+  font-family: 'NeuethingHeaders', 'Arial Black', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Writing Animation Effect */
+.writing-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.writing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--brutal-black);
+  margin-left: 2px;
+  animation: brutal-blink 1s infinite;
+}
+
+@keyframes brutal-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Scribble reveal animation */
+.scribble-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.scribble-reveal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, var(--brutal-yellow) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: scribble-effect 0.5s ease-out;
+}
+
+@keyframes scribble-effect {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Video Background Optimizations */
+video {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Text on video background safety */
+.text-on-video {
+  color: white !important;
+}
+
+.text-on-video h1,
+.text-on-video h2,
+.text-on-video h3,
+.text-on-video p {
+  color: inherit;
+}
+
+/* Responsive Brutalism */
+@media (max-width: 768px) {
+  .brutal-container {
+    margin: 10px;
+    border-width: 3px;
+  }
+  
+  .brutal-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+  
+  .brutal-bubble {
+    max-width: 250px;
+    padding: 12px 16px;
+  }
+  
+  .brutal-shadow {
+    box-shadow: 3px 3px 0px var(--brutal-black);
+  }
+
+  /* Mobile video adjustments */
+  video {
+    height: 100vh;
+    width: 100vw;
+  }
+}
+
+/* Hover states for interactive elements */
+.brutal-interactive:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--brutal-black);
+  transition: all 0.1s ease;
+}
+
+.brutal-interactive:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px var(--brutal-black);
+}

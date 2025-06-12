@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import TypingAnimation from "./TypingAnimation";
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [typingMessage, setTypingMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -80,17 +82,12 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
           setConversationId(data.conversationId);
         }
 
-        // Simulate typing delay for more natural feel
-        setTimeout(() => {
-          setIsTyping(false);
-          const assistantMessage: Message = {
-            id: data.messageId || Date.now().toString(),
-            content: data.response,
-            role: 'assistant',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, assistantMessage]);
-        }, 1000 + Math.random() * 1000); // 1-2 second delay
+        // Start typing animation
+        setTypingMessage(data.response);
+        setIsTyping(true);
+        
+        // Store message ID for when typing completes
+        (window as any).pendingMessageId = data.messageId || Date.now().toString();
       } else {
         throw new Error(data.error || "Failed to get response");
       }
@@ -114,6 +111,18 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const handleTypingComplete = (messageId: string, content: string) => {
+    setIsTyping(false);
+    setTypingMessage(null);
+    const assistantMessage: Message = {
+      id: messageId,
+      content,
+      role: 'assistant',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, assistantMessage]);
   };
 
   const logout = () => {
@@ -166,15 +175,21 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
           </div>
         ))}
         
-        {/* Typing indicator */}
-        {isTyping && (
+        {/* Typing animation */}
+        {isTyping && typingMessage && (
           <div className="flex justify-start">
             <div className="bg-white text-gray-900 shadow-sm max-w-xs lg:max-w-md px-4 py-2 rounded-2xl">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-              </div>
+              <p className="text-sm">
+                <TypingAnimation
+                  text={typingMessage}
+                  speed="normal"
+                  errorRate={0.03}
+                  onComplete={() => {
+                    const messageId = (window as any).pendingMessageId || Date.now().toString();
+                    handleTypingComplete(messageId, typingMessage);
+                  }}
+                />
+              </p>
             </div>
           </div>
         )}

@@ -1,21 +1,194 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Authentication Flow', () => {
-  test('parent should be able to sign up and create child profile', async ({ page }) => {
-    // TODO: Implement once auth system is built
+test.describe('Brutal Landing Page', () => {
+  test('should load the landing page with all sections', async ({ page }) => {
     await page.goto('/')
+    
+    // Check page loads
     await expect(page).toHaveTitle(/Buddy/)
+    
+    // Check header is visible - use more specific selector
+    await expect(page.locator('header').getByText('BUDDY')).toBeVisible()
+    
+    // Check main hero content
+    await expect(page.getByText('AI FRIEND THAT\'S ACTUALLY COOL')).toBeVisible()
+    
+    // Check navigation buttons - be specific about which ones we're checking
+    await expect(page.getByRole('button', { name: 'START CHATTING NOW' }).first()).toBeVisible()
+    await expect(page.locator('header').getByRole('button', { name: 'PARENT LOGIN' })).toBeVisible()
   })
 
-  test('child should be able to access chat with PIN', async ({ page }) => {
-    // TODO: Implement PIN authentication flow
+  test('should show child sign-in modal when START CHATTING is clicked', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle(/Buddy/)
+    
+    // Click the start chatting button
+    await page.getByRole('button', { name: 'START CHATTING NOW' }).click()
+    
+    // Check child sign-in modal appears
+    await expect(page.getByText('WELCOME BACK!')).toBeVisible()
+    await expect(page.getByPlaceholder('coolkid123')).toBeVisible()
+    await expect(page.getByPlaceholder('••••')).toBeVisible()
+    
+    // Check modal has back button
+    await expect(page.getByRole('button', { name: 'BACK' })).toBeVisible()
   })
 
-  test('should redirect unauthorized access attempts', async ({ page }) => {
-    // TODO: Test security redirects
+  test('should close child sign-in modal when BACK is clicked', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle(/Buddy/)
+    
+    // Open child sign-in modal
+    await page.getByRole('button', { name: 'START CHATTING NOW' }).click()
+    await expect(page.getByText('WELCOME BACK!')).toBeVisible()
+    
+    // Close modal
+    await page.getByRole('button', { name: 'BACK' }).click()
+    
+    // Check modal is gone
+    await expect(page.getByText('WELCOME BACK!')).not.toBeVisible()
+  })
+
+  test('should navigate to features section', async ({ page }) => {
+    await page.goto('/')
+    
+    // Click features link in header - be more specific
+    await page.locator('header').getByRole('link', { name: 'FEATURES' }).click()
+    
+    // Check we're at features section
+    await expect(page.getByText('WHY KIDS LOVE BUDDY')).toBeVisible()
+    await expect(page.getByText('REAL TALK')).toBeVisible()
+  })
+
+  test('should have working mobile menu', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto('/')
+    
+    // Check menu button exists
+    await expect(page.getByRole('button', { name: 'MENU' })).toBeVisible()
+    
+    // Open mobile menu
+    await page.getByRole('button', { name: 'MENU' }).click()
+    
+    // Check mobile menu items
+    await expect(page.getByText('FEATURES')).toBeVisible()
+    await expect(page.getByText('SAFETY')).toBeVisible()
+    await expect(page.getByText('FOR PARENTS')).toBeVisible()
+  })
+
+  test('should display all feature cards', async ({ page }) => {
+    await page.goto('/')
+    
+    // Scroll to features section
+    await page.getByText('WHY KIDS LOVE BUDDY').scrollIntoViewIfNeeded()
+    
+    // Check all feature cards are visible
+    await expect(page.getByText('REAL TALK')).toBeVisible()
+    await expect(page.getByText('YOUR STYLE')).toBeVisible()
+    await expect(page.getByText('GETS SMARTER')).toBeVisible()
+    await expect(page.getByText('ALWAYS THERE')).toBeVisible()
+    await expect(page.getByText('WRITES LIKE YOU')).toBeVisible()
+    await expect(page.getByText('SUPER CREATIVE')).toBeVisible()
+  })
+
+  test('should display safety section with video background', async ({ page }) => {
+    await page.goto('/')
+    
+    // Scroll to safety section
+    await page.getByText('ULTRA SAFE').scrollIntoViewIfNeeded()
+    
+    // Check safety content
+    await expect(page.getByText('ULTRA SAFE')).toBeVisible()
+    await expect(page.getByText('DUAL AI SAFETY')).toBeVisible()
+    await expect(page.getByText('PARENT ALERTS')).toBeVisible()
+    await expect(page.getByText('95%+ SAFETY')).toBeVisible()
+  })
+
+  test('should display parent section', async ({ page }) => {
+    await page.goto('/')
+    
+    // Scroll to parents section - be more specific
+    await page.locator('#parents').scrollIntoViewIfNeeded()
+    
+    // Check parent content
+    await expect(page.getByText('FULL CONTROL DASHBOARD')).toBeVisible()
+    await expect(page.getByText('View all conversations in real-time')).toBeVisible()
+    await expect(page.getByText('ACCESS PARENT DASHBOARD')).toBeVisible()
+  })
+
+  test('should have working footer', async ({ page }) => {
+    await page.goto('/')
+    
+    // Scroll to footer
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    
+    // Check footer content
+    await expect(page.getByText('The AI companion that actually gets kids')).toBeVisible()
+    await expect(page.getByText('FOR KIDS')).toBeVisible()
+    await expect(page.getByText('FOR PARENTS')).toBeVisible()
+    await expect(page.getByText('SUPPORT')).toBeVisible()
+  })
+})
+
+test.describe('Child Authentication', () => {
+  test('should show error for empty credentials', async ({ page }) => {
+    await page.goto('/')
+    
+    // Open child sign-in modal
+    await page.getByRole('button', { name: 'START CHATTING NOW' }).click()
+    
+    // Try to submit without credentials
+    await page.getByRole('button', { name: "LET'S GO!" }).click()
+    
+    // Check error message
+    await expect(page.getByText('ENTER YOUR USERNAME AND PIN!')).toBeVisible()
+  })
+
+  test('should disable submit button when credentials are empty', async ({ page }) => {
+    await page.goto('/')
+    
+    // Open child sign-in modal
+    await page.getByRole('button', { name: 'START CHATTING NOW' }).first().click()
+    
+    // Wait for modal to appear then check submit button is disabled
+    await expect(page.getByText('WELCOME BACK!')).toBeVisible()
+    await expect(page.getByRole('button', { name: "LET'S GO!" })).toBeDisabled()
+  })
+
+  test('should enable submit button when credentials are entered', async ({ page }) => {
+    await page.goto('/')
+    
+    // Open child sign-in modal
+    await page.getByRole('button', { name: 'START CHATTING NOW' }).first().click()
+    
+    // Wait for modal and enter credentials
+    await expect(page.getByText('WELCOME BACK!')).toBeVisible()
+    await page.getByPlaceholder('coolkid123').fill('testchild')
+    await page.getByPlaceholder('••••').fill('1234')
+    
+    // Check submit button is enabled
+    await expect(page.getByRole('button', { name: "LET'S GO!" })).toBeEnabled()
+  })
+})
+
+test.describe('Responsive Design', () => {
+  test('should work on mobile devices', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto('/')
+    
+    // Check mobile header - use more specific selector
+    await expect(page.locator('header').getByText('BUDDY')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'MENU' })).toBeVisible()
+    
+    // Check hero content is readable
+    await expect(page.getByText('AI FRIEND THAT\'S ACTUALLY COOL')).toBeVisible()
+  })
+
+  test('should work on tablet devices', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await page.goto('/')
+    
+    // Check tablet layout - use more specific selector
+    await expect(page.locator('header').getByText('BUDDY')).toBeVisible()
+    await expect(page.getByText('AI FRIEND THAT\'S ACTUALLY COOL')).toBeVisible()
   })
 })
