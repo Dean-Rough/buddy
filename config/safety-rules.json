@@ -1,0 +1,387 @@
+{
+  "version": "2.0.0",
+  "lastUpdated": "2025-01-14",
+  "description": "Advanced safety rules with nuanced UK-specific patterns and dynamic severity",
+
+  "criticalPatterns": {
+    "description": "Immediate escalation to parents - severity 3",
+    "patterns": [
+      {
+        "regex": "\\b(kill\\s*(myself|me)|suicide|want\\s*to\\s*die|kms|kys|unalive\\s*myself)\\b",
+        "flags": "i",
+        "reason": "Self-harm indication including youth slang",
+        "category": "self_harm",
+        "contextOverrides": {
+          "allowedContexts": [
+            "kill the boss",
+            "kill it in fortnite",
+            "that killed me (laughing)"
+          ],
+          "requiresContext": true
+        }
+      },
+      {
+        "regex": "\\b(my\\s*(address|postcode|phone\\s*number)|live\\s*at|my\\s*school\\s*is\\s*called)\\b",
+        "flags": "i",
+        "reason": "Personal information sharing",
+        "category": "privacy",
+        "contextOverrides": {
+          "allowedContexts": [
+            "my school is called boring",
+            "live at home obviously"
+          ],
+          "requiresContext": true
+        }
+      },
+      {
+        "regex": "\\b(meet\\s*(up|irl)|come\\s*to\\s*my|let'?s\\s*hang\\s*out\\s*irl)\\b",
+        "flags": "i",
+        "reason": "Real world meeting request",
+        "category": "stranger_danger"
+      },
+      {
+        "regex": "\\b(don'?t\\s*tell\\s*(anyone|parents|mum|dad|grown\\s*ups)|keep\\s*it\\s*secret|between\\s*us)\\b",
+        "flags": "i",
+        "reason": "Secret keeping request",
+        "category": "manipulation"
+      },
+      {
+        "regex": "\\b(send\\s*(me\\s*)?(pics|photos|nudes)|show\\s*me\\s*your)\\b",
+        "flags": "i",
+        "reason": "Inappropriate image request",
+        "category": "exploitation"
+      }
+    ]
+  },
+
+  "highConcernPatterns": {
+    "description": "Notify parents within 10 minutes - severity 2.5",
+    "patterns": [
+      {
+        "regex": "\\b(cutting|self\\s*harm|hurting\\s*myself|want\\s*to\\s*hurt)\\b",
+        "flags": "i",
+        "reason": "Self-harm discussion",
+        "category": "self_harm_discussion",
+        "supportResponse": "high_concern_support"
+      },
+      {
+        "regex": "\\b(nobody\\s*likes\\s*me|better\\s*off\\s*without\\s*me|wish\\s*i\\s*wasn'?t\\s*here)\\b",
+        "flags": "i",
+        "reason": "Severe emotional distress",
+        "category": "emotional_crisis",
+        "supportResponse": "crisis_support"
+      },
+      {
+        "regex": "\\b(ran\\s*away|running\\s*away\\s*from\\s*home|leaving\\s*forever)\\b",
+        "flags": "i",
+        "reason": "Running away indication",
+        "category": "safety_concern",
+        "supportResponse": "safety_support"
+      }
+    ]
+  },
+
+  "emotionalSupportPatterns": {
+    "description": "Offer support, monitor patterns - severity 1",
+    "patterns": [
+      {
+        "regex": "\\b(grandma|grandpa|granny|nan|pet|dog|cat|hamster)\\s*(died|passed\\s*away|is\\s*gone)\\b",
+        "flags": "i",
+        "reason": "Grief and loss",
+        "category": "grief",
+        "supportResponse": "grief_support",
+        "ageResponses": {
+          "7-8": "gentle_grief",
+          "9-10": "understanding_grief",
+          "11-12": "mature_grief"
+        }
+      },
+      {
+        "regex": "\\b(scared|frightened|terrified|nightmare|bad\\s*dream|monster)\\b",
+        "flags": "i",
+        "reason": "Fear expression",
+        "category": "fear",
+        "supportResponse": "fear_support",
+        "contextAnalysis": true
+      },
+      {
+        "regex": "\\b(bullied|bully|picking\\s*on\\s*me|mean\\s*to\\s*me|hate\\s*me)\\b",
+        "flags": "i",
+        "reason": "Bullying concern",
+        "category": "bullying",
+        "supportResponse": "bullying_support",
+        "escalateOnPattern": 3
+      },
+      {
+        "regex": "\\b(divorce|splitting\\s*up|moving\\s*out|separated|custody)\\b",
+        "flags": "i",
+        "reason": "Family changes",
+        "category": "family_stress",
+        "supportResponse": "family_support"
+      },
+      {
+        "regex": "\\b(sad|crying|depressed|lonely|alone|no\\s*friends)\\b",
+        "flags": "i",
+        "reason": "Emotional distress",
+        "category": "emotional_distress",
+        "supportResponse": "emotional_support",
+        "severityByFrequency": {
+          "1": 1,
+          "3": 1.5,
+          "5": 2
+        }
+      },
+      {
+        "regex": "\\b(fat|ugly|stupid|worthless|hate\\s*myself|not\\s*good\\s*enough)\\b",
+        "flags": "i",
+        "reason": "Negative self-talk",
+        "category": "self_esteem",
+        "supportResponse": "self_esteem_support"
+      }
+    ]
+  },
+
+  "contextualGuidancePatterns": {
+    "description": "Context-dependent gentle guidance - severity 1-2",
+    "patterns": [
+      {
+        "regex": "\\b(gay|lesbian|trans|lgbt|sexuality|gender)\\b",
+        "flags": "i",
+        "reason": "Identity exploration",
+        "category": "identity",
+        "supportResponse": "identity_support",
+        "ageBasedHandling": {
+          "7-8": "redirect_to_trusted_adult",
+          "9-10": "basic_acceptance_message",
+          "11-12": "supportive_discussion"
+        }
+      },
+      {
+        "regex": "\\b(sex|pregnant|babies\\s*come\\s*from|puberty|period)\\b",
+        "flags": "i",
+        "reason": "Developmental questions",
+        "category": "development",
+        "supportResponse": "development_redirect",
+        "severity": 1
+      },
+      {
+        "regex": "\\b(drugs|alcohol|smoking|vaping|drunk|high)\\b",
+        "flags": "i",
+        "reason": "Substance discussion",
+        "category": "substances",
+        "supportResponse": "substance_education",
+        "contextAnalysis": true
+      },
+      {
+        "regex": "\\b(shit|fuck|fucking|damn|hell|crap|bloody\\s*hell|piss|dick|cock|ass|bitch)\\b",
+        "flags": "i",
+        "reason": "Mild profanity",
+        "category": "swearing",
+        "supportResponse": "swearing_response",
+        "severity": 1,
+        "contextAnalysis": true
+      },
+      {
+        "regex": "\\b(c*nt|f*ck|sh*t|d*mn|b*tch|a*s|motherf*cker)\\b",
+        "flags": "i",
+        "reason": "Censored profanity attempt",
+        "category": "swearing",
+        "supportResponse": "swearing_response",
+        "severity": 1
+      }
+    ]
+  },
+
+  "youthCulturePatterns": {
+    "description": "UK youth slang requiring context - severity 0-1",
+    "patterns": [
+      {
+        "regex": "\\b(slay|slaying|ate\\s*that|serve|serving|no\\s*cap|fr\\s*fr)\\b",
+        "flags": "i",
+        "reason": "Positive youth slang",
+        "category": "youth_slang_positive",
+        "severity": 0
+      },
+      {
+        "regex": "\\b(mid|cringe|sus|sussy|baka|npc|sigma|chad|based)\\b",
+        "flags": "i",
+        "reason": "Gaming/internet culture",
+        "category": "internet_culture",
+        "severity": 0,
+        "contextualResponse": true
+      },
+      {
+        "regex": "\\b(peng|bare|wasteman|roadman|innit|bruv|fam|blud)\\b",
+        "flags": "i",
+        "reason": "UK slang",
+        "category": "uk_slang",
+        "severity": 0
+      },
+      {
+        "regex": "\\b(rizz|rizzler|gyat|ohio|skibidi|fanum\\s*tax)\\b",
+        "flags": "i",
+        "reason": "TikTok trends",
+        "category": "tiktok_culture",
+        "severity": 0
+      }
+    ]
+  },
+
+  "gamingContextPatterns": {
+    "description": "Gaming terms that look concerning out of context",
+    "patterns": [
+      {
+        "regex": "\\b(kill|death|die|dead|murder|destroy)\\b",
+        "flags": "i",
+        "reason": "Gaming violence terms",
+        "category": "gaming_terms",
+        "requiresContext": true,
+        "allowedContexts": [
+          "fortnite",
+          "minecraft",
+          "roblox",
+          "game",
+          "boss",
+          "level",
+          "respawn",
+          "lag",
+          "glitch",
+          "noob",
+          "pro",
+          "clutch"
+        ]
+      },
+      {
+        "regex": "\\b(grief|griefing|troll|toxic|trash|bot|hacker)\\b",
+        "flags": "i",
+        "reason": "Gaming behavior terms",
+        "category": "gaming_behavior",
+        "severity": 0
+      }
+    ]
+  },
+
+  "schoolPatterns": {
+    "description": "UK school-specific concerns",
+    "patterns": [
+      {
+        "regex": "\\b(sats|year\\s*6\\s*tests|11\\s*plus|gcses)\\s*(stressed|worried|scared)\\b",
+        "flags": "i",
+        "reason": "Academic stress",
+        "category": "academic_anxiety",
+        "supportResponse": "academic_support",
+        "severity": 1
+      },
+      {
+        "regex": "\\b(detention|suspended|excluded|in\\s*trouble|told\\s*off)\\b",
+        "flags": "i",
+        "reason": "School discipline",
+        "category": "school_issues",
+        "supportResponse": "school_support",
+        "severity": 1
+      }
+    ]
+  },
+
+  "dynamicSeverityRules": {
+    "patternFrequency": {
+      "description": "Escalate based on frequency within session",
+      "rules": [
+        {
+          "category": "emotional_distress",
+          "threshold": 3,
+          "timeWindow": "10_messages",
+          "escalateTo": 2
+        },
+        {
+          "category": "self_esteem",
+          "threshold": 5,
+          "timeWindow": "session",
+          "escalateTo": 2.5
+        }
+      ]
+    },
+    "combinationPatterns": {
+      "description": "Multiple concerning patterns together",
+      "rules": [
+        {
+          "patterns": ["emotional_distress", "self_esteem", "bullying"],
+          "required": 2,
+          "escalateTo": 2
+        }
+      ]
+    }
+  },
+
+  "ageSpecificOverrides": {
+    "7-8": {
+      "lowerSeverity": ["gaming_terms", "internet_culture"],
+      "higherSeverity": ["fear", "nightmares"],
+      "additionalPatterns": [
+        {
+          "regex": "\\b(tooth\\s*fairy|santa|easter\\s*bunny)\\s*(real|fake|not\\s*real)\\b",
+          "flags": "i",
+          "reason": "Childhood belief questions",
+          "category": "childhood_beliefs",
+          "supportResponse": "preserve_magic"
+        }
+      ]
+    },
+    "9-10": {
+      "allowedDiscussion": ["basic_puberty", "friendship_drama"],
+      "monitorClosely": ["social_media", "youtube_drama"]
+    },
+    "11-12": {
+      "allowedDiscussion": ["identity_exploration", "social_issues"],
+      "higherSeverity": ["self_harm_discussion", "eating_concerns"]
+    }
+  },
+
+  "responseStrategies": {
+    "contextual_redirect": {
+      "description": "Understand context before redirecting",
+      "example": "If 'I want to die' in gaming context vs real distress"
+    },
+    "pattern_monitoring": {
+      "description": "Track patterns over time not just individual messages",
+      "example": "3+ sad messages = escalate even if each is mild"
+    },
+    "cultural_awareness": {
+      "description": "Understand UK-specific contexts",
+      "example": "'Getting the belt' might mean sports award not punishment"
+    }
+  },
+
+  "severityLevels": {
+    "0": {
+      "name": "Safe",
+      "description": "Normal kid conversation",
+      "action": "allow"
+    },
+    "1": {
+      "name": "Support",
+      "description": "Offer emotional support, log for patterns",
+      "action": "support"
+    },
+    "1.5": {
+      "name": "Monitor",
+      "description": "Increased monitoring, check-ins",
+      "action": "monitor"
+    },
+    "2": {
+      "name": "Concern",
+      "description": "Flag for parent review in weekly summary",
+      "action": "flag"
+    },
+    "2.5": {
+      "name": "HighConcern",
+      "description": "Notify parents within 10 minutes",
+      "action": "notify"
+    },
+    "3": {
+      "name": "Critical",
+      "description": "Immediate parent notification and conversation suspension",
+      "action": "escalate"
+    }
+  }
+}

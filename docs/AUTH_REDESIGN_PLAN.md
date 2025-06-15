@@ -1,4 +1,4 @@
-# AUTH REDESIGN PLAN - Buddy Platform
+# AUTH REDESIGN PLAN - Lumo Platform
 
 ## 🚨 CURRENT PROBLEM
 
@@ -16,7 +16,7 @@ The app is running **dual authentication systems** causing architectural chaos:
 ### New Authentication Flow
 
 ```
-Landing Page → "Get Started" 
+Landing Page → "Get Started"
     ↓
 Parent Clerk Signup (email/password)
     ↓
@@ -36,11 +36,13 @@ Parent Regains Access via Dashboard PIN
 ### Phase 1: Core Infrastructure (Week 1-2)
 
 1. **Custom Clerk Components**
+
    - Create `ChildSignIn` component (username + PIN input)
    - Integrate with Clerk's custom authentication flow
    - Handle PIN validation and session creation
 
 2. **Database Schema Updates**
+
    - Migrate from custom child table to Clerk user metadata
    - Update Prisma schema to use Clerk user IDs
    - Create migration scripts for existing PIN users
@@ -54,11 +56,13 @@ Parent Regains Access via Dashboard PIN
 ### Phase 2: Authentication Logic (Week 2-3)
 
 1. **Middleware Updates**
+
    - Update `middleware.ts` to handle child accounts
    - Add user type detection (parent vs child)
    - Route protection based on account type
 
 2. **Session Management**
+
    - Remove localStorage token system
    - Implement proper Clerk session handling
    - Add session timeout policies for children
@@ -71,11 +75,13 @@ Parent Regains Access via Dashboard PIN
 ### Phase 3: Migration & Testing (Week 3-4)
 
 1. **Data Migration**
+
    - Script to convert existing PIN users to Clerk accounts
    - Parent email collection for account linking
    - Graceful fallback during transition
 
 2. **Security Testing**
+
    - PIN brute force protection
    - Session hijacking prevention
    - COPPA compliance verification
@@ -88,12 +94,14 @@ Parent Regains Access via Dashboard PIN
 ## 🛡️ SECURITY CONSIDERATIONS
 
 ### For Children
+
 - **PIN Requirements**: 4-6 digits, account lockout after 3 failed attempts
 - **Session Timeout**: 2-4 hours of inactivity
 - **Device Security**: Clear logout on shared devices
 - **Password Reset**: Parent-mediated only
 
 ### For Parents
+
 - **Standard Clerk Security**: Email verification, password requirements
 - **Dashboard PIN**: Additional 4-digit PIN for sensitive operations
 - **Audit Trails**: Complete log of child interactions
@@ -106,11 +114,11 @@ Parent Regains Access via Dashboard PIN
 ```typescript
 // Remove custom Child table, use Clerk user metadata instead
 interface ClerkUserMetadata {
-  userType: 'parent' | 'child'
-  age?: number // for children
-  parentEmail?: string // for children
-  childUsernames?: string[] // for parents
-  dashboardPin?: string // hashed, for parents
+  userType: 'parent' | 'child';
+  age?: number; // for children
+  parentEmail?: string; // for children
+  childUsernames?: string[]; // for parents
+  dashboardPin?: string; // hashed, for parents
 }
 ```
 
@@ -122,7 +130,7 @@ const ChildSignIn = () => {
   // Custom form with username + PIN
   // Calls Clerk's signIn with custom identifier
   // Creates proper Clerk session
-}
+};
 ```
 
 ## 🚀 BENEFITS
@@ -168,8 +176,9 @@ const ChildSignIn = () => {
 ### 🚀 Current Status
 
 The auth system is now production-ready with:
+
 - Unified Clerk architecture eliminating dual auth complexity
-- Parent-controlled child account setup ensuring COPPA compliance  
+- Parent-controlled child account setup ensuring COPPA compliance
 - Username/PIN authentication for children via proper Clerk sessions
 - Real-time safety monitoring and parent notification systems intact
 - Scalable foundation for future feature development

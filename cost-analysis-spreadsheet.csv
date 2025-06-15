@@ -1,0 +1,70 @@
+Component,Model,Usage,Input Tokens,Output Tokens,Input Cost per 1K,Output Cost per 1K,Cost Per Use,Notes
+Current Chat Response,GPT-4o,Per message,371,150,$2.50,$10.00,$0.002428,"System prompt (371) + user message (estimated 20) + AI response (150)"
+Current Safety Check,GPT-4o-mini,Per message,50,25,$0.15,$0.60,$0.000023,"Safety prompt + message analysis"
+Current Total,Combined,Per message,441,175,$2.65,$10.60,$0.002451,Current system per message cost
+
+Knowledge Lite Enhancement,None,Per message,50,0,$0.00,$0.00,$0.000125,"Additional context from cached knowledge"
+Knowledge Lite Total,Combined,Per message,491,175,$2.65,$10.60,$0.003576,"+$0.001125 per message (+46%)"
+
+Vector Search,text-embedding-3-small,Per query,20,0,$0.02,$0.00,$0.000000,"Embedding generation for semantic search"
+Web Search,Google Custom Search,Per query,0,0,$0.00,$0.00,$0.005000,"$5 per 1000 queries"
+Advanced Safety,GPT-4o-mini,Per message,100,50,$0.15,$0.60,$0.000045,"Enhanced contextual safety analysis"
+Trending Context,None,Per message,100,0,$0.00,$0.00,$0.000250,"Real-time youth culture context"
+Conversation Memory,None,Per message,75,0,$0.00,$0.00,$0.000188,"Multi-turn conversation context"
+Enhanced Personas,GPT-4o,Per message,200,0,$2.50,$0.00,$0.000500,"Dynamic personality adaptation"
+
+Full Enhanced Total,Combined,Per message,986,225,$5.15,$10.60,$0.006959,"+$0.004508 per message (+184%)"
+
+Monthly Costs (1000 messages),,,,,,,,
+Current System,,$2.45,,,,,,$2.45,
+Knowledge Lite,,$3.58,,,,,,$3.58,"+$1.13 per month"
+Full Enhanced,,$6.96,,,,,,$6.96,"+$4.51 per month"
+
+Monthly Costs (10000 messages),,,,,,,,
+Current System,,$24.51,,,,,,$24.51,
+Knowledge Lite,,$35.76,,,,,,$35.76,"+$11.25 per month"
+Full Enhanced,,$69.59,,,,,,$69.59,"+$45.08 per month"
+
+Infrastructure Costs,Service,Monthly Cost,Setup Cost,Notes,,,,,
+Vector Database,Pinecone,$70,$0,"Starter plan for moderate usage",,,,,
+Caching,Upstash Redis,$8,$0,"Pay-as-you-go pricing",,,,,
+Search API,Google Custom Search,$5,$0,"Per 1000 queries beyond free tier",,,,,
+Additional Compute,Vercel/Railway,$20,$0,"Enhanced API routes and cron jobs",,,,,
+Total Infrastructure,,$103,$0,"Monthly infrastructure overhead",,,,,
+
+Break-even Analysis,Messages per month,Current Cost,Enhanced Cost,Additional Cost,ROI Threshold,,,
+Low Usage,1000,$2.45,$6.96,$4.51,"Need $4.51 value improvement",,,
+Medium Usage,5000,$12.26,$34.80,$22.54,"Need $22.54 value improvement",,,
+High Usage,10000,$24.51,$69.59,$45.08,"Need $45.08 value improvement",,,
+Enterprise Usage,50000,$122.55,$347.95,$225.40,"Need $225.40 value improvement",,,
+
+Value Propositions,Improvement,Quantifiable Benefit,Monthly Value,Cost Justified At,,,,,
+Reduced Safety Incidents,50% fewer escalations,Parent satisfaction + legal protection,$500+,All usage levels,,,,,
+Improved Engagement,25% longer conversations,Higher retention + platform value,$200+,Medium+ usage,,,,,
+Cultural Relevance,90% slang recognition,Better user experience + word-of-mouth,$100+,High+ usage,,,,,
+Conversation Quality,Real-time knowledge,Competitive advantage,$300+,All usage levels,,,,,
+
+Token Calculation Details,Component,Calculation Method,Assumptions,Validation Method,,,,,
+System Prompt,buildSystemPrompt(),371 tokens measured,"Age-specific, persona-aware",Actual measurement from config,,,,,
+User Message,Average estimation,20 tokens,"Short child messages (5-8 words)",Historical data analysis needed,,,,,
+AI Response,max_tokens setting,150 tokens average,300 max but typically shorter,Response length monitoring,,,,,
+Safety Check,Prompt + analysis,75 tokens total,Simple safety validation,Measured from current implementation,,,,,
+Knowledge Context,Vector search results,50-200 tokens,"2-5 knowledge entries",Depends on query complexity,,,,,
+Trending Context,Youth culture data,100 tokens,"Current slang, games, trends",Weekly trending data size,,,,,
+
+Model Pricing (Jan 2025),Model,Input per 1M tokens,Output per 1M tokens,Use Case,Performance Notes,,,
+GPT-4o,$2.50,$10.00,Main chat responses,Highest quality reasoning,,,,,
+GPT-4o-mini,$0.15,$0.60,Safety validation,Fast and cost-effective,,,,,
+text-embedding-3-small,$0.02,$0.00,Vector search,Semantic similarity,,,,,
+GPT-4-turbo,$10.00,$30.00,NOT USED,Too expensive for our use case,,,,,
+
+Cost Optimization Strategies,Strategy,Token Savings,Cost Reduction,Implementation Effort,,,,,
+Smart Caching,Cache frequent knowledge,30-50%,$15-25/month,Low,,,,,
+Conditional Enhancement,Only enhance complex queries,20-40%,$10-20/month,Medium,,,,,
+Batch Processing,Daily knowledge updates,60-80%,$30-40/month,High,,,,,
+Hybrid Approach,Mix cached + real-time,40-60%,$20-30/month,Medium,,,,,
+
+Recommendations,Scenario,Recommended Approach,Monthly Cost,Rationale,,,,,
+Early Stage (<1K messages),Knowledge Lite,$3.58,Low risk validation,,,,,
+Growth Stage (1K-10K),Full Enhanced,$6.96-69.59,Competitive advantage critical,,,,,
+Scale Stage (10K+ messages),Optimized Enhanced,$40-50,Custom optimization needed,,,,,

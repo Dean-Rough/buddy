@@ -1,42 +1,45 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 interface ChildProfileCreatorProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function ChildProfileCreator({ onSuccess, onCancel }: ChildProfileCreatorProps) {
+export default function ChildProfileCreator({
+  onSuccess,
+  onCancel,
+}: ChildProfileCreatorProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    pin: "",
-    confirmPin: "",
+    name: '',
+    age: '',
+    pin: '',
+    confirmPin: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (formData.pin !== formData.confirmPin) {
-      setError("PINs do not match");
+      setError('PINs do not match');
       return;
     }
 
     if (formData.pin.length < 4) {
-      setError("PIN must be at least 4 digits");
+      setError('PIN must be at least 4 digits');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("/api/children", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/children', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           age: parseInt(formData.age),
@@ -49,10 +52,10 @@ export default function ChildProfileCreator({ onSuccess, onCancel }: ChildProfil
       if (data.success) {
         onSuccess();
       } else {
-        setError(data.error || "Failed to create profile");
+        setError(data.error || 'Failed to create profile');
       }
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
+    } catch {
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -70,46 +73,59 @@ export default function ChildProfileCreator({ onSuccess, onCancel }: ChildProfil
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Child's Name
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Child&apos;s Name
           </label>
           <input
             type="text"
             id="name"
             value={formData.name}
-            onChange={(e) => handleChange("name", e.target.value)}
+            onChange={e => handleChange('name', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="age"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Age
           </label>
           <select
             id="age"
             value={formData.age}
-            onChange={(e) => handleChange("age", e.target.value)}
+            onChange={e => handleChange('age', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           >
             <option value="">Select age</option>
             {[6, 7, 8, 9, 10, 11, 12].map(age => (
-              <option key={age} value={age}>{age} years old</option>
+              <option key={age} value={age}>
+                {age} years old
+              </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="pin"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Create PIN (4-6 digits)
           </label>
           <input
             type="password"
             id="pin"
             value={formData.pin}
-            onChange={(e) => handleChange("pin", e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={e =>
+              handleChange('pin', e.target.value.replace(/\D/g, '').slice(0, 6))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             maxLength={6}
             required
@@ -117,14 +133,22 @@ export default function ChildProfileCreator({ onSuccess, onCancel }: ChildProfil
         </div>
 
         <div>
-          <label htmlFor="confirmPin" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="confirmPin"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Confirm PIN
           </label>
           <input
             type="password"
             id="confirmPin"
             value={formData.confirmPin}
-            onChange={(e) => handleChange("confirmPin", e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={e =>
+              handleChange(
+                'confirmPin',
+                e.target.value.replace(/\D/g, '').slice(0, 6)
+              )
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             maxLength={6}
             required
@@ -150,7 +174,7 @@ export default function ChildProfileCreator({ onSuccess, onCancel }: ChildProfil
             disabled={loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Profile"}
+            {loading ? 'Creating...' : 'Create Profile'}
           </button>
         </div>
       </form>

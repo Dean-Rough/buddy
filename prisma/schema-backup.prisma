@@ -1,0 +1,449 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Parent {
+  id            String   @id @default(cuid())
+  clerkUserId   String   @unique @map("clerk_user_id")
+  email         String   @unique
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // New auth fields
+  dashboardPinHash     String?  @map("dashboard_pin_hash")
+  onboardingComplete   Boolean  @default(false) @map("onboarding_complete")
+  
+  // Notification preferences
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  smsNotifications   Boolean @default(false) @map("sms_notifications")
+  pushNotifications  Boolean @default(true) @map("push_notifications")
+  
+  // Privacy settings
+  dataRetentionDays     Int     @default(90) @map("data_retention_days")
+  termsAcceptedAt       DateTime? @map("terms_accepted_at")
+  privacyPolicyVersion  String? @map("privacy_policy_version")
+  
+  // Relations
+  children           Child[]
+  childAccounts      ChildAccount[]
+  notifications      ParentNotification[]
+  newNotifications   NewParentNotification[]
+  
+  @@map("parents")
+}
+
+// Legacy Child model - will be deprecated after migration
+model Child {
+  id         String   @id @default(cuid())
+  parentId   String   @map("parent_id")
+  name       String
+  pinHash    String   @map("pin_hash")
+  age        Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  
+  // Personalization
+  persona         String  @default("friendly-raccoon")
+  languageLevel   String  @default("foundation") @map("language_level")
+  preferredName   String? @map("preferred_name")
+  
+  // Privacy controls
+  visibilityLevel String @default("highlights") @map("visibility_level")
+  accountStatus   String @default("active") @map("account_status")
+  
+  // Migration support
+  childAccountId  String? @map("child_account_id")
+  
+  // Relations
+  parent        Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  safetyEvents  SafetyEvent[]
+  memories      ChildMemory[]
+  notifications ParentNotification[]
+  
+  @@unique([parentId, pinHash])
+  @@map("children")
+}
+
+// New Clerk-based child accounts
+model ChildAccount {
+  id                String   @id @default(cuid())
+  clerkUserId       String   @unique @map("clerk_user_id")
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  username          String   @unique
+  name              String
+  age               Int
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Personalization
+  persona         String  @default("friendly-raccoon")
+  languageLevel   String  @default("foundation") @map("language_level")
+  preferredName   String? @map("preferred_name")
+  
+  // Privacy controls
+  visibilityLevel String @default("highlights") @map("visibility_level")
+  accountStatus   String @default("active") @map("account_status")
+  
+  // Relations
+  parent           Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  conversations    NewConversation[]
+  safetyEvents     NewSafetyEvent[]
+  memories         NewChildMemory[]
+  notifications    NewParentNotification[]
+  
+  @@index([parentClerkUserId])
+  @@index([username])
+  @@index([accountStatus])
+  @@map("child_accounts")
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  childId       String   @map("child_id")
+  startedAt     DateTime @default(now()) @map("started_at")
+  endedAt       DateTime? @map("ended_at")
+  lastActivity  DateTime @default(now()) @map("last_activity")
+  
+  // Session metadata
+  messageCount     Int @default(0) @map("message_count")
+  durationSeconds  Int @default(0) @map("duration_seconds")
+  
+  // Emotional tracking
+  mood            String? 
+  moodConfidence  Decimal? @map("mood_confidence") @db.Decimal(3,2)
+  emotionalTrend  String? @map("emotional_trend")
+  
+  // Content classification
+  topics      String[]
+  safetyLevel Int @default(0) @map("safety_level")
+  
+  // Parent visibility
+  parentSummary   String? @map("parent_summary") @db.Text
+  escalationLevel Int     @default(0) @map("escalation_level")
+  
+  // Relations
+  child        Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  messages     Message[]
+  safetyEvents SafetyEvent[]
+  
+  @@index([childId, startedAt(sort: Desc)])
+  @@index([safetyLevel, startedAt(sort: Desc)])
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  conversationId  String   @map("conversation_id")
+  content         String   @db.Text
+  role            String   // 'child' | 'assistant'
+  messageType     String   @default("text") @map("message_type")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  // AI processing metadata
+  aiModel         String? @map("ai_model")
+  processingTimeMs Int?   @map("processing_time_ms")
+  
+  // Safety analysis
+  safetyScore    Decimal? @map("safety_score") @db.Decimal(3,2)
+  safetyFlags    String[] @map("safety_flags")
+  humanReviewed  Boolean  @default(false) @map("human_reviewed")
+  
+  // Voice/audio metadata
+  audioUrl       String? @map("audio_url")
+  audioDurationMs Int?   @map("audio_duration_ms")
+  
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  safetyEvents SafetyEvent[]
+  
+  @@index([conversationId, createdAt])
+  @@index([humanReviewed, safetyScore(sort: Desc)])
+  @@map("messages")
+}
+
+model SafetyEvent {
+  id             String   @id @default(cuid())
+  eventType      String   @map("event_type")
+  severityLevel  Int      @map("severity_level")
+  childId        String   @map("child_id")
+  conversationId String?  @map("conversation_id")
+  messageId      String?  @map("message_id")
+  
+  // Event details
+  triggerContent   String   @map("trigger_content") @db.Text
+  aiReasoning      String?  @map("ai_reasoning") @db.Text
+  contextSummary   String?  @map("context_summary") @db.Text
+  
+  // Timestamps
+  detectedAt       DateTime  @default(now()) @map("detected_at")
+  parentNotifiedAt DateTime? @map("parent_notified_at")
+  resolvedAt       DateTime? @map("resolved_at")
+  
+  // Human moderation
+  moderatorId       String? @map("moderator_id")
+  moderatorDecision String? @map("moderator_decision")
+  moderatorNotes    String? @map("moderator_notes") @db.Text
+  
+  // Status tracking
+  status String @default("active")
+  
+  // Relations
+  child        Child @relation(fields: [childId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  message      Message? @relation(fields: [messageId], references: [id])
+  moderator    Moderator? @relation(fields: [moderatorId], references: [id])
+  notifications ParentNotification[]
+  
+  @@index([childId, detectedAt(sort: Desc)])
+  @@index([severityLevel, status, detectedAt])
+  @@index([childId, parentNotifiedAt(sort: Desc)])
+  @@map("safety_events")
+}
+
+model ParentNotification {
+  id              String   @id @default(cuid())
+  parentId        String   @map("parent_id")
+  childId         String   @map("child_id")
+  notificationType String  @map("notification_type")
+  subject         String
+  content         String   @db.Text
+  
+  // Delivery info
+  deliveryMethod String    @map("delivery_method")
+  sentAt         DateTime  @default(now()) @map("sent_at")
+  deliveredAt    DateTime? @map("delivered_at")
+  readAt         DateTime? @map("read_at")
+  
+  // Related entities
+  safetyEventId  String? @map("safety_event_id")
+  conversationId String? @map("conversation_id")
+  
+  // Status
+  status String @default("sent")
+  
+  // Relations
+  parent      Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  child       Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  safetyEvent SafetyEvent? @relation(fields: [safetyEventId], references: [id])
+  
+  @@index([parentId, sentAt(sort: Desc)])
+  @@index([status, sentAt])
+  @@map("parent_notifications")
+}
+
+model Moderator {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  name                  String
+  role                  String   @default("moderator")
+  active                Boolean  @default(true)
+  
+  // Certification tracking
+  certifiedAt           DateTime? @map("certified_at")
+  certificationExpiresAt DateTime? @map("certification_expires_at")
+  trainingCompleted     Json?     @map("training_completed")
+  
+  // Activity tracking
+  createdAt             DateTime @default(now()) @map("created_at")
+  lastLogin             DateTime? @map("last_login")
+  
+  // Performance metrics
+  reviewsCompleted       Int     @default(0) @map("reviews_completed")
+  accuracyScore          Decimal @default(1.00) @map("accuracy_score") @db.Decimal(3,2)
+  avgResponseTimeMinutes Int?    @map("average_response_time_minutes")
+  
+  // Relations
+  safetyEvents SafetyEvent[]
+  newSafetyEvents NewSafetyEvent[]
+  
+  @@map("moderators")
+}
+
+model ChildMemory {
+  id                   String   @id @default(cuid())
+  childId              String   @map("child_id")
+  memoryType           String   @map("memory_type")
+  key                  String
+  value                String   @db.Text
+  confidence           Decimal  @default(1.00) @db.Decimal(3,2)
+  lastReferenced       DateTime @default(now()) @map("last_referenced")
+  createdAt            DateTime @default(now()) @map("created_at")
+  
+  // Source tracking
+  sourceConversationId String? @map("source_conversation_id")
+  sourceMessageId      String? @map("source_message_id")
+  aiReasoning          String? @map("ai_reasoning") @db.Text
+  
+  // Relations
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  
+  @@unique([childId, memoryType, key])
+  @@index([childId, lastReferenced(sort: Desc)])
+  @@index([memoryType, lastReferenced(sort: Desc)])
+  @@map("child_memory")
+}
+
+// New models for Clerk-based architecture
+model NewConversation {
+  id              String   @id @default(cuid())
+  childAccountId  String   @map("child_account_id")
+  startedAt       DateTime @default(now()) @map("started_at")
+  endedAt         DateTime? @map("ended_at")
+  lastActivity    DateTime @default(now()) @map("last_activity")
+  
+  // Session metadata
+  messageCount     Int @default(0) @map("message_count")
+  durationSeconds  Int @default(0) @map("duration_seconds")
+  
+  // Emotional tracking
+  mood            String? 
+  moodConfidence  Decimal? @map("mood_confidence") @db.Decimal(3,2)
+  emotionalTrend  String? @map("emotional_trend")
+  
+  // Content classification
+  topics      String[]
+  safetyLevel Int @default(0) @map("safety_level")
+  
+  // Parent visibility
+  parentSummary   String? @map("parent_summary") @db.Text
+  escalationLevel Int     @default(0) @map("escalation_level")
+  
+  // Relations
+  childAccount ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  messages     NewMessage[]
+  safetyEvents NewSafetyEvent[]
+  
+  @@index([childAccountId, startedAt(sort: Desc)])
+  @@index([safetyLevel, startedAt(sort: Desc)])
+  @@map("new_conversations")
+}
+
+model NewMessage {
+  id              String   @id @default(cuid())
+  conversationId  String   @map("conversation_id")
+  content         String   @db.Text
+  role            String   // 'child' | 'assistant'
+  messageType     String   @default("text") @map("message_type")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  // AI processing metadata
+  aiModel         String? @map("ai_model")
+  processingTimeMs Int?   @map("processing_time_ms")
+  
+  // Safety analysis
+  safetyScore    Decimal? @map("safety_score") @db.Decimal(3,2)
+  safetyFlags    String[] @map("safety_flags")
+  humanReviewed  Boolean  @default(false) @map("human_reviewed")
+  
+  // Voice/audio metadata
+  audioUrl       String? @map("audio_url")
+  audioDurationMs Int?   @map("audio_duration_ms")
+  
+  // Relations
+  conversation NewConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  safetyEvents NewSafetyEvent[]
+  
+  @@index([conversationId, createdAt])
+  @@index([humanReviewed, safetyScore(sort: Desc)])
+  @@map("new_messages")
+}
+
+model NewSafetyEvent {
+  id             String   @id @default(cuid())
+  eventType      String   @map("event_type")
+  severityLevel  Int      @map("severity_level")
+  childAccountId String   @map("child_account_id")
+  conversationId String?  @map("conversation_id")
+  messageId      String?  @map("message_id")
+  
+  // Event details
+  triggerContent   String   @map("trigger_content") @db.Text
+  aiReasoning      String?  @map("ai_reasoning") @db.Text
+  contextSummary   String?  @map("context_summary") @db.Text
+  
+  // Timestamps
+  detectedAt       DateTime  @default(now()) @map("detected_at")
+  parentNotifiedAt DateTime? @map("parent_notified_at")
+  resolvedAt       DateTime? @map("resolved_at")
+  
+  // Human moderation
+  moderatorId       String? @map("moderator_id")
+  moderatorDecision String? @map("moderator_decision")
+  moderatorNotes    String? @map("moderator_notes") @db.Text
+  
+  // Status tracking
+  status String @default("active")
+  
+  // Relations
+  childAccount  ChildAccount @relation(fields: [childAccountId], references: [id])
+  conversation  NewConversation? @relation(fields: [conversationId], references: [id])
+  message       NewMessage? @relation(fields: [messageId], references: [id])
+  moderator     Moderator? @relation(fields: [moderatorId], references: [id])
+  notifications NewParentNotification[]
+  
+  @@index([childAccountId, detectedAt(sort: Desc)])
+  @@index([severityLevel, status, detectedAt])
+  @@index([childAccountId, parentNotifiedAt(sort: Desc)])
+  @@map("new_safety_events")
+}
+
+model NewParentNotification {
+  id               String   @id @default(cuid())
+  parentClerkUserId String  @map("parent_clerk_user_id")
+  childAccountId   String   @map("child_account_id")
+  notificationType String   @map("notification_type")
+  subject          String
+  content          String   @db.Text
+  
+  // Delivery info
+  deliveryMethod String    @map("delivery_method")
+  sentAt         DateTime  @default(now()) @map("sent_at")
+  deliveredAt    DateTime? @map("delivered_at")
+  readAt         DateTime? @map("read_at")
+  
+  // Related entities
+  safetyEventId  String? @map("safety_event_id")
+  conversationId String? @map("conversation_id")
+  
+  // Status
+  status String @default("sent")
+  
+  // Relations
+  parent       Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  childAccount ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  safetyEvent  NewSafetyEvent? @relation(fields: [safetyEventId], references: [id])
+  
+  @@index([parentClerkUserId, sentAt(sort: Desc)])
+  @@index([status, sentAt])
+  @@map("new_parent_notifications")
+}
+
+model NewChildMemory {
+  id                   String   @id @default(cuid())
+  childAccountId       String   @map("child_account_id")
+  memoryType           String   @map("memory_type")
+  key                  String
+  value                String   @db.Text
+  confidence           Decimal  @default(1.00) @db.Decimal(3,2)
+  lastReferenced       DateTime @default(now()) @map("last_referenced")
+  createdAt            DateTime @default(now()) @map("created_at")
+  
+  // Source tracking
+  sourceConversationId String? @map("source_conversation_id")
+  sourceMessageId      String? @map("source_message_id")
+  aiReasoning          String? @map("ai_reasoning") @db.Text
+  
+  // Relations
+  childAccount ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  
+  @@unique([childAccountId, memoryType, key])
+  @@index([childAccountId, lastReferenced(sort: Desc)])
+  @@index([memoryType, lastReferenced(sort: Desc)])
+  @@map("new_child_memory")
+}

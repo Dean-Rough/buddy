@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 interface VideoBackgroundProps {
   videoSrc: string;
@@ -10,12 +10,12 @@ interface VideoBackgroundProps {
   className?: string;
 }
 
-export function VideoBackground({ 
-  videoSrc, 
-  overlay = true, 
+export function VideoBackground({
+  videoSrc,
+  overlay = true,
   overlayOpacity = 0.7,
   children,
-  className = ""
+  className = '',
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -42,16 +42,14 @@ export function VideoBackground({
 
       {/* Overlay */}
       {overlay && (
-        <div 
+        <div
           className="absolute inset-0 z-10 bg-black"
           style={{ opacity: overlayOpacity }}
         />
       )}
 
       {/* Content */}
-      <div className="relative z-20">
-        {children}
-      </div>
+      <div className="relative z-20">{children}</div>
     </div>
   );
 }

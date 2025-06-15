@@ -1,0 +1,116 @@
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+// Load configs from the /config directory
+const configDir = path.join(process.cwd(), 'config');
+let systemPromptsConfig: any;
+let personasConfig: any;
+export let safetyRulesConfig: any;
+
+// Immediately-invoked function to load configurations asynchronously
+(async () => {
+  try {
+    const systemPromptsPath = path.join(configDir, 'system-prompts.json');
+    const personasPath = path.join(configDir, 'ai-personas.json');
+    const safetyRulesPath = path.join(configDir, 'safety-rules.json');
+
+    const [systemPrompts, personas, safetyRules] = await Promise.all([
+      fs.readFile(systemPromptsPath, 'utf-8'),
+      fs.readFile(personasPath, 'utf-8'),
+      fs.readFile(safetyRulesPath, 'utf-8'),
+    ]);
+
+    systemPromptsConfig = JSON.parse(systemPrompts);
+    personasConfig = JSON.parse(personas);
+    safetyRulesConfig = JSON.parse(safetyRules);
+  } catch (error) {
+    console.error('Failed to load AI configurations:', error);
+    // In a real app, you might want to throw the error or have a fallback mechanism
+  }
+})();
+
+interface ChildContext {
+  name: string;
+  age: number;
+}
+
+interface ConversationContext {
+  mood: string;
+  recentTopics: string[];
+  engagementLevel: 'low' | 'medium' | 'high';
+  mode: 'normal' | 'whisper' | 'coach';
+}
+
+/**
+ * Builds a dynamic system prompt based on various contexts.
+ *
+ * @param personaId - The ID of the selected AI persona.
+ * @param childContext - Information about the child user.
+ * @param conversationContext - The current state of the conversation.
+ * @returns A fully constructed system prompt string.
+ */
+export function buildChatPrompt(
+  personaId: string,
+  childContext: ChildContext,
+  conversationContext: ConversationContext
+): string {
+  if (!systemPromptsConfig || !personasConfig) {
+    throw new Error('AI configurations not loaded');
+  }
+
+  const template = systemPromptsConfig.chatPromptTemplate;
+  const personaInfo = personasConfig.personas[personaId];
+  if (!personaInfo) {
+    throw new Error(`Persona with ID "${personaId}" not found.`);
+  }
+
+  const ageStyle =
+    systemPromptsConfig.ageSpecificStyles[childContext.age.toString()] ||
+    systemPromptsConfig.ageSpecificStyles['9']; // Default style
+
+  const culturalKnowledge = Object.values(systemPromptsConfig.culturalKnowledge)
+    .map((category: any) => Object.values(category).join('; '))
+    .join('\n');
+
+  const personalityInstructions =
+    systemPromptsConfig.personalityInstructions[personaId]?.base || '';
+
+  const responsePatterns = Object.entries(systemPromptsConfig.responsePatterns)
+    .map(
+      ([key, value]: [string, any]) =>
+        `${key}: ${Object.values(value).flat().join(', ')}`
+    )
+    .join('\n');
+
+  const modeInstructions =
+    systemPromptsConfig.modeInstructions[conversationContext.mode] || '';
+
+  // Simple replacement logic, can be made more sophisticated
+  let prompt = template;
+  prompt = prompt.replace('{persona_name}', personaInfo.name);
+  prompt = prompt.replace('{persona_personality}', personaInfo.personality);
+  prompt = prompt.replace('{child_name}', childContext.name);
+  prompt = prompt.replace('{child_age}', childContext.age.toString());
+  prompt = prompt.replace('{school_year}', ageStyle.school_year);
+  prompt = prompt.replace('{cultural_knowledge}', culturalKnowledge);
+  prompt = prompt.replace('{age_specific_style}', ageStyle.style);
+  prompt = prompt.replace('{detected_mood}', conversationContext.mood);
+  prompt = prompt.replace(
+    '{recent_topics}',
+    conversationContext.recentTopics.join(', ')
+  );
+  prompt = prompt.replace(
+    '{engagement_level}',
+    conversationContext.engagementLevel
+  );
+  prompt = prompt.replace('{time_context}', 'not implemented'); // Placeholder
+  prompt = prompt.replace(
+    '{personality_instructions}',
+    personalityInstructions
+  );
+  prompt = prompt.replace('{response_patterns}', responsePatterns);
+  prompt = prompt.replace('{memory_context}', 'not implemented'); // Placeholder
+  prompt = prompt.replace('{mode_instructions}', modeInstructions);
+
+  return prompt;
+} 

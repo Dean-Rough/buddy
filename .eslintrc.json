@@ -1,1 +1,14 @@
-{"extends": "next/core-web-vitals"}
+{
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+  "plugins": ["@typescript-eslint", "zod"],
+  "rules": {
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "zod/prefer-enum": "warn",
+    "zod/require-strict": "warn"
+  }
+}

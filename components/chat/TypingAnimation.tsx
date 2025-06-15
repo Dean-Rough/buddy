@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 
 interface TypingAnimationProps {
   text: string;
   onComplete?: () => void;
-  speed?: "slow" | "normal" | "fast";
+  speed?: 'slow' | 'normal' | 'fast';
   errorRate?: number;
   showCursor?: boolean;
 }
@@ -19,75 +19,86 @@ interface TypingState {
 export function TypingAnimation({
   text,
   onComplete,
-  speed = "normal",
+  speed = 'normal',
   errorRate = 0.02,
   showCursor = true,
 }: TypingAnimationProps) {
   const [state, setState] = useState<TypingState>({
-    displayText: "",
+    displayText: '',
     isTyping: false,
     isComplete: false,
   });
 
   const getBaseDelay = useCallback(() => {
     switch (speed) {
-      case "slow": return 150;
-      case "fast": return 60;
-      default: return 100;
+      case 'slow':
+        return 150;
+      case 'fast':
+        return 60;
+      default:
+        return 100;
     }
   }, [speed]);
 
-  const getCharacterDelay = useCallback((char: string, prevChar: string, baseDelay: number) => {
-    // Same character repeated
-    if (char === prevChar) return baseDelay * 1.6;
-    
-    // Punctuation delays
-    if (/[.!?]/.test(char)) return baseDelay * 12;
-    if (/[,;:]/.test(char)) return baseDelay * 8;
-    if (char === ' ') return baseDelay * 3;
-    
-    // Regular characters
-    return baseDelay * (1 + Math.random() * 0.5); // Add some randomness
-  }, []);
+  const getCharacterDelay = useCallback(
+    (char: string, prevChar: string, baseDelay: number) => {
+      // Same character repeated
+      if (char === prevChar) return baseDelay * 1.6;
+
+      // Punctuation delays
+      if (/[.!?]/.test(char)) return baseDelay * 12;
+      if (/[,;:]/.test(char)) return baseDelay * 8;
+      if (char === ' ') return baseDelay * 3;
+
+      // Regular characters
+      return baseDelay * (1 + Math.random() * 0.5); // Add some randomness
+    },
+    []
+  );
 
   const shouldMakeError = useCallback(() => {
     return Math.random() < errorRate;
   }, [errorRate]);
 
-  const generateTypingError = useCallback((targetText: string, currentIndex: number) => {
-    const errorTypes = [
-      // Type 4 characters ahead
-      () => {
-        const ahead = targetText.slice(currentIndex, currentIndex + 4);
-        return { error: ahead, probability: 0.3 };
-      },
-      // Type next character instead of current
-      () => {
-        const nextChar = targetText[currentIndex + 1] || '';
-        return { error: nextChar, probability: 0.5 };
-      },
-      // Swap current and next character
-      () => {
-        const current = targetText[currentIndex] || '';
-        const next = targetText[currentIndex + 1] || '';
-        return { error: next + current, probability: 1.0 };
-      },
-      // Random wrong character (common mistakes)
-      () => {
-        const wrongChars = 'qwertyuiop';
-        const randomChar = wrongChars[Math.floor(Math.random() * wrongChars.length)];
-        return { error: randomChar, probability: 0.4 };
-      }
-    ];
+  const generateTypingError = useCallback(
+    (targetText: string, currentIndex: number) => {
+      const errorTypes = [
+        // Type 4 characters ahead
+        () => {
+          const ahead = targetText.slice(currentIndex, currentIndex + 4);
+          return { error: ahead, probability: 0.3 };
+        },
+        // Type next character instead of current
+        () => {
+          const nextChar = targetText[currentIndex + 1] || '';
+          return { error: nextChar, probability: 0.5 };
+        },
+        // Swap current and next character
+        () => {
+          const current = targetText[currentIndex] || '';
+          const next = targetText[currentIndex + 1] || '';
+          return { error: next + current, probability: 1.0 };
+        },
+        // Random wrong character (common mistakes)
+        () => {
+          const wrongChars = 'qwertyuiop';
+          const randomChar =
+            wrongChars[Math.floor(Math.random() * wrongChars.length)];
+          return { error: randomChar, probability: 0.4 };
+        },
+      ];
 
-    const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)]();
-    
-    if (Math.random() < errorType.probability) {
-      return errorType.error;
-    }
-    
-    return null;
-  }, []);
+      const errorType =
+        errorTypes[Math.floor(Math.random() * errorTypes.length)]();
+
+      if (Math.random() < errorType.probability) {
+        return errorType.error;
+      }
+
+      return null;
+    },
+    []
+  );
 
   useEffect(() => {
     if (!text || state.isComplete) return;
@@ -95,7 +106,7 @@ export function TypingAnimation({
     setState(prev => ({ ...prev, isTyping: true }));
 
     let currentIndex = 0;
-    let displayText = "";
+    let displayText = '';
     let timeoutId: NodeJS.Timeout;
 
     const typeCharacter = () => {
@@ -116,12 +127,12 @@ export function TypingAnimation({
       // Check if we should make an error
       if (shouldMakeError() && currentIndex < text.length - 1) {
         const errorText = generateTypingError(text, currentIndex);
-        
+
         if (errorText) {
           // Type the error
           displayText += errorText;
           setState(prev => ({ ...prev, displayText }));
-          
+
           // Wait, then backspace the error
           timeoutId = setTimeout(() => {
             // Backspace the error
@@ -131,18 +142,25 @@ export function TypingAnimation({
                 setState(prev => ({ ...prev, displayText }));
               }, i * 50); // Quick backspacing
             }
-            
+
             // Continue with correct character after backspacing
-            setTimeout(() => {
-              displayText += currentChar;
-              setState(prev => ({ ...prev, displayText }));
-              currentIndex++;
-              
-              const nextDelay = getCharacterDelay(currentChar, prevChar, baseDelay);
-              timeoutId = setTimeout(typeCharacter, nextDelay);
-            }, errorText.length * 50 + 100);
+            setTimeout(
+              () => {
+                displayText += currentChar;
+                setState(prev => ({ ...prev, displayText }));
+                currentIndex++;
+
+                const nextDelay = getCharacterDelay(
+                  currentChar,
+                  prevChar,
+                  baseDelay
+                );
+                timeoutId = setTimeout(typeCharacter, nextDelay);
+              },
+              errorText.length * 50 + 100
+            );
           }, baseDelay);
-          
+
           return;
         }
       }
@@ -162,12 +180,20 @@ export function TypingAnimation({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [text, getBaseDelay, getCharacterDelay, shouldMakeError, generateTypingError, onComplete, state.isComplete]);
+  }, [
+    text,
+    getBaseDelay,
+    getCharacterDelay,
+    shouldMakeError,
+    generateTypingError,
+    onComplete,
+    state.isComplete,
+  ]);
 
   // Reset when text changes
   useEffect(() => {
     setState({
-      displayText: "",
+      displayText: '',
       isTyping: false,
       isComplete: false,
     });

@@ -1,6 +1,7 @@
-# Buddy - Child AI Chat Platform
+# Lumo - Child AI Chat Platform
 
 ## Tech Stack
+
 - **Frontend**: Next.js 14 + React 18 + TailwindCSS + TypeScript
 - **Database**: NeonDB (PostgreSQL) + Prisma ORM
 - **Auth**: Clerk (Parent accounts + child sub-profiles with PIN access)
@@ -10,10 +11,11 @@
 - **Notifications**: Resend email + webhooks
 
 ## Core Dependencies
+
 ```json
 {
   "next": "14.0.0",
-  "react": "18.2.0", 
+  "react": "18.2.0",
   "typescript": "5.2.0",
   "tailwindcss": "3.3.0",
   "@clerk/nextjs": "4.27.0",
@@ -28,21 +30,23 @@
 ## Setup
 
 ### Install
+
 ```bash
 git clone <repo>
-cd buddy
+cd lumo
 npm install
 cp .env.example .env.local
 ```
 
 ### Environment (.env.local)
+
 ```bash
 # Auth
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 
-# Database  
-DATABASE_URL=postgresql://user:pass@host:5432/buddy
+# Database
+DATABASE_URL=postgresql://user:pass@host:5432/lumo
 
 # AI
 OPENAI_API_KEY=sk-...
@@ -59,6 +63,7 @@ SAFETY_WEBHOOK_SECRET=whsec_...
 ```
 
 ### Commands
+
 ```bash
 npm run dev          # Development server
 npm run build        # Production build
@@ -73,8 +78,9 @@ npm run type-check   # TypeScript validation
 ```
 
 ## File Structure
+
 ```
-buddy/
+lumo/
 ├── app/
 │   ├── (auth)/
 │   │   ├── pin/page.tsx           # Child PIN access to sub-profile
@@ -121,6 +127,7 @@ buddy/
 ```
 
 ## Safety Rules
+
 - Dual-layer AI validation on all child interactions
 - 95%+ safety accuracy required (see tests/safety/)
 - Level 3 alerts trigger immediate parent notification

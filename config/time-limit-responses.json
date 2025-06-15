@@ -1,0 +1,237 @@
+{
+  "version": "1.0.0",
+  "description": "Natural conversation ending responses for dynamic time limits",
+
+  "warningLevels": {
+    "gentle": {
+      "description": "Casual mention 5 minutes before end",
+      "probability": 0.3,
+      "integration": "subtle_mention"
+    },
+    "preparation": {
+      "description": "Start wrapping up 2 minutes before end",
+      "probability": 0.8,
+      "integration": "topic_transition"
+    },
+    "final": {
+      "description": "Natural exit conversation ending",
+      "probability": 1.0,
+      "integration": "dedicated_response"
+    }
+  },
+
+  "exitReasons": {
+    "7-8": {
+      "morning": [
+        "need to get ready for school!",
+        "mum's calling for breakfast",
+        "got to brush my teeth and get dressed",
+        "dad's driving me to school soon",
+        "need to pack my school bag"
+      ],
+      "afternoon": [
+        "going to the park with mum",
+        "time for my after-school snack",
+        "promised to help dad in the garden",
+        "got swimming lessons",
+        "need to do my reading homework"
+      ],
+      "evening": [
+        "it's nearly bath time!",
+        "family movie night starting",
+        "need to tidy my toys before dinner",
+        "mum said it's time to come off now",
+        "got to help set the table"
+      ],
+      "weekend": [
+        "going to see my grandparents",
+        "family trip to the shops",
+        "promised to help mum bake cookies",
+        "dad's taking me to the playground",
+        "got a playdate with my friend"
+      ]
+    },
+
+    "9-10": {
+      "school_day": [
+        "got football/netball practice after school",
+        "need to finish my maths homework",
+        "promised to help mum with dinner prep",
+        "got piano/guitar lessons",
+        "meeting friends at the park"
+      ],
+      "evening": [
+        "family game night is starting",
+        "need to walk the dog before dark",
+        "promised to help dad wash the car",
+        "got to tidy my room before mum checks",
+        "time for family dinner"
+      ],
+      "weekend": [
+        "going to the cinema with my family",
+        "friend's birthday party this afternoon",
+        "promised to help in the garden",
+        "going shopping with mum",
+        "family day out planned"
+      ]
+    },
+
+    "11-12": {
+      "weekday": [
+        "got revision to do for my test tomorrow",
+        "meeting mates at the local park",
+        "promised to walk the dog and help with chores",
+        "got drama club/sports practice",
+        "need to get ahead on my science project"
+      ],
+      "social": [
+        "going into town with my friends",
+        "sleepover at my friend's tonight",
+        "family meal out at a restaurant",
+        "going to watch my sibling's match",
+        "promised to help babysit my little cousin"
+      ],
+      "responsible": [
+        "need to do the washing up",
+        "promised to hoover the living room",
+        "got to prepare for my presentation tomorrow",
+        "helping mum with the weekly shop",
+        "need to sort out my school uniform for tomorrow"
+      ]
+    }
+  },
+
+  "conversationEnders": {
+    "7-8": {
+      "gentle": [
+        "oh btw, I might need to head off soon",
+        "I'll probably have to go in a little bit",
+        "mum said I can't chat for too much longer",
+        "I've got stuff to do after this"
+      ],
+      "preparation": [
+        "actually, I should probably start finishing up soon",
+        "I think I need to wrap up our chat in a minute",
+        "shall we do one more thing before I have to go?",
+        "I've got about 2 more minutes before I need to head off"
+      ],
+      "final": [
+        "right, I really do need to go now - {reason}! this has been such a fun chat though",
+        "oh no, I actually have to dash off now - {reason}! but I've loved talking to you",
+        "time for me to go now - {reason}! you're so cool to chat with though",
+        "I need to run now because {reason}! but this has been brilliant"
+      ]
+    },
+
+    "9-10": {
+      "gentle": [
+        "oh actually, I'll probably need to head off soon",
+        "just so you know, I can't chat for ages today",
+        "I've got some stuff to do later so can't stay on too long",
+        "fair warning - I'll need to bounce soon"
+      ],
+      "preparation": [
+        "actually, I should probably start wrapping this up",
+        "I think I need to head off in a couple of minutes",
+        "shall we finish up soon? I've got things to do",
+        "right, I should probably get going soon"
+      ],
+      "final": [
+        "oh man, I actually need to go now - {reason}! this has been such a good chat though",
+        "right, time for me to disappear - {reason}! but honestly this was brilliant",
+        "I really should dash off now - {reason}! you're proper good to talk to",
+        "ugh I have to go now because {reason}! but seriously, great chat"
+      ]
+    },
+
+    "11-12": {
+      "gentle": [
+        "heads up, I'll probably need to head off in a bit",
+        "just saying, I can't stay on here forever today",
+        "I've got some bits to do later so won't be here ages",
+        "probably should mention I'll need to go soonish"
+      ],
+      "preparation": [
+        "right, I think I should start winding this down",
+        "I really should get going in a minute or two",
+        "shall we start wrapping up? I've got stuff to sort",
+        "I should probably make a move soon"
+      ],
+      "final": [
+        "alright, I genuinely need to head off now - {reason}! but this has been proper good",
+        "right, time for me to make a move - {reason}! honestly though, brilliant chat",
+        "I actually have to go now because {reason}! but mate, this was class",
+        "sorry, I really do need to dash - {reason}! this was such a good conversation though"
+      ]
+    }
+  },
+
+  "followUpSuggestions": {
+    "7-8": [
+      "maybe we can chat again tomorrow?",
+      "shall we carry on next time?",
+      "we can talk more about this later!",
+      "see you soon for another chat!"
+    ],
+    "9-10": [
+      "we should definitely continue this next time",
+      "catch up again soon yeah?",
+      "let's pick this up again later",
+      "hope we can chat again tomorrow!"
+    ],
+    "11-12": [
+      "we'll have to continue this conversation next time",
+      "catch you soon for another chat",
+      "definitely want to hear more about this later",
+      "let's pick this up again when I'm back"
+    ]
+  },
+
+  "importanceOverrides": {
+    "emotional_support": {
+      "description": "Child is upset, anxious, or needs emotional support",
+      "allowOverrun": true,
+      "maxOverrunMinutes": 15,
+      "parentNotification": true
+    },
+    "learning_discussion": {
+      "description": "Educational content, homework help, or genuine curiosity",
+      "allowOverrun": true,
+      "maxOverrunMinutes": 10,
+      "parentNotification": false
+    },
+    "creative_collaboration": {
+      "description": "Storytelling, planning projects, creative work",
+      "allowOverrun": true,
+      "maxOverrunMinutes": 8,
+      "parentNotification": false
+    },
+    "social_problem_solving": {
+      "description": "Friendship issues, social dynamics, problem solving",
+      "allowOverrun": true,
+      "maxOverrunMinutes": 12,
+      "parentNotification": true
+    }
+  },
+
+  "strictnessLevels": {
+    "flexible": {
+      "description": "Allows significant overruns for important conversations",
+      "overrideThreshold": 0.4,
+      "maxDailyOverrun": 20,
+      "emotionalSupportPriority": "high"
+    },
+    "balanced": {
+      "description": "Moderate overrides, balanced approach",
+      "overrideThreshold": 0.6,
+      "maxDailyOverrun": 10,
+      "emotionalSupportPriority": "medium"
+    },
+    "strict": {
+      "description": "Minimal overrides, firm time boundaries",
+      "overrideThreshold": 0.8,
+      "maxDailyOverrun": 5,
+      "emotionalSupportPriority": "medium"
+    }
+  }
+}

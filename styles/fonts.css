@@ -1,42 +1,81 @@
-/* Neuething Sans Font Family + Monigue for Buttons */
+/* Onda Font System - Rokano + Avotica */
 
-/* Headers - Neuething Sans Extra Bold Ultra Expanded */
+/* Rokano Funky Display - For H1, H2, H3 and Buttons */
 @font-face {
-  font-family: 'NeuethingHeaders';
-  src: url('/fonts/NeuethingSans-ExtraBoldUltraExpanded.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Titles - Neuething Sans Bold */
-@font-face {
-  font-family: 'NeuethingTitles';
-  src: url('/fonts/NeuethingSans-Bold.woff2') format('woff2');
+  font-family: 'Rokano';
+  src:
+    url('/fonts/Onda FOnda/Rokano Funky Typeface/WOFF/RokanoFunkyDisplay-Bold.woff2')
+      format('woff2'),
+    url('/fonts/Onda FOnda/Rokano Funky Typeface/WOFF/RokanoFunkyDisplay-Bold.woff')
+      format('woff'),
+    url('/fonts/Onda FOnda/Rokano Funky Typeface/TTF/RokanoFunkyDisplay-Bold.ttf')
+      format('truetype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
-/* Body - Neuething Sans Regular */
+/* Avotica Bold - For H4, H5, H6 */
 @font-face {
-  font-family: 'NeuethingBody';
-  src: url('/fonts/NeuethingSans-Regular.woff2') format('woff2');
+  font-family: 'Avotica';
+  src:
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Bold.woff2')
+      format('woff2'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Bold.woff')
+      format('woff'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Bold.ttf')
+      format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Avotica Regular - For Body Text */
+@font-face {
+  font-family: 'Avotica';
+  src:
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Regular.woff2')
+      format('woff2'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Regular.woff')
+      format('woff'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Regular.ttf')
+      format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-/* Buttons - Monigue Condensed */
+/* Avotica Medium - For emphasis */
 @font-face {
-  font-family: 'Monigue';
-  src: url('/fonts/Monigue.woff2') format('woff2');
-  font-weight: normal;
+  font-family: 'Avotica';
+  src:
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Medium.woff2')
+      format('woff2'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Medium.woff')
+      format('woff'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-Medium.ttf')
+      format('truetype');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
-/* Chat font - CasualHuman for personality */
+/* Avotica SemiBold - For strong emphasis */
+@font-face {
+  font-family: 'Avotica';
+  src:
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-SemiBold.woff2')
+      format('woff2'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-SemiBold.woff')
+      format('woff'),
+    url('/fonts/Onda FOnda/avotica-geometric-font-family-2025-06-09-17-48-11-utc/Web-TT/Avotica-SemiBold.ttf')
+      format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Legacy Chat font - CasualHuman for personality */
 @font-face {
   font-family: 'CasualHuman';
   src: url('/fonts/CasualHuman.otf') format('opentype');
@@ -53,59 +92,144 @@
   font-display: swap;
 }
 
-/* Font Stack Fallbacks */
-.font-headers {
-  font-family: 'NeuethingHeaders', 'Arial Black', 'Helvetica Neue', sans-serif;
+/* Font Utility Classes */
+.font-rokano {
+  font-family:
+    'Rokano', 'Impact', 'Franklin Gothic Bold', 'Arial Black', sans-serif;
 }
 
-.font-titles {
-  font-family: 'NeuethingTitles', 'Arial', 'Helvetica Neue', sans-serif;
-}
-
-.font-body {
-  font-family: 'NeuethingBody', 'Arial', 'Helvetica Neue', sans-serif;
-}
-
-.font-buttons {
-  font-family: 'Monigue', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+.font-avotica {
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
 }
 
 .font-chat {
   font-family: 'CasualHuman', 'Comic Sans MS', cursive;
 }
 
-/* Neo-Brutalist Typography Styles with New Fonts */
+/* Typography System Classes */
+
+/* H1, H2, H3 - Rokano Funky Display */
+.brutal-h1,
+.brutal-h2,
+.brutal-h3 {
+  font-family:
+    'Rokano', 'Impact', 'Franklin Gothic Bold', 'Arial Black', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+.brutal-h1 {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+}
+
+.brutal-h2 {
+  font-size: clamp(2rem, 6vw, 4rem);
+}
+
+.brutal-h3 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* H4, H5, H6 - Avotica Bold */
+.brutal-h4,
+.brutal-h5,
+.brutal-h6 {
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.brutal-h4 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.brutal-h5 {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+.brutal-h6 {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+}
+
+/* Body Text - Avotica Regular */
+.brutal-text,
+.brutal-body {
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: normal;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+/* Strong emphasis - Avotica SemiBold */
+.brutal-text-strong {
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Medium emphasis - Avotica Medium */
+.brutal-text-medium {
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Buttons - Rokano */
+.brutal-button-text {
+  font-family:
+    'Rokano', 'Impact', 'Franklin Gothic Bold', 'Arial Black', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+/* Chat Messages - CasualHuman (preserved for personality) */
+.handwritten-chat {
+  font-family: 'CasualHuman', 'Comic Sans MS', cursive;
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+/* Legacy class mappings for compatibility */
 .brutal-title {
-  font-family: 'NeuethingHeaders', 'Arial Black', sans-serif;
-  font-weight: 800;
+  font-family:
+    'Rokano', 'Impact', 'Franklin Gothic Bold', 'Arial Black', sans-serif;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   line-height: 0.9;
 }
 
 .brutal-subtitle {
-  font-family: 'NeuethingTitles', 'Arial', sans-serif;
+  font-family: 'Avotica', 'Helvetica Neue', 'Arial', sans-serif;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: -0.01em;
-  line-height: 1.0;
+  line-height: 1.1;
 }
 
-.brutal-text {
-  font-family: 'NeuethingBody', 'Arial', sans-serif;
-  font-weight: normal;
-  line-height: 1.3;
+/* Font sizes for consistent scaling */
+.text-brutal-xl {
+  font-size: clamp(3rem, 10vw, 8rem);
 }
 
-.brutal-button-text {
-  font-family: 'Monigue', 'Arial Narrow', sans-serif;
-  font-weight: normal;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.text-brutal-lg {
+  font-size: clamp(2rem, 6vw, 4rem);
 }
 
-.handwritten-chat {
-  font-family: 'CasualHuman', 'Comic Sans MS', cursive;
-  font-weight: normal;
-  line-height: 1.4;
+.text-brutal-md {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.text-brutal-sm {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+.text-brutal-xs {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
 }

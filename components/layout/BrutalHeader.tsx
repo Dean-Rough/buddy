@@ -1,16 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Bot, Menu, X } from "lucide-react";
-import BrutalButton from "../ui/BrutalButton";
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import BrutalButton from '../ui/BrutalButton';
 
 interface BrutalHeaderProps {
   onSignInClick?: () => void;
   onSignUpClick?: () => void;
-  onStartChatClick?: () => void;
 }
 
-export function BrutalHeader({ onSignInClick, onSignUpClick, onStartChatClick }: BrutalHeaderProps) {
+export function BrutalHeader({
+  onSignInClick,
+  onSignUpClick,
+}: BrutalHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -19,41 +21,28 @@ export function BrutalHeader({ onSignInClick, onSignUpClick, onStartChatClick }:
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="brutal-h1 mr-2">BUDDY</h1>
-            <div className="w-8 h-8 bg-yellow-400 border-3 border-black brutal-shadow-sm">
-              <div className="w-full h-full flex items-center justify-center">
-                <Bot className="w-5 h-5 text-black" />
-              </div>
-            </div>
+            <img src="/onda-logo-black.svg" alt="Onda" className="h-8 mr-2" />
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="brutal-text hover:text-pink-500 transition-colors">
-              FEATURES
-            </a>
-            <a href="#safety" className="brutal-text hover:text-blue-500 transition-colors">
-              SAFETY
-            </a>
-            <a href="#parents" className="brutal-text hover:text-green-500 transition-colors">
-              FOR PARENTS
-            </a>
-            
+            {/* Navigation links removed - no corresponding page sections yet */}
+
             <div className="flex gap-3 ml-4">
-              <BrutalButton 
+              <BrutalButton
                 onClick={onSignInClick}
-                variant="white" 
+                variant="white"
                 size="small"
               >
-                PARENT LOGIN
+                SIGN IN
               </BrutalButton>
-              
-              <BrutalButton 
-                onClick={onStartChatClick}
-                variant="yellow" 
+
+              <BrutalButton
+                onClick={onSignUpClick}
+                variant="yellow"
                 size="small"
               >
-                START CHAT
+                SIGN UP
               </BrutalButton>
             </div>
           </nav>
@@ -65,7 +54,11 @@ export function BrutalHeader({ onSignInClick, onSignUpClick, onStartChatClick }:
             size="small"
             className="md:hidden"
           >
-            {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {isMenuOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
           </BrutalButton>
         </div>
 
@@ -73,31 +66,23 @@ export function BrutalHeader({ onSignInClick, onSignUpClick, onStartChatClick }:
         {isMenuOpen && (
           <div className="md:hidden mt-6 pb-4 border-t-3 border-black pt-4">
             <nav className="flex flex-col gap-4">
-              <a href="#features" className="brutal-text hover:text-pink-500">
-                FEATURES
-              </a>
-              <a href="#safety" className="brutal-text hover:text-blue-500">
-                SAFETY
-              </a>
-              <a href="#parents" className="brutal-text hover:text-green-500">
-                FOR PARENTS
-              </a>
-              
+              {/* Mobile navigation links removed - no corresponding page sections yet */}
+
               <div className="flex flex-col gap-3 mt-4">
-                <BrutalButton 
+                <BrutalButton
                   onClick={onSignInClick}
                   variant="white"
                   className="w-full"
                 >
-                  PARENT LOGIN
+                  SIGN IN
                 </BrutalButton>
-                
-                <BrutalButton 
-                  onClick={onStartChatClick}
+
+                <BrutalButton
+                  onClick={onSignUpClick}
                   variant="yellow"
                   className="w-full"
                 >
-                  START CHAT
+                  SIGN UP
                 </BrutalButton>
               </div>
             </nav>

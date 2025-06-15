@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { InputHTMLAttributes, forwardRef } from "react";
+import { InputHTMLAttributes, forwardRef } from 'react';
 
 interface BrutalInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,11 +8,11 @@ interface BrutalInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const BrutalInput = forwardRef<HTMLInputElement, BrutalInputProps>(
-  ({ label, error, className = "", ...props }, ref) => {
+  ({ label, error, className = '', ...props }, ref) => {
     return (
       <div className="flex flex-col gap-2">
         {label && (
-          <label className="font-sink text-sm uppercase tracking-wide">
+          <label className="font-rokano text-sm uppercase tracking-wide">
             {label}
           </label>
         )}
@@ -22,7 +22,7 @@ export const BrutalInput = forwardRef<HTMLInputElement, BrutalInputProps>(
           {...props}
         />
         {error && (
-          <span className="text-red-600 font-sink text-sm uppercase">
+          <span className="text-red-600 font-rokano text-sm uppercase">
             {error}
           </span>
         )}
@@ -31,6 +31,6 @@ export const BrutalInput = forwardRef<HTMLInputElement, BrutalInputProps>(
   }
 );
 
-BrutalInput.displayName = "BrutalInput";
+BrutalInput.displayName = 'BrutalInput';
 
 export default BrutalInput;

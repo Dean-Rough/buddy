@@ -1,4 +1,4 @@
-# Deployment & Environment Setup - Buddy Platform
+# Deployment & Environment Setup - Lumo Platform
 
 ## Environment Configuration
 
@@ -40,8 +40,8 @@ SMTP_USER=resend
 SMTP_PASS=re_...
 
 # Parent Notifications
-PARENT_ALERT_FROM_EMAIL=alerts@buddy-app.com
-WEEKLY_SUMMARY_FROM_EMAIL=summaries@buddy-app.com
+PARENT_ALERT_FROM_EMAIL=alerts@lumo-app.com
+WEEKLY_SUMMARY_FROM_EMAIL=summaries@lumo-app.com
 EMERGENCY_CONTACT_PHONE=+1234567890
 
 # Security & Rate Limiting
@@ -112,8 +112,8 @@ sudo apt-get install postgresql postgresql-contrib
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/buddy-platform.git
-cd buddy-platform
+git clone https://github.com/your-org/lumo-platform.git
+cd lumo-platform
 
 # Install dependencies
 pnpm install
@@ -342,13 +342,13 @@ export async function GET() {
     checkAIProviders(),
     checkSafetySystem(),
     checkNotificationService(),
-    checkVoiceService()
+    checkVoiceService(),
   ]);
-  
+
   return Response.json({
     status: checks.every(check => check.healthy) ? 'healthy' : 'unhealthy',
     checks,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 ```
@@ -358,32 +358,32 @@ export async function GET() {
 ```yaml
 # monitoring.yml
 services:
-  - name: "Database Connection"
-    endpoint: "/api/health/database"
+  - name: 'Database Connection'
+    endpoint: '/api/health/database'
     interval: 30s
     timeout: 10s
-    
-  - name: "AI Safety System"
-    endpoint: "/api/health/safety"
+
+  - name: 'AI Safety System'
+    endpoint: '/api/health/safety'
     interval: 60s
     timeout: 15s
     critical: true
-    
-  - name: "Parent Notifications"
-    endpoint: "/api/health/notifications"
+
+  - name: 'Parent Notifications'
+    endpoint: '/api/health/notifications'
     interval: 300s
     timeout: 30s
 
 alerts:
-  - name: "Safety System Down"
-    condition: "safety_system_healthy == false"
-    severity: "critical"
-    notification: "immediate"
-    
-  - name: "High Error Rate"
-    condition: "error_rate > 5%"
-    severity: "warning"
-    notification: "email"
+  - name: 'Safety System Down'
+    condition: 'safety_system_healthy == false'
+    severity: 'critical'
+    notification: 'immediate'
+
+  - name: 'High Error Rate'
+    condition: 'error_rate > 5%'
+    severity: 'warning'
+    notification: 'email'
 ```
 
 ### Performance Monitoring
@@ -410,10 +410,10 @@ alerts:
 
 ```bash
 # Automated daily backups
-0 2 * * * pg_dump $DATABASE_URL > /backups/buddy-$(date +%Y%m%d).sql
+0 2 * * * pg_dump $DATABASE_URL > /backups/lumo-$(date +%Y%m%d).sql
 
 # Weekly full backup with retention
-0 3 * * 0 pg_dump --clean --create $DATABASE_URL | gzip > /backups/weekly/buddy-$(date +%Y%m%d).sql.gz
+0 3 * * 0 pg_dump --clean --create $DATABASE_URL | gzip > /backups/weekly/lumo-$(date +%Y%m%d).sql.gz
 
 # Backup verification
 # Test restore to staging environment weekly
@@ -423,17 +423,20 @@ alerts:
 
 ```markdown
 ## Recovery Time Objectives (RTO)
+
 - Critical safety systems: 5 minutes
-- Chat functionality: 15 minutes  
+- Chat functionality: 15 minutes
 - Parent dashboard: 30 minutes
 - Full system: 60 minutes
 
 ## Recovery Point Objectives (RPO)
+
 - Safety events: 0 minutes (no data loss acceptable)
 - Conversations: 5 minutes
 - User preferences: 15 minutes
 
 ## Recovery Procedures
+
 1. Assess scope of outage
 2. Activate incident response team
 3. Implement temporary safety measures
@@ -471,7 +474,7 @@ ENABLE_DEBUG_LOGS=true
 DISABLE_RATE_LIMITING=true
 MOCK_EXTERNAL_SERVICES=true
 
-# Staging  
+# Staging
 ENABLE_DEBUG_LOGS=true
 DISABLE_RATE_LIMITING=false
 MOCK_EXTERNAL_SERVICES=false

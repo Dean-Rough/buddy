@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface WritingAnimationProps {
   text: string;
   onComplete?: () => void;
-  speed?: "slow" | "normal" | "fast";
+  speed?: 'slow' | 'normal' | 'fast';
   errorRate?: number;
   showCursor?: boolean;
   playSound?: boolean;
@@ -21,13 +21,13 @@ interface WritingState {
 export function WritingAnimation({
   text,
   onComplete,
-  speed = "normal",
+  speed = 'normal',
   errorRate = 0.03,
   showCursor = true,
   playSound = true,
 }: WritingAnimationProps) {
   const [state, setState] = useState<WritingState>({
-    displayText: "",
+    displayText: '',
     isWriting: false,
     isComplete: false,
     currentChar: 0,
@@ -40,89 +40,119 @@ export function WritingAnimation({
   useEffect(() => {
     if (playSound && typeof window !== 'undefined') {
       audioRef.current = new Audio('/audio/Pencil Writing.mp3');
-      audioRef.current.volume = 0.3;
-      audioRef.current.loop = false;
+      audioRef.current.volume = 0.21; // Reduced from 0.3 to 0.21 (30% quieter)
+      audioRef.current.loop = true; // Loop the audio continuously
     }
-    
+
     return () => {
       if (soundTimerRef.current) {
         clearTimeout(soundTimerRef.current);
       }
+      // Stop audio when component unmounts
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
     };
   }, [playSound]);
 
-  const playWritingSound = useCallback(() => {
+  const startWritingSound = useCallback(() => {
     if (audioRef.current && playSound) {
-      // Play sound in short bursts to simulate writing
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(console.warn);
-      
-      // Stop sound after short duration
-      if (soundTimerRef.current) {
-        clearTimeout(soundTimerRef.current);
+      // Only play if not already playing to prevent AbortError
+      if (audioRef.current.paused) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(err => {
+          // Filter out common browser errors that aren't actual issues
+          if (
+            !err.message.includes('autoplay') &&
+            !err.name.includes('AbortError') &&
+            !err.message.includes('interrupted')
+          ) {
+            console.warn('Audio playback error:', err);
+          }
+        });
       }
-      soundTimerRef.current = setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-      }, 200 + Math.random() * 300);
     }
   }, [playSound]);
 
+  const stopWritingSound = useCallback(() => {
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (soundTimerRef.current) {
+      clearTimeout(soundTimerRef.current);
+      soundTimerRef.current = null;
+    }
+  }, []);
+
   const getBaseDelay = useCallback(() => {
     switch (speed) {
-      case "slow": return 180;
-      case "fast": return 80;
-      default: return 120;
+      case 'slow':
+        return 120;
+      case 'fast':
+        return 40;
+      default:
+        return 60; // Much faster default
     }
   }, [speed]);
 
-  const getCharacterDelay = useCallback((char: string, prevChar: string, baseDelay: number) => {
-    // Realistic typing patterns
-    if (char === prevChar) return baseDelay * 1.8; // Same char repeated
-    if (/[.!?]/.test(char)) return baseDelay * 15; // End of sentence pause
-    if (/[,;:]/.test(char)) return baseDelay * 8; // Punctuation pause
-    if (char === ' ') return baseDelay * 2.5; // Space pause
-    if (/[A-Z]/.test(char) && /[a-z]/.test(prevChar)) return baseDelay * 1.5; // Capital after lowercase
-    
-    // Add natural variation
-    return baseDelay * (0.8 + Math.random() * 0.6);
-  }, []);
+  const getCharacterDelay = useCallback(
+    (char: string, prevChar: string, baseDelay: number) => {
+      // Realistic typing patterns - but much faster
+      if (char === prevChar) return baseDelay * 1.5; // Same char repeated
+      if (/[.!?]/.test(char)) return baseDelay * 6; // End of sentence pause (was 15x)
+      if (/[,;:]/.test(char)) return baseDelay * 3; // Punctuation pause (was 8x)
+      if (char === ' ') return baseDelay * 1.8; // Space pause (was 2.5x)
+      if (/[A-Z]/.test(char) && /[a-z]/.test(prevChar)) return baseDelay * 1.2; // Capital after lowercase
+
+      // Add natural variation
+      return baseDelay * (0.7 + Math.random() * 0.6);
+    },
+    []
+  );
 
   const shouldMakeError = useCallback(() => {
     return Math.random() < errorRate;
   }, [errorRate]);
 
-  const generateTypingError = useCallback((targetText: string, currentIndex: number) => {
-    const errorTypes = [
-      // Type wrong character
-      () => {
-        const wrongChars = 'qwertyuioplkjhgfdsazxcvbnm';
-        return wrongChars[Math.floor(Math.random() * wrongChars.length)];
-      },
-      // Type next character instead
-      () => targetText[currentIndex + 1] || '',
-      // Double character
-      () => targetText[currentIndex] + targetText[currentIndex],
-      // Swap current and next
-      () => {
-        const current = targetText[currentIndex] || '';
-        const next = targetText[currentIndex + 1] || '';
-        return next + current;
-      }
-    ];
+  const generateTypingError = useCallback(
+    (targetText: string, currentIndex: number) => {
+      const errorTypes = [
+        // Type wrong character
+        () => {
+          const wrongChars = 'qwertyuioplkjhgfdsazxcvbnm';
+          return wrongChars[Math.floor(Math.random() * wrongChars.length)];
+        },
+        // Type next character instead
+        () => targetText[currentIndex + 1] || '',
+        // Double character
+        () => targetText[currentIndex] + targetText[currentIndex],
+        // Swap current and next
+        () => {
+          const current = targetText[currentIndex] || '';
+          const next = targetText[currentIndex + 1] || '';
+          return next + current;
+        },
+      ];
 
-    const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-    return errorType();
-  }, []);
+      const errorType =
+        errorTypes[Math.floor(Math.random() * errorTypes.length)];
+      return errorType();
+    },
+    []
+  );
 
   useEffect(() => {
     if (!text || state.isComplete) return;
 
     setState(prev => ({ ...prev, isWriting: true }));
 
+    // Start the writing sound at the beginning
+    startWritingSound();
+
     let currentIndex = 0;
-    let displayText = "";
+    let displayText = '';
     let timeoutId: NodeJS.Timeout;
 
     const writeCharacter = () => {
@@ -133,6 +163,8 @@ export function WritingAnimation({
           isComplete: true,
           currentChar: text.length,
         });
+        // Stop the writing sound when complete
+        stopWritingSound();
         onComplete?.();
         return;
       }
@@ -141,67 +173,68 @@ export function WritingAnimation({
       const prevChar = currentIndex > 0 ? text[currentIndex - 1] : '';
       const baseDelay = getBaseDelay();
 
-      // Play writing sound occasionally (not every character)
-      if (Math.random() < 0.4) {
-        playWritingSound();
-      }
+      // Sound is now playing continuously, no need for individual calls
 
       // Check for typing error
       if (shouldMakeError() && currentIndex < text.length - 2) {
         const errorText = generateTypingError(text, currentIndex);
-        
+
         if (errorText && errorText !== currentChar) {
           // Type the error
           displayText += errorText;
-          setState(prev => ({ 
-            ...prev, 
+          setState(prev => ({
+            ...prev,
             displayText,
-            currentChar: currentIndex 
+            currentChar: currentIndex,
           }));
-          
+
           // Wait, then backspace
           timeoutId = setTimeout(() => {
-            const backspaceDelay = 80;
+            const backspaceDelay = 50; // Faster backspacing
             let backspaceIndex = errorText.length;
-            
+
             const backspaceChar = () => {
               if (backspaceIndex > 0) {
                 displayText = displayText.slice(0, -1);
-                setState(prev => ({ 
-                  ...prev, 
+                setState(prev => ({
+                  ...prev,
                   displayText,
-                  currentChar: currentIndex 
+                  currentChar: currentIndex,
                 }));
                 backspaceIndex--;
                 setTimeout(backspaceChar, backspaceDelay);
               } else {
                 // Now type the correct character
                 displayText += currentChar;
-                setState(prev => ({ 
-                  ...prev, 
+                setState(prev => ({
+                  ...prev,
                   displayText,
-                  currentChar: currentIndex + 1 
+                  currentChar: currentIndex + 1,
                 }));
                 currentIndex++;
-                
-                const nextDelay = getCharacterDelay(currentChar, prevChar, baseDelay);
+
+                const nextDelay = getCharacterDelay(
+                  currentChar,
+                  prevChar,
+                  baseDelay
+                );
                 timeoutId = setTimeout(writeCharacter, nextDelay);
               }
             };
-            
-            setTimeout(backspaceChar, baseDelay * 2);
+
+            setTimeout(backspaceChar, baseDelay); // Faster error correction start
           }, baseDelay);
-          
+
           return;
         }
       }
 
       // Type the correct character
       displayText += currentChar;
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         displayText,
-        currentChar: currentIndex + 1 
+        currentChar: currentIndex + 1,
       }));
       currentIndex++;
 
@@ -210,26 +243,40 @@ export function WritingAnimation({
     };
 
     // Start writing after brief delay
-    timeoutId = setTimeout(writeCharacter, 500);
+    timeoutId = setTimeout(writeCharacter, 200); // Much faster start
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
+      // Stop sound if component is being cleaned up
+      stopWritingSound();
     };
-  }, [text, getBaseDelay, getCharacterDelay, shouldMakeError, generateTypingError, onComplete, state.isComplete, playWritingSound]);
+  }, [
+    text,
+    getBaseDelay,
+    getCharacterDelay,
+    shouldMakeError,
+    generateTypingError,
+    onComplete,
+    state.isComplete,
+    startWritingSound,
+    stopWritingSound,
+  ]);
 
   // Reset when text changes
   useEffect(() => {
     setState({
-      displayText: "",
+      displayText: '',
       isWriting: false,
       isComplete: false,
       currentChar: 0,
     });
-  }, [text]);
+    // Stop any playing sound when text changes
+    stopWritingSound();
+  }, [text, stopWritingSound]);
 
   return (
     <div className="writing-effect">
-      <span 
+      <span
         className="handwritten-chat"
         style={{
           // Add slight character spacing for handwritten effect
@@ -245,7 +292,10 @@ export function WritingAnimation({
             style={{
               display: char === ' ' ? 'inline' : 'inline-block',
               // Add tiny random transforms for handwritten feel
-              transform: char !== ' ' ? `rotate(${(Math.random() - 0.5) * 2}deg) translateY(${(Math.random() - 0.5) * 1}px)` : 'none',
+              transform:
+                char !== ' '
+                  ? `rotate(${(Math.random() - 0.5) * 2}deg) translateY(${(Math.random() - 0.5) * 1}px)`
+                  : 'none',
               transition: 'all 0.1s ease',
             }}
           >
@@ -253,7 +303,7 @@ export function WritingAnimation({
           </span>
         ))}
       </span>
-      
+
       {(state.isWriting || !state.isComplete) && showCursor && (
         <span className="writing-cursor">|</span>
       )}

@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
   test: {
@@ -10,12 +10,7 @@ export default defineConfig({
       'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
-    exclude: [
-      'tests/e2e/**',
-      'node_modules/**',
-      'dist/**',
-      '.next/**',
-    ],
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**', '.next/**'],
     globals: true,
     coverage: {
       provider: 'v8',
@@ -40,4 +35,4 @@ export default defineConfig({
       '@/tests': resolve(__dirname, './tests'),
     },
   },
-})
+});

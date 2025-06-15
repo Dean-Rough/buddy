@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import TypingAnimation from "./TypingAnimation";
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import TypingAnimation from './TypingAnimation';
 
 interface Message {
   id: string;
@@ -21,7 +21,7 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -30,7 +30,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
   const router = useRouter();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -59,14 +59,14 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputMessage("");
+    setInputMessage('');
     setIsLoading(true);
     setIsTyping(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
           childId: childProfile.id,
@@ -85,18 +85,20 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
         // Start typing animation
         setTypingMessage(data.response);
         setIsTyping(true);
-        
+
         // Store message ID for when typing completes
-        (window as any).pendingMessageId = data.messageId || Date.now().toString();
+        (window as any).pendingMessageId =
+          data.messageId || Date.now().toString();
       } else {
-        throw new Error(data.error || "Failed to get response");
+        throw new Error(data.error || 'Failed to get response');
       }
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error('Chat error:', error);
       setIsTyping(false);
       const errorMessage: Message = {
         id: Date.now().toString(),
-        content: "Oops! I'm having trouble hearing you right now. Could you try again?",
+        content:
+          "Oops! I'm having trouble hearing you right now. Could you try again?",
         role: 'assistant',
         timestamp: new Date(),
       };
@@ -148,17 +150,31 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
             <p className="text-sm text-gray-600">Chatting with Buddy</p>
           </div>
         </div>
-        <button
-          onClick={logout}
-          className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded"
-        >
-          Logout
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push('/parent')}
+            className="text-sm text-green-600 hover:text-green-700 px-3 py-1 rounded border border-green-200 hover:bg-green-50"
+          >
+            Parent Dashboard
+          </button>
+          <button
+            onClick={() => router.push('/whisper')}
+            className="text-sm text-purple-600 hover:text-purple-700 px-3 py-1 rounded border border-purple-200 hover:bg-purple-50"
+          >
+            Whisper Mode
+          </button>
+          <button
+            onClick={logout}
+            className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.role === 'child' ? 'justify-end' : 'justify-start'}`}
@@ -174,7 +190,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
             </div>
           </div>
         ))}
-        
+
         {/* Typing animation */}
         {isTyping && typingMessage && (
           <div className="flex justify-start">
@@ -185,7 +201,8 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
                   speed="normal"
                   errorRate={0.03}
                   onComplete={() => {
-                    const messageId = (window as any).pendingMessageId || Date.now().toString();
+                    const messageId =
+                      (window as any).pendingMessageId || Date.now().toString();
                     handleTypingComplete(messageId, typingMessage);
                   }}
                 />
@@ -193,7 +210,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -203,7 +220,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
           <input
             type="text"
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={e => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"

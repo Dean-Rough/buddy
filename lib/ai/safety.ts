@@ -1,5 +1,10 @@
-import { validateSafety } from "./client";
-import { prisma } from "../prisma";
+import { validateSafety } from './client';
+import { prisma } from '../prisma';
+import { sendSafetyAlert } from '../notifications';
+import {
+  getCompiledSafetyPatterns,
+  getSafetyResponseFromConfig,
+} from '../config-loader';
 
 export interface SafetyResult {
   isSafe: boolean;
@@ -10,7 +15,7 @@ export interface SafetyResult {
 }
 
 export interface SafetyContext {
-  childId: string;
+  childAccountId: string;
   childAge: number;
   conversationId?: string;
   recentMessages?: string[];
@@ -25,120 +30,178 @@ export async function validateMessageSafety(
 ): Promise<SafetyResult> {
   try {
     // Build context string from recent messages
-    const contextString = context.recentMessages?.slice(-3).join(" | ") || "";
-    
-    // Run AI safety validation
-    const aiResult = await validateSafety(message, context.childAge, contextString);
-    
+    const contextString = context.recentMessages?.slice(-3).join(' | ') || '';
+
+    // Run AI safety validation (with mock fallback)
+    const aiResult = await validateSafety(
+      message,
+      context.childAge,
+      contextString
+    );
+
     // Run additional rule-based checks
     const ruleBasedResult = runRuleBasedSafety(message, context.childAge);
-    
+
     // Combine results - use most restrictive
     const combinedResult = combineResults(aiResult, ruleBasedResult);
-    
+
     // Log safety event if concerning
     if (combinedResult.severity >= 2) {
       await logSafetyEvent(message, combinedResult, context);
     }
-    
+
     // Escalate to parents if severity 3
     if (combinedResult.severity >= 3) {
       await escalateToParent(message, combinedResult, context);
     }
-    
+
     return combinedResult;
-    
   } catch (error) {
-    console.error("Safety validation error:", error);
-    
+    console.error('Safety validation error:', error);
+
     // Fail-safe: block if safety validation fails
     return {
       isSafe: false,
       severity: 3,
-      reason: "Safety validation system error",
-      action: "block",
+      reason: 'Safety validation system error',
+      action: 'block',
       flaggedTerms: [],
     };
   }
 }
 
 /**
- * Rule-based safety checks for common patterns
+ * Rule-based safety checks using modular configuration
  */
-function runRuleBasedSafety(message: string, childAge: number): SafetyResult {
-  const lowerMessage = message.toLowerCase();
-  
-  // High-severity patterns (immediate block)
-  const criticalPatterns = [
-    /\b(kill|murder|death|die|suicide)\b/i,
-    /\b(address|phone.?number|where.?live)\b/i,
-    /\b(secret|don'?t.?tell|hide.?from)\b/i,
-    /\b(meet.?me|come.?over|visit.?me)\b/i,
-  ];
-  
-  // Medium-severity patterns (warn/redirect)
-  const warningPatterns = [
-    /\b(stupid|dumb|hate|shut.?up)\b/i,
-    /\b(scared|afraid|nightmare)\b/i,
-    /\b(bleeding|hurt|pain)\b/i,
-  ];
-  
-  // Check critical patterns
-  for (const pattern of criticalPatterns) {
-    if (pattern.test(message)) {
-      return {
-        isSafe: false,
-        severity: 3,
-        reason: "Message contains inappropriate content",
-        action: "escalate",
-        flaggedTerms: [pattern.source],
-      };
+function runRuleBasedSafety(message: string, _childAge: number): SafetyResult {
+  try {
+    const patterns = getCompiledSafetyPatterns();
+
+    // Check critical patterns (immediate escalation)
+    for (const pattern of patterns.critical) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: false,
+          severity: 3,
+          reason: pattern.reason,
+          action: 'escalate',
+          flaggedTerms: [pattern.category],
+        };
+      }
     }
-  }
-  
-  // Check warning patterns
-  for (const pattern of warningPatterns) {
-    if (pattern.test(message)) {
-      return {
-        isSafe: false,
-        severity: 2,
-        reason: "Message needs gentle redirection",
-        action: "warn",
-        flaggedTerms: [pattern.source],
-      };
+
+    // Check emotional support patterns (allow but offer support)
+    for (const pattern of patterns.emotionalSupport) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: true,
+          severity: 1,
+          reason: pattern.reason,
+          action: 'allow',
+          flaggedTerms: [pattern.supportResponse || 'emotional_support_needed'],
+        };
+      }
     }
-  }
-  
-  // Check for ALL CAPS (might indicate shouting/upset)
-  if (message.length > 10 && message === message.toUpperCase()) {
+
+    // Check high concern patterns (Level 2)
+    for (const pattern of patterns.highConcern) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: false,
+          severity: 2,
+          reason: pattern.reason,
+          action: 'warn',
+          flaggedTerms: [pattern.category],
+        };
+      }
+    }
+
+    // Check contextual guidance patterns (gentle guidance)
+    for (const pattern of patterns.contextualGuidance) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: false,
+          severity: 2,
+          reason: pattern.reason,
+          action: 'warn',
+          flaggedTerms: [pattern.category],
+        };
+      }
+    }
+
+    // Check youth culture patterns (monitoring)
+    for (const pattern of patterns.youthCulture) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: true,
+          severity: 1,
+          reason: pattern.reason,
+          action: 'allow',
+          flaggedTerms: [pattern.category],
+        };
+      }
+    }
+
+    // Check gaming patterns (monitoring)
+    for (const pattern of patterns.gaming) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: true,
+          severity: 1,
+          reason: pattern.reason,
+          action: 'allow',
+          flaggedTerms: [pattern.category],
+        };
+      }
+    }
+
+    // Check school patterns (monitoring)
+    for (const pattern of patterns.school) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: true,
+          severity: 1,
+          reason: pattern.reason,
+          action: 'allow',
+          flaggedTerms: [pattern.category],
+        };
+      }
+    }
+
     return {
       isSafe: true,
-      severity: 1,
-      reason: "Message in all caps - child might be upset",
-      action: "allow",
-      flaggedTerms: ["ALL_CAPS"],
+      severity: 0,
+      reason: 'No safety concerns detected',
+      action: 'allow',
+      flaggedTerms: [],
+    };
+  } catch (error) {
+    console.error('Error loading safety patterns:', error);
+    // Fallback to safe mode if config loading fails
+    return {
+      isSafe: false,
+      severity: 2,
+      reason: 'Safety configuration error - using safe defaults',
+      action: 'warn',
+      flaggedTerms: ['config_error'],
     };
   }
-  
-  return {
-    isSafe: true,
-    severity: 0,
-    reason: "No safety concerns detected",
-    action: "allow",
-    flaggedTerms: [],
-  };
 }
 
 /**
  * Combine AI and rule-based results (use most restrictive)
  */
-function combineResults(aiResult: SafetyResult, ruleResult: SafetyResult): SafetyResult {
+function combineResults(
+  aiResult: SafetyResult,
+  ruleResult: SafetyResult
+): SafetyResult {
   const maxSeverity = Math.max(aiResult.severity, ruleResult.severity);
   const isSafe = aiResult.isSafe && ruleResult.isSafe;
-  
+
   // Use result with higher severity
-  const primaryResult = aiResult.severity >= ruleResult.severity ? aiResult : ruleResult;
-  
+  const primaryResult =
+    aiResult.severity >= ruleResult.severity ? aiResult : ruleResult;
+
   return {
     isSafe,
     severity: maxSeverity,
@@ -159,18 +222,18 @@ async function logSafetyEvent(
   try {
     await prisma.safetyEvent.create({
       data: {
-        eventType: "message_flagged",
+        eventType: 'message_flagged',
         severityLevel: result.severity,
-        childId: context.childId,
+        childAccountId: context.childAccountId,
         conversationId: context.conversationId,
         triggerContent: message,
         aiReasoning: result.reason,
         contextSummary: `Age: ${context.childAge}, Action: ${result.action}`,
-        status: result.severity >= 3 ? "active" : "logged",
+        status: result.severity >= 3 ? 'active' : 'logged',
       },
     });
   } catch (error) {
-    console.error("Failed to log safety event:", error);
+    console.error('Failed to log safety event:', error);
   }
 }
 
@@ -184,77 +247,119 @@ async function escalateToParent(
 ): Promise<void> {
   try {
     // Get child and parent info
-    const child = await prisma.child.findUnique({
-      where: { id: context.childId },
+    const child = await prisma.childAccount.findUnique({
+      where: { id: context.childAccountId },
       include: { parent: true },
     });
-    
+
     if (!child) return;
-    
+
     // Create safety event
     const safetyEvent = await prisma.safetyEvent.create({
       data: {
-        eventType: "escalated_content",
+        eventType: 'escalated_content',
         severityLevel: result.severity,
-        childId: context.childId,
+        childAccountId: context.childAccountId,
         conversationId: context.conversationId,
         triggerContent: message,
         aiReasoning: result.reason,
-        contextSummary: `Escalated: ${result.flaggedTerms.join(", ")}`,
-        status: "active",
+        contextSummary: `Escalated: ${result.flaggedTerms.join(', ')}`,
+        status: 'active',
         parentNotifiedAt: new Date(),
       },
     });
-    
+
+    // Generate AI response for context in email
+    const aiResponse = getSafetyResponse(result, context.childAge);
+
     // Create parent notification
-    await prisma.parentNotification.create({
+    const notification = await prisma.parentNotification.create({
       data: {
-        parentId: child.parentId,
-        childId: context.childId,
-        notificationType: "safety_alert",
+        parentClerkUserId: child.parentClerkUserId,
+        childAccountId: context.childAccountId,
+        notificationType: 'safety_alert',
         subject: `Safety Alert: ${child.name}`,
         content: `Your child ${child.name} has shared content that requires your attention. Please review their recent conversation in your parent dashboard.`,
-        deliveryMethod: "email",
+        deliveryMethod: 'email',
         safetyEventId: safetyEvent.id,
         conversationId: context.conversationId,
+        status: 'pending',
       },
     });
-    
-    // TODO: Send actual email notification via Resend
-    console.log(`Safety escalation created for child ${child.name} (${child.id})`);
-    
+
+    // Send actual email notification via Resend
+    const emailSent = await sendSafetyAlert(
+      child.parent.email,
+      child.name,
+      result.severity,
+      message,
+      aiResponse
+    );
+
+    // Update notification status based on email delivery
+    await prisma.parentNotification.update({
+      where: { id: notification.id },
+      data: {
+        status: emailSent ? 'sent' : 'failed',
+        sentAt: emailSent ? new Date() : undefined,
+      },
+    });
+
+    console.log(
+      `Safety escalation processed for child ${child.name} (${child.id}) - Email ${emailSent ? 'sent' : 'failed'}`
+    );
   } catch (error) {
-    console.error("Failed to escalate to parent:", error);
+    console.error('Failed to escalate to parent:', error);
   }
 }
 
 /**
- * Get child-friendly safety response based on action
+ * Get child-friendly safety response using modular configuration
  */
-export function getSafetyResponse(result: SafetyResult, childAge: number): string {
-  switch (result.action) {
-    case 'warn':
-      if (childAge <= 8) {
-        return "That's a good question, but maybe we could talk about something else? What's your favorite animal? 🐾";
-      } else {
-        return "I think that might be better to discuss with a grown-up you trust. How about we chat about something fun instead?";
-      }
-      
-    case 'block':
-      if (childAge <= 8) {
-        return "Let's talk about something happier! What made you smile today? 😊";
-      } else {
-        return "That's something I can't help with, but a trusted adult definitely can! What else would you like to explore?";
-      }
-      
-    case 'escalate':
-      if (childAge <= 8) {
-        return "That sounds like something important to share with a grown-up who takes care of you. They're really good at helping with big questions!";
-      } else {
-        return "That's definitely something to talk about with a parent, teacher, or another trusted adult. They'll know exactly how to help you.";
-      }
-      
-    default:
-      return "I want to make sure we have safe, fun conversations! Let's try talking about something else.";
+export function getSafetyResponse(
+  result: SafetyResult,
+  childAge: number
+): string {
+  try {
+    // Handle emotional support scenarios specially
+    if (result.flaggedTerms.includes('emotional_support_needed')) {
+      return getSafetyResponseFromConfig('emotional_support', childAge);
+    }
+
+    // Check for specific categories that have custom responses
+    const flaggedCategories = result.flaggedTerms;
+
+    // Handle swearing with fun responses
+    if (flaggedCategories.includes('swearing')) {
+      return getSafetyResponseFromConfig('swearing_response', childAge);
+    }
+
+    // Handle inappropriate content
+    if (
+      flaggedCategories.some(term =>
+        ['development', 'substances', 'identity'].includes(term)
+      )
+    ) {
+      return getSafetyResponseFromConfig('inappropriate_content', childAge);
+    }
+
+    // Default action-based responses
+    switch (result.action) {
+      case 'warn':
+        return getSafetyResponseFromConfig('gentle_redirect', childAge);
+
+      case 'block':
+        return getSafetyResponseFromConfig('block_response', childAge);
+
+      case 'escalate':
+        return getSafetyResponseFromConfig('escalate_response', childAge);
+
+      default:
+        return "i want to make sure we have good conversations! what's going on?";
+    }
+  } catch (error) {
+    console.error('Error loading safety response config:', error);
+    // Fallback responses if config fails
+    return "i want to make sure we have good conversations! what's going on?";
   }
 }

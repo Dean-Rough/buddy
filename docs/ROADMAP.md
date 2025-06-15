@@ -1,11 +1,82 @@
-# AI Agent Build Tasks - Buddy Platform
+# AI Agent Build Tasks - Lumo Platform
+
+## 🚀 NEW FEATURE: Dynamic Time Limits (Priority Addition)
+
+### 🕐 Intelligent Chat Duration Management
+
+**Goal**: Parent-controlled time limits that feel natural and conversational
+
+**Smart Detection System**:
+
+- **Conversation Analysis**: Detect emotional discussions, learning moments, or important topics
+- **Context-Aware Decisions**: Allow meaningful conversations to continue, wind down casual chat
+- **Natural Transitions**: AI gives human-like reasons to end ("I need to tidy my room", "got football practice")
+
+**Parent Controls**:
+
+- Set daily/session time limits in parent dashboard
+- Choose strictness level: flexible, balanced, or strict
+- Emergency override for emotional support scenarios
+
+**Implementation Plan**:
+
+1. Add time limit fields to parent settings in database
+2. Create conversation importance scoring system
+3. Build natural conversation ending prompt library
+4. Integrate with existing chat flow for seamless transitions
+
+**Benefits**:
+
+- Healthy screen time boundaries without abrupt cutoffs
+- Maintains trust and engagement with children
+- Gives parents control while preserving conversation quality
+- Teaches natural conversation closure patterns
+
+---
+
+## 🏛️ PARENT DASHBOARD (High Priority)
+
+### 📱 Comprehensive Parental Control Center
+
+**Goal**: COPPA-compliant parent dashboard with time limits, safety alerts, and family management
+
+**Core Features**:
+
+- **Time Management**: Dynamic chat limits with smart overrides for emotional/educational content
+- **Multi-Channel Alerts**: Email, SMS, push notifications for safety events
+- **Weekly Summaries**: Automated insights about child's digital wellbeing
+- **Privacy Controls**: Data export, deletion, conversation visibility settings
+- **Family Management**: Multi-child support, partner access permissions
+
+**Safety Integration**:
+
+- Real-time safety alert delivery (< 60 seconds for critical)
+- Customizable alert thresholds and notification preferences
+- Emergency override capabilities for crisis situations
+- Complete audit trail for compliance and family trust
+
+**Implementation Phases**:
+
+1. **MVP Dashboard** (Week 1): Basic time limits, email alerts, single child
+2. **Enhanced Controls** (Week 2): SMS/push notifications, weekly summaries
+3. **Family Features** (Week 3): Multi-child management, partner access
+
+**Benefits**:
+
+- Full COPPA compliance through transparent parental control
+- Builds family trust with clear oversight and communication
+- Provides parents peace of mind while maintaining child autonomy
+- Creates healthy digital boundaries without abrupt technology cutoffs
+
+---
 
 ## Foundation (Week 1-2)
 
 ### 🔧 Project Setup
+
 ```bash
 # Task: Initialize Next.js project with TypeScript
-mkdir buddy && cd buddy
+mkdir lumo && cd lumo
 npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir=false
 npm install @clerk/nextjs prisma @prisma/client openai @anthropic-ai/sdk resend zod zustand
 
@@ -19,7 +90,8 @@ npx prisma init
 npx prisma generate
 ```
 
-### 📊 Database Setup  
+### 📊 Database Setup
+
 ```bash
 # Task: Create NeonDB project and get connection string
 # Add DATABASE_URL to .env.local
@@ -34,6 +106,7 @@ npx prisma db seed
 ```
 
 ### 🔐 ✅ Unified Clerk Authentication System **COMPLETE**
+
 ```bash
 # ✅ IMPLEMENTED: Unified Clerk architecture (December 2024)
 # Status: Production-ready, replaces dual authentication system
@@ -63,6 +136,7 @@ npx prisma db seed
 ## Core Chat System (Week 3-4)
 
 ### 💬 Chat Infrastructure
+
 ```bash
 # Task: Create chat message API endpoint
 # File: app/api/chat/message/route.ts
@@ -81,6 +155,7 @@ npx prisma db seed
 ```
 
 ### 🎭 Persona System
+
 ```bash
 # Task: Create persona manager
 # File: lib/personas.ts
@@ -94,6 +169,7 @@ npx prisma db seed
 ```
 
 ### 🎯 Chat Interface
+
 ```bash
 # Task: Create main chat container
 # File: components/chat/ChatContainer.tsx
@@ -113,6 +189,7 @@ npx prisma db seed
 ## Safety & Moderation (Week 5-6)
 
 ### 🚨 Safety Escalation
+
 ```bash
 # Task: Build escalation API endpoint
 # File: app/api/safety/escalate/route.ts
@@ -131,6 +208,7 @@ npx prisma db seed
 ```
 
 ### 👥 Human Moderation
+
 ```bash
 # Task: Create moderation queue API
 # File: app/api/moderation/queue/route.ts
@@ -144,7 +222,34 @@ npx prisma db seed
 
 ## Parent Dashboard (Week 7-8)
 
+### 🔐 Post-Auth Parent Dashboard Access **NEXT PRIORITY**
+
+```bash
+# Task: Implement post-authentication parent dashboard access
+# File: app/parent/page.tsx (already created, needs enhancement)
+# Auth Strategy: PIN or OAuth-protected access from any logged-in session
+#
+# Features:
+# - PIN verification for sensitive operations (delete data, account settings)
+# - OAuth verification option for enhanced security
+# - Child account management and oversight
+# - Safety alerts and moderation controls
+# - Conversation history access with privacy controls
+#
+# Components to create/enhance:
+# - components/parent/PinVerification.tsx: PIN entry with attempts limiting
+# - components/parent/DashboardAccess.tsx: Auth choice (PIN vs OAuth)
+# - app/api/parent/verify-access/route.ts: Dual verification endpoint
+#
+# Security requirements:
+# - Rate limiting on PIN attempts
+# - Session management for dashboard access
+# - Audit logging for all parent actions
+# - COPPA compliance for child data access
+```
+
 ### 📊 Parent Interface
+
 ```bash
 # Task: Create parent dashboard overview
 # File: app/(parent)/dashboard/page.tsx
@@ -165,6 +270,7 @@ npx prisma db seed
 ## Voice Integration (Week 9-10)
 
 ### 🎵 Voice Features
+
 ```bash
 # Task: Integrate Cartesia TTS
 # File: lib/voice.ts
@@ -184,6 +290,7 @@ npx prisma db seed
 ## Advanced Features (Week 11-12)
 
 ### 🌙 Whisper Mode
+
 ```bash
 # Task: Create Whisper Mode interface
 # File: app/(chat)/whisper/page.tsx
@@ -196,6 +303,7 @@ npx prisma db seed
 ```
 
 ### 🧠 Memory System
+
 ```bash
 # Task: Build child memory service
 # File: lib/memory.ts
@@ -210,6 +318,7 @@ npx prisma db seed
 ## Testing & Validation (Week 13-14)
 
 ### 🧪 Safety Testing
+
 ```bash
 # Task: Create safety test suite
 # File: tests/safety/escalation.test.ts
@@ -223,6 +332,7 @@ npx prisma db seed
 ```
 
 ### 📊 Performance Testing
+
 ```bash
 # Task: Create load testing suite
 # File: tests/performance/load.test.ts
@@ -238,6 +348,7 @@ npx prisma db seed
 ## Production Setup (Week 15-16)
 
 ### 🚀 Deployment
+
 ```bash
 # Task: Configure Vercel deployment
 # File: vercel.json
@@ -255,6 +366,7 @@ npx prisma db seed
 ```
 
 ### 🔒 Security Hardening
+
 ```bash
 # Task: Implement rate limiting
 # File: lib/rate-limit.ts
@@ -268,6 +380,7 @@ npx prisma db seed
 ```
 
 ## Dependencies & Order
+
 ```bash
 # Critical Path:
 1. Project Setup → Database Setup → Auth Foundation
@@ -283,6 +396,7 @@ npx prisma db seed
 ```
 
 ## Validation Checkpoints
+
 ```bash
 # Week 4: Core chat system functional
 - PIN auth working

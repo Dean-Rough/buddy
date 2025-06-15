@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import WritingAnimation from "./WritingAnimation";
-import BrutalButton from "../ui/BrutalButton";
-import BrutalInput from "../ui/BrutalInput";
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import WritingAnimation from './WritingAnimation';
+import BrutalButton from '../ui/BrutalButton';
+import BrutalInput from '../ui/BrutalInput';
+import VoiceInput from './VoiceInput';
 
 interface Message {
   id: string;
@@ -18,26 +19,55 @@ interface BrutalChatInterfaceProps {
     id: string;
     name: string;
     age: number;
+    persona?: string;
   };
 }
 
-export default function BrutalChatInterface({ childProfile }: BrutalChatInterfaceProps) {
+export default function BrutalChatInterface({
+  childProfile,
+}: BrutalChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isWriting, setIsWriting] = useState(false);
   const [writingMessage, setWritingMessage] = useState<string | null>(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (force = false) => {
+    const element = messagesEndRef.current;
+    if (element) {
+      if (force) {
+        // Immediate scroll for new messages
+        element.scrollIntoView({ behavior: 'auto' });
+      } else {
+        // Smooth scroll for animations
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
+  // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isWriting]);
+  }, [messages]);
+
+  // Auto-scroll when writing state changes
+  useEffect(() => {
+    if (isWriting) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => scrollToBottom(), 100);
+    }
+  }, [isWriting]);
+
+  // Auto-scroll when writing message updates (for real-time typing)
+  useEffect(() => {
+    if (writingMessage) {
+      scrollToBottom();
+    }
+  }, [writingMessage]);
 
   useEffect(() => {
     // Welcome message with personality
@@ -50,8 +80,17 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
     setMessages([welcomeMessage]);
   }, [childProfile.name]);
 
+  const enableAudio = () => {
+    setAudioEnabled(true);
+  };
+
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
+
+    // Enable audio on first user interaction
+    if (!audioEnabled) {
+      enableAudio();
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -61,16 +100,19 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputMessage("");
+    setInputMessage('');
     setIsLoading(true);
 
+    // Force immediate scroll for user messages
+    setTimeout(() => scrollToBottom(true), 50);
+
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
-          childId: childProfile.id,
+          childAccountId: childProfile.id,
           conversationId,
         }),
       });
@@ -85,14 +127,15 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
         // Start writing animation
         setWritingMessage(data.response);
         setIsWriting(true);
-        
+
         // Store message ID for completion
-        (window as any).pendingMessageId = data.messageId || Date.now().toString();
+        (window as any).pendingMessageId =
+          data.messageId || Date.now().toString();
       } else {
-        throw new Error(data.error || "Failed to get response");
+        throw new Error(data.error || 'Failed to get response');
       }
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error('Chat error:', error);
       setIsWriting(false);
       const errorMessage: Message = {
         id: Date.now().toString(),
@@ -116,6 +159,9 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, assistantMessage]);
+
+    // Force scroll when writing completes
+    setTimeout(() => scrollToBottom(true), 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -137,67 +183,78 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
       <div className="brutal-header flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-yellow-400 border-3 border-black flex items-center justify-center brutal-shadow-small">
-            <span className="font-sink text-xl font-bold">
+            <span className="font-rokano text-xl font-bold">
               {childProfile.name.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <h1 className="brutal-h3 text-white">
+            <h1 className="font-avotica font-bold text-xl text-white">
               {childProfile.name} + BUDDY
             </h1>
-            <p className="text-yellow-400 font-just font-medium text-sm">
+            <p className="text-yellow-400 font-avotica font-medium text-sm">
               CHAT MODE ACTIVATED
             </p>
           </div>
         </div>
-        
-        <BrutalButton 
-          variant="red" 
-          size="small" 
-          onClick={logout}
-          className="text-white font-bold"
-        >
-          LOGOUT
-        </BrutalButton>
+
+        <div className="flex gap-2">
+          <BrutalButton
+            variant="purple"
+            size="small"
+            onClick={() => router.push('/whisper')}
+            className="text-white font-bold"
+          >
+            WHISPER MODE
+          </BrutalButton>
+          <BrutalButton
+            variant="red"
+            size="small"
+            onClick={logout}
+            className="text-white font-bold"
+          >
+            LOGOUT
+          </BrutalButton>
+        </div>
       </div>
 
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.map((message) => (
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.role === 'child' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`brutal-bubble ${
-              message.role === 'child' 
-                ? 'brutal-bubble-user' 
-                : 'brutal-bubble-ai'
-            }`}>
-              <p className="text-base leading-relaxed">
-                {message.content}
-              </p>
+            <div
+              className={`brutal-bubble ${
+                message.role === 'child'
+                  ? 'brutal-bubble-user'
+                  : 'brutal-bubble-ai'
+              }`}
+            >
+              <p className="text-base leading-relaxed">{message.content}</p>
             </div>
           </div>
         ))}
-        
+
         {/* Writing Animation */}
         {isWriting && writingMessage && (
           <div className="flex justify-start">
             <div className="brutal-bubble brutal-bubble-ai">
               <WritingAnimation
                 text={writingMessage}
-                speed="normal"
-                errorRate={0.04}
-                playSound={true}
+                speed="fast"
+                errorRate={0.02}
+                playSound={audioEnabled}
                 onComplete={() => {
-                  const messageId = (window as any).pendingMessageId || Date.now().toString();
+                  const messageId =
+                    (window as any).pendingMessageId || Date.now().toString();
                   handleWritingComplete(messageId, writingMessage);
                 }}
               />
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -207,7 +264,7 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
           <div className="flex-1">
             <BrutalInput
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
+              onChange={e => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="type something cool..."
               disabled={isLoading}
@@ -215,7 +272,7 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
               maxLength={500}
             />
           </div>
-          
+
           <BrutalButton
             onClick={sendMessage}
             disabled={isLoading || !inputMessage.trim()}
@@ -223,17 +280,47 @@ export default function BrutalChatInterface({ childProfile }: BrutalChatInterfac
             size="large"
             className="shrink-0"
           >
-            {isLoading ? "..." : "SEND"}
+            {isLoading ? '...' : 'SEND'}
           </BrutalButton>
         </div>
-        
+
+        {/* Voice Input */}
+        <div className="mt-4 flex justify-center">
+          <VoiceInput
+            onTranscript={text => {
+              setInputMessage(prev => prev + (prev ? ' ' : '') + text);
+            }}
+            onError={error => console.error('Voice input error:', error)}
+            disabled={isLoading}
+            whisperMode={false}
+          />
+        </div>
+
         <div className="mt-4 text-center">
-          <p className="brutal-text text-sm opacity-70">
+          <p className="font-avotica text-sm opacity-70">
             BE AWESOME • HAVE FUN • STAY SAFE 🤘
           </p>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            {audioEnabled && (
+              <button
+                onClick={() => setAudioEnabled(!audioEnabled)}
+                className="flex items-center gap-1 text-xs opacity-60 hover:opacity-80 transition-opacity"
+                title="Toggle writing sounds"
+              >
+                <span>{audioEnabled ? '🔊' : '🔇'}</span>
+                <span className="font-casual">
+                  writing sounds {audioEnabled ? 'on' : 'off'}
+                </span>
+              </button>
+            )}
+            {!audioEnabled && (
+              <p className="font-casual text-xs opacity-50">
+                send a message to enable writing sounds ✏️
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
