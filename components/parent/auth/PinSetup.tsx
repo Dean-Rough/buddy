@@ -131,8 +131,8 @@ export default function PinSetup() {
                 className="mt-1 w-4 h-4 border-2 border-black"
               />
               <label htmlFor="understood" className="text-sm text-gray-700">
-                I understand this PIN protects my child&apos;s safety settings and
-                conversation data
+                I understand this PIN protects my child&apos;s safety settings
+                and conversation data
               </label>
             </div>
 

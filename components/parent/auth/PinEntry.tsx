@@ -157,8 +157,8 @@ export default function PinEntry({ childName, onVerified }: PinEntryProps) {
             </h1>
             <p className="text-gray-600 text-sm">
               Enter your 4-digit PIN to access{' '}
-              {childName ? `${childName}&apos;s` : "your child&apos;s"} safety settings
-              and reports
+              {childName ? `${childName}&apos;s` : 'your child&apos;s'} safety
+              settings and reports
             </p>
           </div>
 
@@ -214,8 +214,8 @@ export default function PinEntry({ childName, onVerified }: PinEntryProps) {
 
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
-              Your PIN adds an extra layer of security to protect your family&apos;s
-              safety settings and conversation data.
+              Your PIN adds an extra layer of security to protect your
+              family&apos;s safety settings and conversation data.
             </p>
           </div>
         </div>

@@ -167,7 +167,7 @@ export default function ParentDashboard() {
               <h2 className="font-rokano text-2xl mb-4">RECENT ACTIVITY</h2>
               {usage.length > 0 ? (
                 <div className="grid gap-3">
-                  {usage.slice(0, 7).map((day) => (
+                  {usage.slice(0, 7).map(day => (
                     <div
                       key={day.date}
                       className="flex justify-between items-center"
@@ -296,7 +296,7 @@ export default function ParentDashboard() {
 
                     <div className="border-t pt-4">
                       <h3 className="font-avotica font-bold mb-2">
-                        What's Included
+                        What&apos;s Included
                       </h3>
                       <ul className="text-sm text-gray-700 space-y-1">
                         <li>• Conversation topics and themes</li>
