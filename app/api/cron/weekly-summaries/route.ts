@@ -1,148 +1,128 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import {
-  generateWeeklySummary,
-  formatSummaryForEmail,
-} from '@/lib/summary-generator';
-import { sendWeeklySummary } from '@/lib/notifications';
+import { WeeklySummaryGenerator } from '@/lib/email-summary';
 
-// This endpoint should be called by a cron job (e.g., Vercel Cron or external service)
-// Security: Add authorization header in production
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    // Security check - only allow cron jobs
-    const authHeader = request.headers.get('authorization');
+    // Verify cron secret for security
+    const authHeader = request.headers.get('Authorization');
     const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
 
-    if (!process.env.CRON_SECRET || authHeader !== expectedAuth) {
+    if (!process.env.CRON_SECRET) {
+      console.error('CRON_SECRET not configured');
+      return NextResponse.json(
+        { error: 'Cron secret not configured' },
+        { status: 500 }
+      );
+    }
+
+    if (authHeader !== expectedAuth) {
+      console.error('Unauthorized cron access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const now = new Date();
-    const weekAgo = new Date(now);
-    weekAgo.setDate(weekAgo.getDate() - 7);
+    console.log('🔄 Starting weekly summary generation...');
+    const startTime = Date.now();
 
-    // Get all active children
-    const children = await prisma.childAccount.findMany({
-      where: {
-        accountStatus: 'active',
-      },
-      include: {
-        parent: {
-          select: {
-            id: true,
-            email: true,
-            emailNotifications: true,
-            clerkUserId: true,
-          },
-        },
-      },
-    });
+    const generator = new WeeklySummaryGenerator();
+    await generator.generateWeeklySummaries();
 
-    const results = [];
+    const duration = Date.now() - startTime;
+    const stats = await generator.getSummaryStats();
 
-    for (const child of children) {
-      try {
-        // Skip if parent has disabled email notifications
-        if (!child.parent.emailNotifications) {
-          continue;
-        }
-
-        // Generate summary for the past week
-        const summary = await generateWeeklySummary(child.id, weekAgo);
-
-        if (!summary) {
-          continue; // No activity this week
-        }
-
-        // Format email content
-        const emailContent = formatSummaryForEmail(summary);
-
-        // Store notification in database
-        const notification = await prisma.parentNotification.create({
-          data: {
-            parentClerkUserId: child.parent.clerkUserId,
-            childAccountId: child.id,
-            notificationType: 'weekly_summary',
-            subject: `Weekly Summary: ${child.name}`,
-            content: emailContent,
-            deliveryMethod: 'email',
-            status: 'pending',
-          },
-        });
-
-        // Send actual email notification
-        const emailSent = await sendWeeklySummary(
-          child.parent.email,
-          child.name,
-          emailContent
-        );
-
-        // Update notification status based on email delivery
-        await prisma.parentNotification.update({
-          where: { id: notification.id },
-          data: {
-            status: emailSent ? 'sent' : 'failed',
-            sentAt: emailSent ? new Date() : undefined,
-          },
-        });
-
-        console.log(
-          `Weekly summary for ${child.name} (${child.id}) - Email ${emailSent ? 'sent' : 'failed'}`
-        );
-
-        results.push({
-          childId: child.id,
-          childName: child.name,
-          parentEmail: child.parent.email,
-          status: emailSent ? 'sent' : 'failed',
-        });
-      } catch (error) {
-        console.error(
-          `Failed to process summary for child ${child.id}:`,
-          error
-        );
-        results.push({
-          childId: child.id,
-          childName: child.name,
-          status: 'error',
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
+    console.log('✅ Weekly summary generation completed');
+    console.log(`Duration: ${duration}ms`);
+    console.log('Stats:', stats);
 
     return NextResponse.json({
       success: true,
-      processed: results.length,
-      results,
-      timestamp: now.toISOString(),
+      duration: `${duration}ms`,
+      stats,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Weekly summary cron job error:', error);
+    console.error('❌ Weekly summary generation failed:', error);
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Summary generation failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }
 }
 
-// Manual trigger endpoint for testing
-export async function GET(request: NextRequest) {
-  // Allow manual triggers in development
-  if (process.env.NODE_ENV !== 'development') {
+// Handle POST requests for manual triggers
+export async function POST(request: NextRequest) {
+  try {
+    // Verify authorization (API key or admin auth)
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Authorization required' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { action, parentClerkUserId, childAccountId, weekStart, weekEnd } =
+      body;
+
+    const generator = new WeeklySummaryGenerator();
+
+    switch (action) {
+      case 'generate_manual':
+        if (!parentClerkUserId || !childAccountId) {
+          return NextResponse.json(
+            {
+              error:
+                'parentClerkUserId and childAccountId required for manual generation',
+            },
+            { status: 400 }
+          );
+        }
+
+        await generator.generateManualSummary(
+          parentClerkUserId,
+          childAccountId,
+          weekStart ? new Date(weekStart) : undefined,
+          weekEnd ? new Date(weekEnd) : undefined
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: 'Manual summary generated successfully',
+        });
+
+      case 'retry_failed':
+        await generator.retryFailedSummaries();
+
+        return NextResponse.json({
+          success: true,
+          message: 'Failed summaries retry completed',
+        });
+
+      case 'get_stats':
+        const stats = await generator.getSummaryStats();
+
+        return NextResponse.json({
+          success: true,
+          stats,
+        });
+
+      default:
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Manual summary operation failed:', error);
+
     return NextResponse.json(
-      { error: 'Not available in production' },
-      { status: 403 }
+      {
+        error: 'Operation failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
     );
   }
-
-  // Create a mock request to trigger the POST handler
-  const mockRequest = new NextRequest(request.url, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${process.env.CRON_SECRET || 'dev-secret'}`,
-    },
-  });
-
-  return POST(mockRequest);
 }

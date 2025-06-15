@@ -6,12 +6,24 @@ import WritingAnimation from './WritingAnimation';
 import BrutalButton from '../ui/BrutalButton';
 import BrutalInput from '../ui/BrutalInput';
 import VoiceInput from './VoiceInput';
+import TimeWarning from './TimeWarning';
 
 interface Message {
   id: string;
   content: string;
   role: 'child' | 'assistant';
   timestamp: Date;
+}
+
+interface TimeStatus {
+  minutesRemaining?: number;
+  shouldShowWarning: boolean;
+  warningMessage?: string;
+  canContinueWithOverride: boolean;
+  minutesUsedToday: number;
+  sessionEnded?: boolean;
+  reason?: string;
+  endingMessage?: string;
 }
 
 interface BrutalChatInterfaceProps {
@@ -33,6 +45,8 @@ export default function BrutalChatInterface({
   const [isWriting, setIsWriting] = useState(false);
   const [writingMessage, setWritingMessage] = useState<string | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [timeStatus, setTimeStatus] = useState<TimeStatus | null>(null);
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -119,9 +133,40 @@ export default function BrutalChatInterface({
 
       const data = await response.json();
 
+      // Handle session ending due to time limits
+      if (data.timeStatus?.sessionEnded) {
+        const assistantMessage: Message = {
+          id: Date.now().toString(),
+          content: data.timeStatus.endingMessage || data.response,
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+
+        // Redirect to end session or show session ended state
+        setTimeout(() => {
+          router.push('/session-ended');
+        }, 3000);
+        return;
+      }
+
       if (data.response) {
         if (data.conversationId && !conversationId) {
           setConversationId(data.conversationId);
+        }
+
+        // Handle time status
+        if (data.timeStatus) {
+          setTimeStatus(data.timeStatus);
+
+          if (
+            data.timeStatus.shouldShowWarning &&
+            data.timeStatus.warningMessage
+          ) {
+            setShowTimeWarning(true);
+          }
         }
 
         // Start writing animation
@@ -175,6 +220,59 @@ export default function BrutalChatInterface({
     localStorage.removeItem('childSession');
     localStorage.removeItem('childProfile');
     router.push('/');
+  };
+
+  const handleTimeWarningAcknowledge = () => {
+    setShowTimeWarning(false);
+  };
+
+  const handleExtendTime = async () => {
+    try {
+      const response = await fetch('/api/chat/time-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childAccountId: childProfile.id,
+          action: 'extend_time',
+          parentOverride: true, // This would require PIN verification in real implementation
+        }),
+      });
+
+      if (response.ok) {
+        setShowTimeWarning(false);
+        setTimeStatus(null); // Reset time status to allow continued chatting
+
+        // Show feedback message
+        const extendMessage: Message = {
+          id: Date.now().toString(),
+          content:
+            "Great! Your parent has given you more time to chat. Let's keep going! 🎉",
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, extendMessage]);
+      }
+    } catch (error) {
+      console.error('Error extending time:', error);
+    }
+  };
+
+  const handleEndSession = async () => {
+    try {
+      await fetch('/api/chat/time-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childAccountId: childProfile.id,
+          action: 'end_session',
+        }),
+      });
+
+      router.push('/session-ended');
+    } catch (error) {
+      console.error('Error ending session:', error);
+      router.push('/session-ended');
+    }
   };
 
   return (
@@ -321,6 +419,19 @@ export default function BrutalChatInterface({
           </div>
         </div>
       </div>
+
+      {/* Time Warning Component */}
+      {showTimeWarning && timeStatus && timeStatus.warningMessage && (
+        <TimeWarning
+          minutesRemaining={timeStatus.minutesRemaining || 0}
+          warningMessage={timeStatus.warningMessage}
+          childAge={childProfile.age}
+          canContinueWithOverride={timeStatus.canContinueWithOverride}
+          onExtendTime={handleExtendTime}
+          onAcknowledge={handleTimeWarningAcknowledge}
+          onEndSession={handleEndSession}
+        />
+      )}
     </div>
   );
 }

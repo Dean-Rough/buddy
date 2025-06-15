@@ -3,6 +3,8 @@ import { generateChatResponse } from '@/lib/ai/client';
 import { validateMessageSafety, getSafetyResponse } from '@/lib/ai/safety';
 import { prisma } from '@/lib/prisma';
 import { getMemoryContext, extractMemoriesFromMessage } from '@/lib/memory';
+import { TimeManager } from '@/lib/time-management';
+import { ContextAwareWarnings } from '@/lib/context-aware-warnings';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +50,55 @@ export async function POST(request: NextRequest) {
         },
         include: {
           messages: true,
+        },
+      });
+    }
+
+    // Check time limits and conversation context
+    const recentMessageHistory = conversation.messages.map(m => ({
+      content: m.content,
+      role: m.role as 'child' | 'assistant',
+      createdAt: m.createdAt,
+    }));
+
+    const conversationContext = ContextAwareWarnings.analyzeConversationContext(
+      recentMessageHistory,
+      child.age
+    );
+
+    const timeStatus = await TimeManager.getTimeStatus(
+      childAccountId,
+      conversationContext,
+      recentMessageHistory
+    );
+
+    // Update session timing
+    await TimeManager.updateSessionTiming(childAccountId);
+
+    // Check if conversation should end due to time limits
+    if (
+      timeStatus.shouldEndConversation &&
+      ContextAwareWarnings.isGoodTimeToEnd(conversationContext)
+    ) {
+      const endingMessage = ContextAwareWarnings.generateGracefulEnding(
+        conversationContext,
+        child.age,
+        'gradual'
+      );
+
+      // End the session
+      await TimeManager.endSession(childAccountId, 'time_limit');
+
+      return NextResponse.json({
+        response: endingMessage,
+        conversationId: conversation.id,
+        timeStatus: {
+          sessionEnded: true,
+          reason: 'time_limit',
+          endingMessage,
+        },
+        safety: {
+          blocked: false,
         },
       });
     }
@@ -171,10 +222,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Generate time warning if needed
+    let timeWarning;
+    if (timeStatus.shouldShowWarning && conversationContext) {
+      timeWarning = ContextAwareWarnings.generateContextualWarning(
+        conversationContext,
+        timeStatus.minutesRemaining || 0,
+        child.age
+      );
+    }
+
     return NextResponse.json({
       response: finalResponse,
       conversationId: conversation.id,
       messageId: assistantMessage.id,
+      timeStatus: {
+        minutesRemaining: timeStatus.minutesRemaining,
+        shouldShowWarning: timeStatus.shouldShowWarning,
+        warningMessage: timeWarning || timeStatus.warningMessage,
+        canContinueWithOverride: timeStatus.canContinueWithOverride,
+        minutesUsedToday: timeStatus.minutesUsedToday,
+      },
       safety: {
         blocked: false,
         inputSafety: safetyResult.severity,

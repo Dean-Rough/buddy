@@ -64,6 +64,7 @@ model ChildAccount {
   knowledgeUsage        KnowledgeUsage[]
   conversationContexts  ConversationContext[]
   dailyUsage            DailyUsage[]
+  weeklySummaries       WeeklySummary[]
   
   @@index([parentClerkUserId])
   @@index([username])
@@ -532,4 +533,51 @@ model DailyUsage {
   @@index([parentClerkUserId, date(sort: Desc)])
   @@index([childAccountId, date(sort: Desc)])
   @@map("daily_usage")
+}
+
+// ========================================
+// EMAIL SUMMARY SYSTEM
+// ========================================
+
+// Weekly email summaries for parents
+model WeeklySummary {
+  id                  String   @id @default(cuid())
+  parentClerkUserId   String   @map("parent_clerk_user_id")
+  childAccountId      String   @map("child_account_id")
+  
+  // Time period
+  weekStart           DateTime @db.Date @map("week_start")
+  weekEnd             DateTime @db.Date @map("week_end")
+  
+  // Usage statistics
+  totalChatTime       Int      @map("total_chat_time") // minutes
+  sessionCount        Int      @map("session_count")
+  averageSessionTime  Int      @map("average_session_time") // minutes
+  
+  // LLM Analysis data (stored as JSON)
+  analysisData        Json     @map("analysis_data")
+  
+  // Email delivery tracking
+  emailSent           Boolean  @default(false) @map("email_sent")
+  emailSentAt         DateTime? @map("email_sent_at")
+  emailSubject        String?  @map("email_subject")
+  emailContent        String?  @map("email_content") @db.Text
+  
+  // Generation metadata
+  generatedAt         DateTime @default(now()) @map("generated_at")
+  generationModel     String   @default("gpt-4o-mini") @map("generation_model")
+  tokenCost           Int?     @map("token_cost") // Total tokens used
+  
+  // Error handling
+  generationErrors    String[] @map("generation_errors")
+  retryCount          Int      @default(0) @map("retry_count")
+  
+  // Relations
+  childAccount        ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  
+  @@unique([parentClerkUserId, childAccountId, weekStart])
+  @@index([parentClerkUserId, weekStart(sort: Desc)])
+  @@index([childAccountId, weekStart(sort: Desc)])
+  @@index([emailSent, weekStart])
+  @@map("weekly_summaries")
 }
