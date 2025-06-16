@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
@@ -18,6 +18,7 @@ interface ParentSettings {
   emailSummaryEnabled: boolean;
   summaryEmail?: string;
   emailSummaryFrequency: string;
+  dataRetentionDays?: number;
 }
 
 interface DailyUsage {
@@ -30,7 +31,7 @@ interface DailyUsage {
 }
 
 export default function ParentDashboard() {
-  const { user } = useAuth();
+  const { user, isLoaded } = useUser();
   const [children, setChildren] = useState<ChildAccount[]>([]);
   const [settings, setSettings] = useState<ParentSettings>({
     emailSummaryEnabled: true,
@@ -91,7 +92,7 @@ export default function ParentDashboard() {
     }
   };
 
-  if (loading) {
+  if (!isLoaded || loading) {
     return (
       <div className="min-h-screen bg-[#FFF8E1] flex items-center justify-center">
         <div className="text-xl">Loading dashboard...</div>
@@ -195,7 +196,7 @@ export default function ParentDashboard() {
 
         {activeTab === 'time' && (
           <div className="grid gap-6">
-            <BrutalCard variant="orange">
+            <BrutalCard variant="pink">
               <h2 className="font-rokano text-2xl mb-4">TIME MANAGEMENT</h2>
               <div className="space-y-4">
                 <div>
@@ -236,18 +237,20 @@ export default function ParentDashboard() {
 
         {activeTab === 'summaries' && (
           <div className="grid gap-6">
-            <BrutalCard variant="purple">
+            <BrutalCard variant="blue">
               <h2 className="font-rokano text-2xl mb-4">EMAIL SUMMARIES</h2>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="emailEnabled"
                     checked={settings.emailSummaryEnabled}
                     onChange={e =>
-                      updateSettings({ emailSummaryEnabled: e.target.checked })
+                      updateSettings({
+                        emailSummaryEnabled: e.target.checked,
+                      })
                     }
-                    className="w-4 h-4 border-2 border-black"
+                    className="h-5 w-5 border-black"
                   />
                   <label
                     htmlFor="emailEnabled"
@@ -257,57 +260,42 @@ export default function ParentDashboard() {
                   </label>
                 </div>
 
-                {settings.emailSummaryEnabled && (
-                  <>
-                    <div>
-                      <label className="block font-avotica font-bold mb-2">
-                        Summary Email Address
-                      </label>
-                      <BrutalInput
-                        type="email"
-                        value={settings.summaryEmail || ''}
-                        onChange={e =>
-                          updateSettings({ summaryEmail: e.target.value })
-                        }
-                        placeholder={
-                          user?.emailAddresses[0]?.emailAddress || 'Enter email'
-                        }
-                      />
-                    </div>
+                <div>
+                  <label className="block font-avotica font-bold mb-2">
+                    Email Address
+                  </label>
+                  <BrutalInput
+                    type="email"
+                    value={
+                      settings.summaryEmail ||
+                      user?.emailAddresses[0]?.emailAddress ||
+                      ''
+                    }
+                    onChange={e =>
+                      updateSettings({ summaryEmail: e.target.value })
+                    }
+                    placeholder="parent@example.com"
+                  />
+                </div>
 
-                    <div>
-                      <label className="block font-avotica font-bold mb-2">
-                        Frequency
-                      </label>
-                      <select
-                        value={settings.emailSummaryFrequency}
-                        onChange={e =>
-                          updateSettings({
-                            emailSummaryFrequency: e.target.value,
-                          })
-                        }
-                        className="w-full p-2 border-3 border-black brutal-shadow-small font-avotica"
-                      >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                      </select>
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <h3 className="font-avotica font-bold mb-2">
-                        What&apos;s Included
-                      </h3>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• Conversation topics and themes</li>
-                        <li>• Time spent and engagement patterns</li>
-                        <li>• Mood and emotional trends</li>
-                        <li>• Learning opportunities discovered</li>
-                        <li>• Any safety events (rare)</li>
-                      </ul>
-                    </div>
-                  </>
-                )}
+                <div>
+                  <label className="block font-avotica font-bold mb-2">
+                    Frequency
+                  </label>
+                  <select
+                    value={settings.emailSummaryFrequency}
+                    onChange={e =>
+                      updateSettings({
+                        emailSummaryFrequency: e.target.value,
+                      })
+                    }
+                    className="w-full p-3 border-3 border-black brutal-shadow-small"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
               </div>
             </BrutalCard>
           </div>
@@ -315,39 +303,44 @@ export default function ParentDashboard() {
 
         {activeTab === 'privacy' && (
           <div className="grid gap-6">
-            <BrutalCard variant="green">
-              <h2 className="font-rokano text-2xl mb-4">PRIVACY & DATA</h2>
+            <BrutalCard variant="white">
+              <h2 className="font-rokano text-2xl mb-4">PRIVACY SETTINGS</h2>
               <div className="space-y-4">
-                <div className="bg-blue-50 p-4 brutal-shadow-small">
+                <div>
                   <h3 className="font-avotica font-bold mb-2">
-                    🔒 Your Data is Protected
+                    Data Retention Policy
                   </h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• All conversations encrypted and secure</li>
-                    <li>• 90-day automatic data retention</li>
-                    <li>• COPPA and GDPR compliant</li>
-                    <li>• You control all data access</li>
-                  </ul>
+                  <p className="text-sm text-gray-700 mb-4">
+                    Choose how long conversation data is stored before being
+                    automatically deleted.
+                  </p>
+                  <select
+                    className="w-full p-3 border-3 border-black brutal-shadow-small"
+                    value={settings.dataRetentionDays || 90}
+                    onChange={e =>
+                      updateSettings({
+                        dataRetentionDays: parseInt(e.target.value),
+                      })
+                    }
+                  >
+                    <option value="30">30 days</option>
+                    <option value="90">90 days</option>
+                    <option value="180">180 days</option>
+                    <option value="365">1 year</option>
+                  </select>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-avotica font-bold">Export Data</h3>
-                    <p className="text-sm text-gray-600">
-                      Download all conversation data
-                    </p>
-                  </div>
-                  <BrutalButton variant="blue">DOWNLOAD</BrutalButton>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-avotica font-bold">Delete All Data</h3>
-                    <p className="text-sm text-gray-600">
-                      Permanently remove all information
-                    </p>
-                  </div>
-                  <BrutalButton variant="red">DELETE</BrutalButton>
+                <div className="border-t pt-4">
+                  <h3 className="font-avotica font-bold mb-2">
+                    Delete All Data
+                  </h3>
+                  <p className="text-sm text-gray-700 mb-4">
+                    This will permanently delete all conversation history and
+                    usage data for all children. This action cannot be undone.
+                  </p>
+                  <BrutalButton variant="red" size="normal">
+                    DELETE ALL DATA
+                  </BrutalButton>
                 </div>
               </div>
             </BrutalCard>

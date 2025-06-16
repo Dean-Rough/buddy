@@ -143,7 +143,7 @@ export function BrutalFooter({}: BrutalFooterProps) {
         {/* Bottom Bar */}
         <div className="border-t-3 border-gray-300 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="font-avotica text-gray-600 mb-4 md:mb-0">
-            © 2024 LUMO. BUILT FOR KIDS • TRUSTED BY PARENTS • POWERED BY THE
+            © 2024 Onda. BUILT FOR KIDS • TRUSTED BY PARENTS • POWERED BY THE
             FUTURE
           </div>
 

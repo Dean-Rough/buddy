@@ -7,7 +7,6 @@ import {
   KnowledgeResponse,
   SafeSearchResult,
   KnowledgeConfig,
-  KnowledgeError,
 } from './types';
 
 export class YouthKnowledgeBase {
@@ -145,8 +144,8 @@ export class YouthKnowledgeBase {
         responseTime: Date.now() - startTime,
         source: 'fallback',
       };
-    } catch (error) {
-      console.error('Knowledge retrieval error:', error);
+    } catch (_error) {
+      console.error('Knowledge retrieval __error:', _error);
       return {
         found: false,
         confidence: 0,
@@ -175,8 +174,8 @@ export class YouthKnowledgeBase {
       }
 
       return null;
-    } catch (error) {
-      console.error('Cache retrieval error:', error);
+    } catch (_error) {
+      console.error('Cache retrieval __error:', error);
       return null;
     }
   }
@@ -212,8 +211,8 @@ export class YouthKnowledgeBase {
           expiresAt,
         },
       });
-    } catch (error) {
-      console.error('Cache storage error:', error);
+    } catch (_error) {
+      console.error('Cache storage __error:', error);
     }
   }
 
@@ -243,8 +242,8 @@ export class YouthKnowledgeBase {
       }
 
       return null;
-    } catch (error) {
-      console.error('Database query error:', error);
+    } catch (_error) {
+      console.error('Database query __error:', error);
       return null;
     }
   }
@@ -298,8 +297,8 @@ export class YouthKnowledgeBase {
       }
 
       return null;
-    } catch (error) {
-      console.error('Vector search error:', error);
+    } catch (_error) {
+      console.error('Vector search __error:', error);
       return null;
     }
   }
@@ -343,7 +342,7 @@ export class YouthKnowledgeBase {
       });
 
       if (!response.ok) {
-        throw new Error(`Search API error: ${response.statusText}`);
+        throw new Error(`Search API __error: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -365,8 +364,8 @@ export class YouthKnowledgeBase {
       }
 
       return null;
-    } catch (error) {
-      console.error('Safe web search error:', error);
+    } catch (_error) {
+      console.error('Safe web search __error:', error);
       return null;
     }
   }
@@ -411,8 +410,8 @@ export class YouthKnowledgeBase {
       await this.addToVectorDB(entry);
 
       return this.mapPrismaToKnowledge(entry);
-    } catch (error) {
-      console.error('Knowledge entry creation error:', error);
+    } catch (_error) {
+      console.error('Knowledge entry creation __error:', error);
       return null;
     }
   }
@@ -641,13 +640,13 @@ export class YouthKnowledgeBase {
       });
 
       if (!response.ok) {
-        throw new Error(`Embedding API error: ${response.statusText}`);
+        throw new Error(`Embedding API __error: ${response.statusText}`);
       }
 
       const data = await response.json();
       return data.data[0].embedding;
-    } catch (error) {
-      console.error('Embedding generation error:', error);
+    } catch (_error) {
+      console.error('Embedding generation __error:', _error);
       return [];
     }
   }
@@ -673,8 +672,8 @@ export class YouthKnowledgeBase {
           },
         },
       ]);
-    } catch (error) {
-      console.error('Vector DB error:', error);
+    } catch (_error) {
+      console.error('Vector DB __error:', _error);
     }
   }
 
@@ -682,7 +681,7 @@ export class YouthKnowledgeBase {
     knowledgeId: string,
     childAge: number,
     queryTerm: string,
-    confidence: number = 1.0
+    ___confidence: number = 1.0
   ): Promise<void> {
     try {
       // This would be called from the main chat integration
@@ -691,8 +690,8 @@ export class YouthKnowledgeBase {
         where: { id: knowledgeId },
         data: { popularity: { increment: 1 } },
       });
-    } catch (error) {
-      console.error('Usage tracking error:', error);
+    } catch (_error) {
+      console.error('Usage tracking __error:', _error);
     }
   }
 
@@ -705,7 +704,7 @@ export class YouthKnowledgeBase {
           lastHit: new Date(),
         },
       });
-    } catch (error) {
+    } catch (_error) {
       // Ignore cache hit update errors
     }
   }

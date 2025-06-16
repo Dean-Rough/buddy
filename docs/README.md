@@ -1,4 +1,4 @@
-# Lumo - Child AI Chat Platform
+# Onda - Child AI Chat Platform
 
 ## Tech Stack
 
@@ -33,7 +33,7 @@
 
 ```bash
 git clone <repo>
-cd lumo
+cd Onda
 npm install
 cp .env.example .env.local
 ```
@@ -46,7 +46,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 
 # Database
-DATABASE_URL=postgresql://user:pass@host:5432/lumo
+DATABASE_URL=postgresql://user:pass@host:5432/Onda
 
 # AI
 OPENAI_API_KEY=sk-...
@@ -80,7 +80,7 @@ npm run type-check   # TypeScript validation
 ## File Structure
 
 ```
-lumo/
+Onda/
 ├── app/
 │   ├── (auth)/
 │   │   ├── pin/page.tsx           # Child PIN access to sub-profile

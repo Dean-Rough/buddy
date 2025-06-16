@@ -44,7 +44,6 @@ export class YouthKnowledgeBase {
     this.redis = Redis.fromEnv();
     this.pinecone = new Pinecone({
       apiKey: process.env.PINECONE_API_KEY!,
-      environment: process.env.PINECONE_ENVIRONMENT!,
     });
   }
 
@@ -75,15 +74,16 @@ export class YouthKnowledgeBase {
     const embedding = await this.getEmbedding(query);
     const vectorResults = await this.searchVectors(embedding, childAge);
 
-    if (vectorResults.matches && vectorResults.matches[0]?.score > 0.85) {
-      const knowledge = await this.getEntryById(vectorResults.matches[0].id);
+    if (vectorResults.matches && vectorResults.matches[0]?.score && vectorResults.matches[0].score > 0.85) {
+      const firstMatch = vectorResults.matches[0];
+      const knowledge = await this.getEntryById(firstMatch.id);
       if (knowledge) {
         // Cache for future
         await this.redis.set(cacheKey, knowledge, { ex: this.CACHE_TTL });
         return {
           found: true,
           knowledge,
-          confidence: vectorResults.matches[0].score,
+          confidence: firstMatch.score || 0,
         };
       }
     }
@@ -97,11 +97,11 @@ export class YouthKnowledgeBase {
 
     if (searchResult) {
       // Create new knowledge entry
-      const newEntry = await this.createKnowledgeEntry(
+      const newEntry = await this.createKnowledgeEntry({
         query,
-        searchResult,
+        content: searchResult,
         childAge
-      );
+      });
       return {
         found: true,
         knowledge: newEntry,
@@ -147,7 +147,7 @@ export class YouthKnowledgeBase {
 
       // Process and filter results
       for (const item of data.items) {
-        const processed = await this.processSearchResult(item, childAge);
+        const processed = await this.processSearchResult(item, childAge, query);
         if (processed.safetyScore > 0.9) {
           return processed;
         }
@@ -243,13 +243,14 @@ export class YouthKnowledgeBase {
       'natgeokids.com'
     );
 
-    return [...new Set(sources)]; // Remove duplicates
+    return Array.from(new Set(sources)); // Remove duplicates
   }
 
   // Process search results with safety scoring
   private async processSearchResult(
     item: any,
-    childAge: number
+    childAge: number,
+    query: string
   ): Promise<SafeSearchResult> {
     const content = item.snippet || '';
 
@@ -261,7 +262,7 @@ export class YouthKnowledgeBase {
       content: this.simplifyForAge(content, childAge),
       source: item.displayLink,
       safetyScore,
-      relevanceScore: this.calculateRelevance(content, item.title),
+      relevanceScore: this.calculateRelevance({ content, title: item.title }, query, childAge),
       processedAt: new Date(),
     };
 
@@ -325,7 +326,7 @@ export class YouthKnowledgeBase {
 
   // Generate age-appropriate fallbacks
   private generateFallback(query: string, age: number): string {
-    const fallbacks = {
+    const fallbacks: { [key: string]: string[] } = {
       game: [
         "haven't heard of that game yet - is it new? what's it like?",
         "don't know that one - what kind of game is it?",
@@ -401,6 +402,21 @@ export class YouthKnowledgeBase {
       },
     });
   }
+
+  async getEntryById(id: string): Promise<any> {
+    // TODO: Implement knowledge entry retrieval by ID
+    return null;
+  }
+
+  async createKnowledgeEntry(data: any): Promise<any> {
+    // TODO: Implement knowledge entry creation
+    return null;
+  }
+
+  calculateRelevance(entry: any, query: string, age: number): number {
+    // TODO: Implement relevance calculation
+    return 0.5;
+  }
 }
 
 // lib/knowledge/trending-monitor.ts
@@ -429,7 +445,7 @@ export class TrendingMonitor {
     await this.redis.hincrby(key, `age_${childAge}`, 1);
 
     // Track category
-    await this.redis.hset(key, 'category', category);
+    await this.redis.hset(key, { category });
 
     // Set expiry (2 weeks)
     await this.redis.expire(key, 60 * 60 * 24 * 14);
@@ -451,8 +467,8 @@ export class TrendingMonitor {
     const trends: TrendingTopic[] = [];
 
     for (const key of keys) {
-      const data = await this.redis.hgetall(key);
-      if (!data) continue;
+      const data = await this.redis.hgetall(key) as { [key: string]: string };
+      if (!data || Object.keys(data).length === 0) continue;
 
       // Calculate relevance for age group
       let ageRelevance = 0;
@@ -513,10 +529,16 @@ export class TrendingMonitor {
     }
     return ages;
   }
+
+  private async checkTrendingStatus(term: string): Promise<void> {
+    // TODO: Implement trending status check logic
+    // This would check if a term has crossed trending thresholds
+    // and potentially trigger notifications or updates
+  }
 }
 
 // lib/knowledge/knowledge-updater.ts
-import { CronJob } from 'cron';
+// import { CronJob } from 'cron'; // TODO: Install cron package if needed
 
 export class KnowledgeUpdater {
   private knowledgeBase: YouthKnowledgeBase;
@@ -532,47 +554,36 @@ export class KnowledgeUpdater {
   }
 
   private setupDailyUpdate() {
+    // TODO: Implement cron jobs when cron package is installed
     // Run every day at 3 AM
-    new CronJob(
-      '0 3 * * *',
-      async () => {
-        console.log('Running daily knowledge update...');
-
-        // Update trending gaming content
-        await this.updateGamingTrends();
-
-        // Update UK-specific content
-        await this.updateUKContent();
-
-        // Check for new slang
-        await this.updateSlangDictionary();
-      },
-      null,
-      true,
-      'Europe/London'
-    );
+    // new CronJob(
+    //   '0 3 * * *',
+    //   async () => {
+    //     console.log('Running daily knowledge update...');
+    //     await this.updateGamingTrends();
+    //     await this.updateUKContent();
+    //     await this.updateSlangDictionary();
+    //   },
+    //   null,
+    //   true,
+    //   'Europe/London'
+    // );
   }
 
   private setupWeeklyDeepUpdate() {
     // Run every Sunday at 2 AM
-    new CronJob(
-      '0 2 * * 0',
-      async () => {
-        console.log('Running weekly deep knowledge update...');
-
-        // Analyze trending patterns
-        await this.analyzeTrendingPatterns();
-
-        // Update YouTuber database
-        await this.updateYouTuberDatabase();
-
-        // Clean up old entries
-        await this.cleanupOldKnowledge();
-      },
-      null,
-      true,
-      'Europe/London'
-    );
+    // new CronJob(
+    //   '0 2 * * 0',
+    //   async () => {
+    //     console.log('Running weekly deep knowledge update...');
+    //     await this.analyzeTrendingPatterns();
+    //     await this.updateYouTuberDatabase();
+    //     await this.cleanupOldKnowledge();
+    //   },
+    //   null,
+    //   true,
+    //   'Europe/London'
+    // );
   }
 
   private async updateGamingTrends() {
@@ -637,7 +648,7 @@ export class KnowledgeUpdater {
 
       if (definition.found && definition.confidence > 0.7) {
         // Add to permanent knowledge base
-        await this.storeSlangTerm(term.term, definition.knowledge!);
+        await this.storeSlangTerm(term.term, String(definition.knowledge) || '');
       }
     }
   }
@@ -656,6 +667,32 @@ export class KnowledgeUpdater {
     }
 
     return response.json();
+  }
+
+  private async analyzeTrendingPatterns(): Promise<void> {
+    // TODO: Implement trending pattern analysis
+  }
+
+  private async updateYouTuberDatabase(): Promise<void> {
+    // TODO: Implement YouTuber database updates
+  }
+
+  private async cleanupOldKnowledge(): Promise<void> {
+    // TODO: Implement old knowledge cleanup
+  }
+
+  private async scrapeRobloxTrending(): Promise<any> {
+    // TODO: Implement Roblox trending scraping
+    return null;
+  }
+
+  private async fetchYouTubeTrends(countryCode?: string): Promise<any> {
+    // TODO: Implement YouTube trends fetching for country
+    return null;
+  }
+
+  private async storeSlangTerm(term: string, definition: string): Promise<void> {
+    // TODO: Implement slang term storage
   }
 }
 
@@ -833,29 +870,8 @@ export class KnowledgeAwareChat {
   }
 }
 
-// Usage example in your chat API
-// app/api/chat/route.ts
-import { KnowledgeAwareChat } from '@/lib/knowledge/integration';
-
-const knowledgeChat = new KnowledgeAwareChat();
-
-export async function POST(req: Request) {
-  const { message, childAge, childId, personaId } = await req.json();
-
-  // Enhance the prompt with knowledge
-  const { enhancedPrompt, unknownTerms } = await knowledgeChat.enhancePrompt(
-    message,
-    childAge,
-    childId,
-    personaId
-  );
-
-  // If there are unknown terms, the AI can ask about them
-  let systemPrompt = getSystemPrompt(personaId, childAge);
-  if (unknownTerms.length > 0) {
-    systemPrompt += `\n\n❓ UNKNOWN TERMS: ${unknownTerms.join(', ')}`;
-    systemPrompt += `\nFeel free to ask the child about these naturally!`;
-  }
-
-  // Continue with your normal chat flow...
-}
+// Usage example:
+// const knowledgeChat = new KnowledgeAwareChat();
+// const { enhancedPrompt, unknownTerms } = await knowledgeChat.enhancePrompt(
+//   message, childAge, childId, personaId
+// );

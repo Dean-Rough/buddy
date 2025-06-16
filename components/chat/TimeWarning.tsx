@@ -1,23 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import BrutalButton from '../ui/BrutalButton';
 import BrutalCard from '../ui/BrutalCard';
 
+export enum WarningLevel {
+  Info = 'info',
+  Warning = 'warning',
+  Critical = 'critical',
+}
+
 interface TimeWarningProps {
-  minutesRemaining: number;
   warningMessage: string;
-  childAge: number;
+  warningLevel?: WarningLevel;
+  _minutesRemaining: number;
+  _childAge: number;
   canContinueWithOverride: boolean;
-  onExtendTime?: () => void;
-  onAcknowledge?: () => void;
-  onEndSession?: () => void;
+  onExtendTime: () => Promise<void>;
+  onAcknowledge: () => void;
+  onEndSession: () => Promise<void>;
 }
 
 export default function TimeWarning({
-  minutesRemaining,
   warningMessage,
-  childAge,
+  warningLevel = WarningLevel.Warning,
+  _minutesRemaining,
+  _childAge,
   canContinueWithOverride,
   onExtendTime,
   onAcknowledge,
@@ -30,27 +39,27 @@ export default function TimeWarning({
 
   const handleAcknowledge = () => {
     setIsVisible(false);
-    onAcknowledge?.();
+    onAcknowledge();
   };
 
-  const handleParentOverride = () => {
-    onExtendTime?.();
+  const handleParentOverride = async () => {
+    await onExtendTime();
     setIsVisible(false);
   };
 
-  const handleEndNow = () => {
-    onEndSession?.();
+  const handleEndNow = async () => {
+    await onEndSession();
   };
 
   const getWarningIcon = () => {
-    if (minutesRemaining <= 2) return '⏰';
-    if (minutesRemaining <= 5) return '⏱️';
+    if (warningLevel === WarningLevel.Critical) return '⏰';
+    if (warningLevel === WarningLevel.Warning) return '⏱️';
     return '🕐';
   };
 
   const getWarningColor = () => {
-    if (minutesRemaining <= 2) return 'pink';
-    if (minutesRemaining <= 5) return 'yellow';
+    if (warningLevel === WarningLevel.Critical) return 'pink';
+    if (warningLevel === WarningLevel.Warning) return 'yellow';
     return 'blue';
   };
 

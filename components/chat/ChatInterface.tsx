@@ -41,7 +41,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
     // Welcome message
     const welcomeMessage: Message = {
       id: 'welcome',
-      content: `Hi ${childProfile.name}! 👋 I'm Buddy, your AI friend. What would you like to chat about today?`,
+      content: `Hi ${childProfile.name}! 👋 I'm Onda, your AI friend. What would you like to chat about today?`,
       role: 'assistant',
       timestamp: new Date(),
     };
@@ -147,7 +147,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
             <h2 className="font-semibold text-gray-900">
               Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-sm text-gray-600">Chatting with Buddy</p>
+            <p className="text-sm text-gray-600">Chatting with Onda</p>
           </div>
         </div>
         <div className="flex gap-2">

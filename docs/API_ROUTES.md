@@ -1,4 +1,4 @@
-# API Routes - Lumo Platform
+# API Routes - Onda Platform
 
 ## Core Endpoints
 

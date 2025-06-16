@@ -59,7 +59,7 @@ export class TimeManager {
     recentMessages?: Array<{ content: string; role: string; createdAt: Date }>
   ): Promise<TimeStatus> {
     const settings = await this.getTimeSettings(childAccountId);
-    const session = await this.getCurrentSession(childAccountId);
+    const __session = await this.getCurrentSession(childAccountId);
     const usage = await this.getTodaysUsage(childAccountId);
 
     // Check if within allowed hours
@@ -566,7 +566,7 @@ export class TimeManager {
    */
   static async endSession(
     childAccountId: string,
-    reason: 'time_limit' | 'manual' | 'parent_override'
+    _reason: 'time_limit' | 'manual' | 'parent_override'
   ): Promise<void> {
     const now = new Date();
 

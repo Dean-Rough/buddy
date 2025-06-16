@@ -26,7 +26,7 @@ const mockWeeklyData: WeeklyData = {
       duration: 15,
       messageCount: 12,
       childMessages: [
-        'Hi Buddy! What should we talk about today?',
+        'Hi Onda! What should we talk about today?',
         'Can you help me with my math homework?',
         'I love space! Tell me about planets!',
       ],
@@ -107,7 +107,7 @@ const mockAnalysis: SummaryAnalysis = {
   ],
   suggested_conversations: [
     '"What was the most interesting thing you learned about space this week?"',
-    '"How did your conversation with Buddy help with your friend situation?"',
+    '"How did your conversation with Onda help with your friend situation?"',
     '"What are you most excited about for your sleepover?"',
   ],
 };

@@ -169,10 +169,10 @@ The children's interface will prioritize extreme simplicity and emotional safety
 #### Escalation Communication Templates
 
 **Level 3 Alert (Parent)**:
-"URGENT: [Child's name] mentioned concerning content during their chat with Lumo. Please check on them immediately. Details: [specific quote] at [timestamp]. Contact child safety services if needed."
+"URGENT: [Child's name] mentioned concerning content during their chat with Onda. Please check on them immediately. Details: [specific quote] at [timestamp]. Contact child safety services if needed."
 
 **Level 2 Alert (Parent)**:
-"[Child's name] shared some concerns during their Lumo chat today that might need your attention: [summary]. Consider having a gentle conversation with them when appropriate."
+"[Child's name] shared some concerns during their Onda chat today that might need your attention: [summary]. Consider having a gentle conversation with them when appropriate."
 
 **Level 1 Summary (Weekly)**:
 "This week [Child's name] talked about some normal growing-up topics like [general themes]. They seemed to handle our conversations well and no immediate concerns were identified."
@@ -417,7 +417,7 @@ Future versions will include a transparent Privacy Policy and Consent Workflow t
 
 **Memory & Persistence Tests**:
 
-- Lumo remembers child's name, chosen persona, and 3 previous conversation topics
+- Onda remembers child's name, chosen persona, and 3 previous conversation topics
 - Emotional tone adapts correctly based on child's mood patterns
 - Age-appropriate language maintained consistently across sessions
 

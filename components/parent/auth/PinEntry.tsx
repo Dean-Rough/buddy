@@ -135,7 +135,7 @@ export default function PinEntry({ childName, onVerified }: PinEntryProps) {
               Too many incorrect PIN attempts. Please try again in{' '}
               {formatLockoutTime()}.
             </p>
-            <BrutalButton variant="red" size="medium" onClick={handleForgotPin}>
+            <BrutalButton variant="red" size="normal" onClick={handleForgotPin}>
               Reset PIN via Email
             </BrutalButton>
           </div>

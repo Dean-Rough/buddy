@@ -1,4 +1,4 @@
-## 🚨 Project Lumo: Recovery Roadmap 🚨
+## 🚨 Project Onda: Recovery Roadmap 🚨
 
 This document outlines the critical path to address the severe architectural, security, and functionality issues identified during the codebase autopsy. All new feature development must halt until Phase 0 and Phase 1 are complete.
 

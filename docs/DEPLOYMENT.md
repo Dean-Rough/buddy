@@ -1,4 +1,4 @@
-# Deployment & Environment Setup - Lumo Platform
+# Deployment & Environment Setup - Onda Platform
 
 ## Environment Configuration
 
@@ -40,8 +40,8 @@ SMTP_USER=resend
 SMTP_PASS=re_...
 
 # Parent Notifications
-PARENT_ALERT_FROM_EMAIL=alerts@lumo-app.com
-WEEKLY_SUMMARY_FROM_EMAIL=summaries@lumo-app.com
+PARENT_ALERT_FROM_EMAIL=alerts@Onda-app.com
+WEEKLY_SUMMARY_FROM_EMAIL=summaries@Onda-app.com
 EMERGENCY_CONTACT_PHONE=+1234567890
 
 # Security & Rate Limiting
@@ -112,8 +112,8 @@ sudo apt-get install postgresql postgresql-contrib
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/lumo-platform.git
-cd lumo-platform
+git clone https://github.com/your-org/Onda-platform.git
+cd Onda-platform
 
 # Install dependencies
 pnpm install
@@ -410,10 +410,10 @@ alerts:
 
 ```bash
 # Automated daily backups
-0 2 * * * pg_dump $DATABASE_URL > /backups/lumo-$(date +%Y%m%d).sql
+0 2 * * * pg_dump $DATABASE_URL > /backups/Onda-$(date +%Y%m%d).sql
 
 # Weekly full backup with retention
-0 3 * * 0 pg_dump --clean --create $DATABASE_URL | gzip > /backups/weekly/lumo-$(date +%Y%m%d).sql.gz
+0 3 * * 0 pg_dump --clean --create $DATABASE_URL | gzip > /backups/weekly/Onda-$(date +%Y%m%d).sql.gz
 
 # Backup verification
 # Test restore to staging environment weekly

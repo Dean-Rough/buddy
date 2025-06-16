@@ -423,9 +423,9 @@ export default function BrutalChatInterface({
       {/* Time Warning Component */}
       {showTimeWarning && timeStatus && timeStatus.warningMessage && (
         <TimeWarning
-          minutesRemaining={timeStatus.minutesRemaining || 0}
+          _minutesRemaining={timeStatus.minutesRemaining || 0}
           warningMessage={timeStatus.warningMessage}
-          childAge={childProfile.age}
+          _childAge={childProfile.age}
           canContinueWithOverride={timeStatus.canContinueWithOverride}
           onExtendTime={handleExtendTime}
           onAcknowledge={handleTimeWarningAcknowledge}

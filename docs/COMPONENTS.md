@@ -1,4 +1,4 @@
-# Component Breakdown - Lumo Platform
+# Component Breakdown - Onda Platform
 
 ## Frontend Components (React/Next.js)
 

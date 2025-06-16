@@ -1,4 +1,4 @@
-import { ConversationContext, TimeManager } from './time-management';
+import { ConversationContext } from './time-management';
 import { NaturalExitGenerator, ExitContext } from './natural-exit-generator';
 
 /**
@@ -471,7 +471,7 @@ export class ContextAwareWarnings {
    */
   private static generateExcitedWarning(
     minutesRemaining: number,
-    childAge: number
+    _childAge: number
   ): string {
     const timeStr =
       minutesRemaining === 1 ? '1 minute' : `${minutesRemaining} minutes`;
@@ -490,7 +490,7 @@ export class ContextAwareWarnings {
    */
   private static generateQuestionWarning(
     minutesRemaining: number,
-    childAge: number
+    _childAge: number
   ): string {
     const timeStr =
       minutesRemaining === 1 ? '1 minute' : `${minutesRemaining} minutes`;
@@ -512,7 +512,7 @@ export class ContextAwareWarnings {
   private static generateDefaultWarning(
     minutesRemaining: number,
     childAge: number,
-    context: ConversationContext
+    _context: ConversationContext
   ): string {
     const timeStr =
       minutesRemaining === 1 ? '1 minute' : `${minutesRemaining} minutes`;
@@ -548,14 +548,14 @@ export class ContextAwareWarnings {
   /**
    * Determine optimal timing for next warning based on context
    */
-  static getNextWarningDelay(context: ConversationContext): number {
+  static getNextWarningDelay(_context: ConversationContext): number {
     // Delay warnings during important moments
-    if (context.isInMiddleOfStory || context.isDiscussingImportantTopic) {
+    if (_context.isInMiddleOfStory || _context.isDiscussingImportantTopic) {
       return 5; // Check again in 5 minutes
     }
 
     // More frequent warnings for surface-level chats
-    if (context.topicDepth === 'surface') {
+    if (_context.topicDepth === 'surface') {
       return 2; // Check every 2 minutes
     }
 
@@ -566,25 +566,25 @@ export class ContextAwareWarnings {
   /**
    * Check if it's a good time to end conversation gracefully
    */
-  static isGoodTimeToEnd(context: ConversationContext): boolean {
+  static isGoodTimeToEnd(_context: ConversationContext): boolean {
     // Never end during important conversations
-    if (context.isInMiddleOfStory || context.isDiscussingImportantTopic) {
+    if (_context.isInMiddleOfStory || _context.isDiscussingImportantTopic) {
       return false;
     }
 
     // Don't end during emotional support moments
     if (
-      context.emotionalState === 'sad' ||
-      context.emotionalState === 'anxious'
+      _context.emotionalState === 'sad' ||
+      _context.emotionalState === 'anxious'
     ) {
       return false;
     }
 
     // Good time to end: surface conversation, neutral/calm state
     return (
-      context.topicDepth === 'surface' &&
-      (context.emotionalState === 'neutral' ||
-        context.emotionalState === 'calm')
+      _context.topicDepth === 'surface' &&
+      (_context.emotionalState === 'neutral' ||
+        _context.emotionalState === 'calm')
     );
   }
 
@@ -592,9 +592,9 @@ export class ContextAwareWarnings {
    * Generate graceful conversation ending based on context
    */
   static generateGracefulEnding(
-    context: ConversationContext,
+    _context: ConversationContext,
     childAge: number,
-    behavior: 'gradual' | 'warning_only' | 'hard_stop'
+    _behavior: 'gradual' | 'warning_only' | 'hard_stop'
   ): string {
     const now = new Date();
     const isWeekend = now.getDay() === 0 || now.getDay() === 6;
@@ -603,9 +603,9 @@ export class ContextAwareWarnings {
       childAge,
       timeOfDay: NaturalExitGenerator.getCurrentTimeContext(isWeekend),
       conversationTone: NaturalExitGenerator.analyzeConversationTone(
-        context.emotionalState,
-        context.topicDepth,
-        context.isAskingQuestions
+        _context.emotionalState,
+        _context.topicDepth,
+        _context.isAskingQuestions
       ),
       isWeekend,
     };

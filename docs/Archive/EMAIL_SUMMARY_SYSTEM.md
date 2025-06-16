@@ -131,7 +131,7 @@ Respond in this JSON format:
   <body>
     <div class="container">
       <div class="header">
-        <h1>{{childName}}'s Week with Buddy</h1>
+        <h1>{{childName}}'s Week with Onda</h1>
         <p>{{weekDateRange}}</p>
       </div>
 
@@ -378,7 +378,7 @@ CREATE TABLE "WeeklySummary" (
 ## Sample Email Output
 
 ```
-Subject: Emma's Week with Buddy (Dec 4-10, 2024)
+Subject: Emma's Week with Onda (Dec 4-10, 2024)
 
 📊 This Week's Overview
 Total chat time: 3h 24m
@@ -403,7 +403,7 @@ No safety concerns detected this week.
 
 💬 Family Conversation Starters
 • "What was the most interesting thing you learned about space this week?"
-• "How did your conversation with Buddy help with your friend situation?"
+• "How did your conversation with Onda help with your friend situation?"
 ```
 
 This system provides **meaningful insights** for parents while keeping costs minimal and privacy protected!

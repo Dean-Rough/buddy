@@ -24,7 +24,7 @@ _Real-world examples of how to modify Onda AI behavior safely_
 
 ---
 
-### Scenario 2: "8-year-old finds Buddy too babyish"
+### Scenario 2: "8-year-old finds Onda too babyish"
 
 **Problem:** Older kids in the 6-8 age group want slightly more mature language.
 

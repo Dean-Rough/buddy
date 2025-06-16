@@ -1,4 +1,4 @@
-# System Architecture - Lumo AI Chat Platform
+# System Architecture - Onda AI Chat Platform
 
 ## High-Level Architecture Overview
 

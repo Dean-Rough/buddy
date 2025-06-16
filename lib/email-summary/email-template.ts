@@ -80,7 +80,7 @@ export class EmailTemplateGenerator {
    */
   private generateSubject(data: EmailTemplateData): string {
     const weekShort = data.weekDateRange.split(' - ')[0];
-    return `${data.childName}'s Week with Buddy (${weekShort})`;
+    return `${data.childName}'s Week with Onda (${weekShort})`;
   }
 
   /**
@@ -92,7 +92,7 @@ export class EmailTemplateGenerator {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${data.childName}'s Week with Buddy</title>
+    <title>${data.childName}'s Week with Onda</title>
     <style>
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -223,7 +223,7 @@ export class EmailTemplateGenerator {
   <body>
     <div class="container">
       <div class="header">
-        <h1>📊 ${data.childName}'s Week with Buddy</h1>
+        <h1>📊 ${data.childName}'s Week with Onda</h1>
         <p>${data.weekDateRange}</p>
       </div>
 
@@ -373,7 +373,7 @@ export class EmailTemplateGenerator {
    */
   generatePlainTextContent(data: EmailTemplateData): string {
     return `
-${data.childName}'s Week with Buddy
+${data.childName}'s Week with Onda
 ${data.weekDateRange}
 
 This Week's Overview:

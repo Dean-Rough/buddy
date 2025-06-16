@@ -1,82 +1,108 @@
-# AI Agent Build Tasks - Lumo Platform
+# Platform Evolution Roadmap - Buddy 2.0 → Onda 3.0
 
-## 🚀 NEW FEATURE: Dynamic Time Limits (Priority Addition)
+## 🌟 PLATFORM EVOLUTION OVERVIEW
 
-### 🕐 Intelligent Chat Duration Management
+### Current State: Buddy 1.0 (Production)
+**Safe AI chat companion with dual-layer safety system**
+- ✅ Clerk authentication with PIN-protected parent dashboard
+- ✅ Dual-layer AI safety validation (100% coverage)
+- ✅ Voice integration with Cartesia TTS
+- ✅ Parent oversight with weekly summaries
+- ✅ Cultural authenticity (UK youth culture, gaming, slang)
 
-**Goal**: Parent-controlled time limits that feel natural and conversational
+### Next Phase: Buddy 2.0 (6 months) - "Organic Nudging Platform"
+**Enhanced family coordination with invisible intelligence**
+- 🎯 Calendar-aware conversations with natural topic bridging
+- 🎯 Parent gentle nudging disguised as friendly advice
+- 🎯 Enhanced analytics and multi-child support
+- 🎯 Voice-enhanced experience with audio summaries
+- 🎯 Advanced emotional intelligence and persona system
 
-**Smart Detection System**:
+### Future Vision: Onda 3.0 (18 months) - "Clinical ADHD Intervention"
+**Evidence-based therapeutic support with professional integration**
+- 🔮 ADHD-specialized therapeutic conversation patterns
+- 🔮 Crisis intervention with professional coordination
+- 🔮 Clinical validation and FDA compliance pathway
+- 🔮 Healthcare system integration (EHR, insurance)
+- 🔮 Outcome measurement and therapeutic analytics
 
-- **Conversation Analysis**: Detect emotional discussions, learning moments, or important topics
-- **Context-Aware Decisions**: Allow meaningful conversations to continue, wind down casual chat
-- **Natural Transitions**: AI gives human-like reasons to end ("I need to tidy my room", "got football practice")
-
-**Parent Controls**:
-
-- Set daily/session time limits in parent dashboard
-- Choose strictness level: flexible, balanced, or strict
-- Emergency override for emotional support scenarios
-
-**Implementation Plan**:
-
-1. Add time limit fields to parent settings in database
-2. Create conversation importance scoring system
-3. Build natural conversation ending prompt library
-4. Integrate with existing chat flow for seamless transitions
-
-**Benefits**:
-
-- Healthy screen time boundaries without abrupt cutoffs
-- Maintains trust and engagement with children
-- Gives parents control while preserving conversation quality
-- Teaches natural conversation closure patterns
+**Detailed roadmaps**: See `/docs/roadmaps/` for phase-specific implementation guides
 
 ---
 
-## 🏛️ PARENT DASHBOARD (High Priority)
+## 🚀 BUDDY 2.0: ORGANIC NUDGING SYSTEM
 
-### 📱 Comprehensive Parental Control Center
+### Core Innovation: Invisible Intelligence
+**Hyper-natural conversation bridges that never feel orchestrated**
 
-**Goal**: COPPA-compliant parent dashboard with time limits, safety alerts, and family management
+**Vision**: "An AI friend that naturally supports family coordination while preserving authentic childhood conversation"
 
-**Core Features**:
+### Key Features
 
-- **Time Management**: Dynamic chat limits with smart overrides for emotional/educational content
-- **Multi-Channel Alerts**: Email, SMS, push notifications for safety events
-- **Weekly Summaries**: Automated insights about child's digital wellbeing
-- **Privacy Controls**: Data export, deletion, conversation visibility settings
-- **Family Management**: Multi-child support, partner access permissions
+#### 🎯 Organic Nudging Engine
+- **Calendar Integration**: Read-only family calendar with natural conversation awareness
+- **Topic Bridging**: Connect any conversation topic to family routines organically
+- **Parent Gentle Nudges**: "Let Onda naturally mention..." dashboard feature
+- **Smart Timing**: Conversation flow analysis for optimal nudge moments
 
-**Safety Integration**:
+**Example Flow**:
+```
+Child: "this boss is impossible!"
+AI: "mate that sounds proper frustrating! you know what though, some of the hardest challenges are the most satisfying when you crack them... speaking of cracking things, what's the trickiest thing you're working on lately?"
+→ Piano practice at 4pm becomes natural conversation about practice and persistence
+```
 
-- Real-time safety alert delivery (< 60 seconds for critical)
-- Customizable alert thresholds and notification preferences
-- Emergency override capabilities for crisis situations
-- Complete audit trail for compliance and family trust
+#### 🔄 Enhanced Intelligence
+- **8 AI Personas**: Distinct characters with consistent personality traits
+- **90% Emotion Recognition**: Sophisticated mood detection and appropriate responses
+- **Voice & Audio**: Enhanced TTS with audio summaries for parents
+- **Multi-Child Support**: Individual settings with family analytics
 
-**Implementation Phases**:
-
-1. **MVP Dashboard** (Week 1): Basic time limits, email alerts, single child
-2. **Enhanced Controls** (Week 2): SMS/push notifications, weekly summaries
-3. **Family Features** (Week 3): Multi-child management, partner access
-
-**Benefits**:
-
-- Full COPPA compliance through transparent parental control
-- Builds family trust with clear oversight and communication
-- Provides parents peace of mind while maintaining child autonomy
-- Creates healthy digital boundaries without abrupt technology cutoffs
+**Implementation Guide**: See `/docs/roadmaps/buddy-2.0-implementation.md`
 
 ---
 
-## Foundation (Week 1-2)
+## 🎯 ONDA 3.0: CLINICAL THERAPEUTIC PLATFORM
+
+### Vision: Evidence-Based ADHD Intervention
+**Therapeutic techniques disguised as enhanced AI friendship**
+
+**Target**: Children with ADHD (6.1M US diagnosed) + healthcare partnerships
+**Business Model**: $79/month premium + insurance reimbursement
+
+### Core Therapeutic Features
+
+#### 🧠 ADHD-Specialized Intervention
+- **Task Decomposition**: "Breaking down challenges" disguised as helpful techniques
+- **Executive Function Scaffolding**: "Brain training games" for attention regulation
+- **Crisis Intervention**: Professional-grade detection and response (<60s)
+- **Therapeutic Analytics**: Evidence-based outcome measurement
+
+#### 🏥 Healthcare Integration
+- **FDA Compliance**: Medical device pathway and clinical validation
+- **EHR Integration**: HL7 FHIR-compliant healthcare system connectivity
+- **Professional Dashboard**: Therapist oversight and care coordination
+- **Insurance Integration**: Reimbursement optimization (80% coverage goal)
+
+**Implementation Guide**: See `/docs/roadmaps/onda-3.0-clinical.md`
+
+---
+
+## 📋 CURRENT STATE: BUDDY 1.0 (PRODUCTION-READY)
+
+### ✅ Completed Foundation (December 2024)
+
+**For detailed implementation guides for upcoming phases:**
+- 📝 [Buddy 2.0 Implementation Guide](/docs/roadmaps/buddy-2.0-implementation.md)
+- 📝 [Onda 3.0 Clinical Roadmap](/docs/roadmaps/onda-3.0-clinical.md)
+
+**Current Production Features:**
 
 ### 🔧 Project Setup
 
 ```bash
 # Task: Initialize Next.js project with TypeScript
-mkdir lumo && cd lumo
+mkdir Onda && cd Onda
 npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir=false
 npm install @clerk/nextjs prisma @prisma/client openai @anthropic-ai/sdk resend zod zustand
 
@@ -251,20 +277,22 @@ npx prisma db seed
 ### 📊 Parent Interface
 
 ```bash
-# Task: Create parent dashboard overview
-# File: app/(parent)/dashboard/page.tsx
-# Data: Child profile management, activity summaries, recent alerts, mood trends
-# Components: ChildProfileCreator, ActivityCard, AlertCenter, MoodChart
+# ✅ COMPLETE: Create parent dashboard overview
+# ✅ File: app/(parent)/dashboard/page.tsx
+# ✅ Data: Child profile management, activity summaries, recent alerts, mood trends
+# ✅ Components: ChildProfileCreator, ActivityCard, AlertCenter, MoodChart
 
-# Task: Build alert management system
-# File: app/(parent)/alerts/page.tsx
-# Features: Alert filtering, batch actions, transcript access
-# Permissions: Visibility level controls
+# ✅ COMPLETE: Build alert management system
+# ✅ File: app/(parent)/alerts/page.tsx
+# ✅ Features: Alert filtering, batch actions, transcript access
+# ✅ Permissions: Visibility level controls
 
-# Task: Implement weekly summary generation
-# File: lib/summary-generator.ts
-# Content: Session counts, mood analysis, topic breakdown
-# Delivery: Automated email via Resend
+# ✅ COMPLETE: Implement weekly summary generation
+# ✅ File: lib/email-summary/ (comprehensive system)
+# ✅ Content: Session counts, mood analysis, topic breakdown
+# ✅ Delivery: Automated email via Resend
+# ✅ APIs: /api/weekly-summaries/* endpoints
+# ✅ UI: WeeklySummaryManager component for manual triggers
 ```
 
 ## Voice Integration (Week 9-10)
@@ -272,19 +300,19 @@ npx prisma db seed
 ### 🎵 Voice Features
 
 ```bash
-# Task: Integrate Cartesia TTS
-# File: lib/voice.ts
-# Functions: synthesizeSpeech(), getPersonaVoice(), optimizeForChild()
-# Caching: Audio file storage and retrieval
+# ✅ COMPLETE: Integrate Cartesia TTS
+# ✅ File: lib/voice.ts
+# ✅ Functions: synthesizeSpeech(), getPersonaVoice(), optimizeForChild()
+# ✅ Caching: Audio file storage and retrieval, age-appropriate speech optimization
 
-# Task: Create voice input component
-# File: components/chat/VoiceInput.tsx
-# Features: Recording, waveform display, speech-to-text
-# Validation: Audio quality checks, content filtering
+# ✅ COMPLETE: Create voice input component
+# ✅ File: components/chat/VoiceInput.tsx
+# ✅ Features: Recording, waveform display, speech-to-text, audio level monitoring
+# ✅ Validation: Audio quality checks, content filtering, whisper mode support
 
-# Task: Add voice settings management
-# File: components/chat/VoiceSettings.tsx
-# Controls: Volume, speed, voice selection per persona
+# ✅ COMPLETE: Add voice settings management
+# ✅ File: components/chat/VoiceSettings.tsx
+# ✅ Controls: Volume, speed, voice selection per persona, auto-play toggle, test voice
 ```
 
 ## Advanced Features (Week 11-12)
@@ -292,14 +320,14 @@ npx prisma db seed
 ### 🌙 Whisper Mode
 
 ```bash
-# Task: Create Whisper Mode interface
-# File: app/(chat)/whisper/page.tsx
-# Features: Calming colors, reduced animations, gentle prompts
-# Triggers: Emotional distress detection, manual activation
+# ✅ COMPLETE: Create Whisper Mode interface
+# ✅ File: app/whisper/page.tsx + components/chat/WhisperModeInterface.tsx
+# ✅ Features: Calming colors, reduced animations, gentle prompts, voice input
+# ✅ Triggers: Emotional distress detection, manual activation
 
-# Task: Implement mode transition animations
-# File: components/animations/WhisperModeTransition.tsx
-# Effects: Smooth color transitions, gentle visual cues
+# ✅ COMPLETE: Implement mode transition animations
+# ✅ File: components/animations/WhisperModeTransition.tsx
+# ✅ Effects: Smooth color transitions, gentle visual cues, floating particles, distress detection
 ```
 
 ### 🧠 Memory System

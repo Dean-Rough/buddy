@@ -1,4 +1,4 @@
-# Database Schema - Lumo Platform
+# Database Schema - Onda Platform
 
 ## Prisma Schema Reference
 

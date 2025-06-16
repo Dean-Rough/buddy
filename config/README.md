@@ -38,7 +38,7 @@ Every change you make affects real children's safety. When in doubt:
 
 **What it does:**
 
-- Creates distinct AI companions (Buddy the raccoon, Coral the jellyfish, etc.)
+- Creates distinct AI companions (Onda the raccoon, Coral the jellyfish, etc.)
 - Sets age-appropriate language levels (6-8 vs 11-12 year olds)
 - Defines interests and speaking styles
 
@@ -127,7 +127,7 @@ npm run dev
 
 ### Adjusting AI Personality
 
-**Example: Making Buddy more enthusiastic**
+**Example: Making Onda more enthusiastic**
 
 1. Open `ai-personas.json`
 2. Find the `friendly-raccoon` persona
@@ -183,7 +183,7 @@ npm run dev
 
 ### Current Characters
 
-**🦝 Buddy (friendly-raccoon)**
+**🦝 Onda (friendly-raccoon)**
 
 - **Age group:** Universal (6-12)
 - **Personality:** Curious, loves weird stuff, silly games

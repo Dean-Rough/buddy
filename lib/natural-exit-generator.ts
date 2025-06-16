@@ -49,7 +49,7 @@ export class NaturalExitGenerator {
   ): string {
     if (isWeekend) return 'weekend';
 
-    const ageGroupCategories = {
+    const _ageGroupCategories = {
       '7-8': {
         morning: 'morning',
         afternoon: 'afternoon',
@@ -75,7 +75,7 @@ export class NaturalExitGenerator {
    */
   private static generateFinalExit(
     ageGroup: '7-8' | '9-10' | '11-12',
-    timeCategory: string,
+    _timeCategory: string,
     context: ExitContext
   ): string {
     // Get appropriate exit reasons for age and time
@@ -123,7 +123,7 @@ export class NaturalExitGenerator {
    * Get current time context
    */
   static getCurrentTimeContext(
-    isWeekend: boolean = false
+    __isWeekend: boolean = false
   ): ExitContext['timeOfDay'] {
     const hour = new Date().getHours();
 
@@ -138,7 +138,7 @@ export class NaturalExitGenerator {
   static analyzeConversationTone(
     emotionalState: 'excited' | 'sad' | 'anxious' | 'calm' | 'neutral',
     topicDepth: 'surface' | 'deep' | 'personal',
-    isAskingQuestions: boolean
+    ___isAskingQuestions: boolean
   ): ExitContext['conversationTone'] {
     if (emotionalState === 'excited') return 'excited';
     if (topicDepth === 'deep' || topicDepth === 'personal') return 'learning';
@@ -154,7 +154,7 @@ export class NaturalExitGenerator {
     strictnessLevel: 'flexible' | 'balanced' | 'strict' = 'balanced'
   ): boolean {
     const importanceOverrides = exitResponses.importanceOverrides;
-    const strictnessConfig = exitResponses.strictnessLevels[strictnessLevel];
+    const _strictnessConfig = exitResponses.strictnessLevels[strictnessLevel];
 
     // Check for emotional support needs
     if (
@@ -193,7 +193,7 @@ export class NaturalExitGenerator {
     strictnessLevel: 'flexible' | 'balanced' | 'strict' = 'balanced'
   ): number {
     const importanceOverrides = exitResponses.importanceOverrides;
-    const strictnessConfig = exitResponses.strictnessLevels[strictnessLevel];
+    const _strictnessConfig = exitResponses.strictnessLevels[strictnessLevel];
 
     if (
       conversationContext.emotionalState === 'sad' ||
@@ -217,6 +217,27 @@ export class NaturalExitGenerator {
       return importanceOverrides.social_problem_solving.maxOverrunMinutes;
     }
 
-    return strictnessConfig.maxDailyOverrun;
+    return _strictnessConfig.maxDailyOverrun;
+  }
+
+  private static getExitReasonByTimeContext(
+    _timeCategory: string,
+    _context: any
+  ): string {
+    // ... existing code ...
+  }
+
+  private static getExitReasonByConversationTone(
+    _tone: string,
+    _context: any
+  ): string {
+    // ... existing code ...
+  }
+
+  private static getExitReasonByChildAge(
+    childAge: number,
+    ___isWeekend: boolean = false
+  ): string {
+    // ...
   }
 }

@@ -1,4 +1,4 @@
-# AUTH REDESIGN PLAN - Lumo Platform
+# AUTH REDESIGN PLAN - Onda Platform
 
 ## 🚨 CURRENT PROBLEM
 

@@ -18,21 +18,27 @@ async function generateAiResponse(
   );
 }
 
-const chatMessageSchema = z.object({
-  message: z.string().min(1).max(5000),
-  childId: z.string(), // In a real app, you'd get this from the session
-  personaId: z.string(),
-  conversationContext: z.object({
-    mood: z.string(),
-    recentTopics: z.array(z.string()),
-    engagementLevel: z.enum(['low', 'medium', 'high']),
-    mode: z.enum(['normal', 'whisper', 'coach']),
-  }),
-  childContext: z.object({
-    name: z.string(),
-    age: z.number().min(6).max(12),
-  }),
-});
+const chatMessageSchema = z
+  .object({
+    message: z.string().min(1).max(5000),
+    childId: z.string(), // In a real app, you'd get this from the session
+    personaId: z.string(),
+    conversationContext: z
+      .object({
+        mood: z.string(),
+        recentTopics: z.array(z.string()),
+        engagementLevel: z.enum(['low', 'medium', 'high']),
+        mode: z.enum(['normal', 'whisper', 'coach']),
+      })
+      .strict(),
+    childContext: z
+      .object({
+        name: z.string(),
+        age: z.number().min(6).max(12),
+      })
+      .strict(),
+  })
+  .strict();
 
 export async function POST(request: NextRequest) {
   try {

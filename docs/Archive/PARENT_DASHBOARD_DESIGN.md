@@ -142,7 +142,7 @@ Delivery Method:
 **Sample Weekly Summary:**
 
 ```
-🌟 Emma's Week with Buddy (Dec 4-10, 2024)
+🌟 Emma's Week with Onda (Dec 4-10, 2024)
 
 📊 OVERVIEW
 Total chat time: 3h 24m (within healthy limits)
@@ -171,8 +171,8 @@ Safety: No concerning content detected
 
 📞 NEXT WEEK
 Suggested conversation starters:
-"What was the coolest thing Buddy taught you about space?"
-"How did talking to Buddy help with your friend situation?"
+"What was the coolest thing Onda taught you about space?"
+"How did talking to Onda help with your friend situation?"
 ```
 
 ### 5. 👧 **Child Profile Management**
