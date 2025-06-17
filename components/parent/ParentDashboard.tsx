@@ -11,6 +11,7 @@ interface ChildAccount {
   name: string;
   username: string;
   age: number;
+  parentNotes?: string;
 }
 
 interface ParentSettings {
@@ -32,16 +33,20 @@ interface DailyUsage {
 
 export default function ParentDashboard() {
   const { user, isLoaded } = useUser();
-  const [children, setChildren] = useState<ChildAccount[]>([]);
+  const [child, setChild] = useState<ChildAccount | null>(null);
   const [settings, setSettings] = useState<ParentSettings>({
     emailSummaryEnabled: true,
     emailSummaryFrequency: 'weekly',
   });
   const [usage, setUsage] = useState<DailyUsage[]>([]);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'time' | 'summaries' | 'privacy'
-  >('overview');
+    'info' | 'time' | 'summaries' | 'privacy'
+  >('info');
   const [loading, setLoading] = useState(true);
+  const [editingChildName, setEditingChildName] = useState(false);
+  const [editingChildNotes, setEditingChildNotes] = useState(false);
+  const [tempChildName, setTempChildName] = useState('');
+  const [tempChildNotes, setTempChildNotes] = useState('');
 
   useEffect(() => {
     loadDashboardData();
@@ -49,11 +54,13 @@ export default function ParentDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Load children
+      // Load child (assuming first/primary child for now)
       const childrenResponse = await fetch('/api/children');
       if (childrenResponse.ok) {
         const childrenData = await childrenResponse.json();
-        setChildren(childrenData);
+        if (childrenData.length > 0) {
+          setChild(childrenData[0]); // Use first child
+        }
       }
 
       // Load settings
@@ -92,6 +99,49 @@ export default function ParentDashboard() {
     }
   };
 
+  const updateChildInfo = async (field: 'name' | 'parentNotes', value: string) => {
+    if (!child) return;
+
+    try {
+      const response = await fetch(`/api/children/${child.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+
+      if (response.ok) {
+        setChild({ ...child, [field]: value });
+        if (field === 'name') {
+          setEditingChildName(false);
+        } else {
+          setEditingChildNotes(false);
+        }
+      }
+    } catch (error) {
+      console.error(`Error updating child ${field}:`, error);
+    }
+  };
+
+  const startEditingName = () => {
+    setEditingChildName(true);
+    setTempChildName(child?.name || '');
+  };
+
+  const startEditingNotes = () => {
+    setEditingChildNotes(true);
+    setTempChildNotes(child?.parentNotes || '');
+  };
+
+  const cancelEditing = (field: 'name' | 'notes') => {
+    if (field === 'name') {
+      setEditingChildName(false);
+      setTempChildName('');
+    } else {
+      setEditingChildNotes(false);
+      setTempChildNotes('');
+    }
+  };
+
   if (!isLoaded || loading) {
     return (
       <div className="min-h-screen bg-[#FFF8E1] flex items-center justify-center">
@@ -105,16 +155,31 @@ export default function ParentDashboard() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="font-rokano text-4xl">PARENT DASHBOARD</h1>
-          <div className="text-sm text-gray-600">
-            Welcome back, {user?.emailAddresses[0]?.emailAddress}
+          <div>
+            <h1 className="font-rokano text-4xl">PARENT DASHBOARD</h1>
+            {child && (
+              <h2 className="font-avotica text-xl text-gray-600 mt-2">
+                Managing {child.name}'s Account
+              </h2>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600">
+              Welcome back, {user?.emailAddresses[0]?.emailAddress}
+            </div>
+            <BrutalButton 
+              variant="blue" 
+              onClick={() => window.location.href = '/chat'}
+            >
+              BACK TO CHAT
+            </BrutalButton>
           </div>
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex gap-2 mb-8">
           {[
-            { id: 'overview', label: 'OVERVIEW' },
+            { id: 'info', label: 'CHILD INFO' },
             { id: 'time', label: 'TIME LIMITS' },
             { id: 'summaries', label: 'EMAIL SUMMARIES' },
             { id: 'privacy', label: 'PRIVACY' },
@@ -131,34 +196,112 @@ export default function ParentDashboard() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'overview' && (
+        {activeTab === 'info' && child && (
           <div className="grid gap-6">
-            {/* Children Overview */}
+            {/* Child Basic Info */}
             <BrutalCard variant="blue">
-              <h2 className="font-rokano text-2xl mb-4">YOUR CHILDREN</h2>
-              {children.length > 0 ? (
-                <div className="grid gap-4">
-                  {children.map(child => (
-                    <div
-                      key={child.id}
-                      className="flex justify-between items-center p-4 bg-white/50 brutal-shadow-small"
-                    >
-                      <div>
-                        <h3 className="font-avotica font-bold">{child.name}</h3>
-                        <p className="text-sm text-gray-600">
-                          @{child.username} • Age {child.age}
-                        </p>
-                      </div>
-                      <BrutalButton variant="green" size="small">
-                        VIEW ACTIVITY
+              <h2 className="font-rokano text-2xl mb-4">BASIC INFO</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-avotica font-bold mb-2">
+                    Child's Name
+                  </label>
+                  {editingChildName ? (
+                    <div className="flex items-center gap-2">
+                      <BrutalInput
+                        value={tempChildName}
+                        onChange={e => setTempChildName(e.target.value)}
+                        className="flex-1"
+                        placeholder="Child's name"
+                      />
+                      <BrutalButton 
+                        variant="green" 
+                        size="small"
+                        onClick={() => updateChildInfo('name', tempChildName)}
+                      >
+                        SAVE
+                      </BrutalButton>
+                      <BrutalButton 
+                        variant="white" 
+                        size="small"
+                        onClick={() => cancelEditing('name')}
+                      >
+                        CANCEL
                       </BrutalButton>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-avotica text-lg">{child.name}</span>
+                      <BrutalButton 
+                        variant="white" 
+                        size="small"
+                        onClick={startEditingName}
+                      >
+                        EDIT
+                      </BrutalButton>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <span className="font-avotica font-bold">Username:</span> @{child.username}
+                </div>
+                <div>
+                  <span className="font-avotica font-bold">Age:</span> {child.age}
+                </div>
+              </div>
+            </BrutalCard>
+
+            {/* Sensitivities */}
+            <BrutalCard variant="pink">
+              <h2 className="font-rokano text-2xl mb-4">SENSITIVITIES</h2>
+              <p className="text-sm text-gray-700 mb-4">
+                Share important information about your child that Onda should be aware of - 
+                allergies, disabilities, physical limitations, emotional sensitivities, or 
+                anything that helps provide appropriate responses.
+              </p>
+              
+              {editingChildNotes ? (
+                <div className="space-y-3">
+                  <textarea
+                    value={tempChildNotes}
+                    onChange={e => setTempChildNotes(e.target.value)}
+                    className="w-full p-3 border-3 border-black brutal-shadow-small resize-none"
+                    rows={4}
+                    placeholder="e.g., Has a nut allergy, uses a wheelchair, gets anxious about loud noises, loves art but struggles with reading..."
+                  />
+                  <div className="flex gap-2">
+                    <BrutalButton 
+                      variant="green"
+                      onClick={() => updateChildInfo('parentNotes', tempChildNotes)}
+                    >
+                      SAVE NOTES
+                    </BrutalButton>
+                    <BrutalButton 
+                      variant="white"
+                      onClick={() => cancelEditing('notes')}
+                    >
+                      CANCEL
+                    </BrutalButton>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">No children added yet</p>
-                  <BrutalButton variant="green">ADD CHILD ACCOUNT</BrutalButton>
+                <div>
+                  {child.parentNotes ? (
+                    <div className="bg-white/50 p-4 brutal-shadow-small mb-3">
+                      <p className="text-gray-800 whitespace-pre-wrap">{child.parentNotes}</p>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-100 p-4 brutal-shadow-small mb-3 text-center">
+                      <p className="text-gray-600">No sensitivities noted yet</p>
+                    </div>
+                  )}
+                  <BrutalButton 
+                    variant="blue"
+                    onClick={startEditingNotes}
+                  >
+                    {child.parentNotes ? 'EDIT NOTES' : 'ADD NOTES'}
+                  </BrutalButton>
                 </div>
               )}
             </BrutalCard>

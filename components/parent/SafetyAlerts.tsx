@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface SafetyEvent {
   id: string;
@@ -28,11 +28,7 @@ export default function SafetyAlerts({ childId }: SafetyAlertsProps) {
     'all'
   );
 
-  useEffect(() => {
-    fetchAlerts();
-  }, [childId, filter, severityFilter]);
-
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -48,24 +44,31 @@ export default function SafetyAlerts({ childId }: SafetyAlertsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [childId, filter, severityFilter]);
 
-  const markAsResolved = async (alertId: string) => {
-    try {
-      const response = await fetch(`/api/safety/alerts/${alertId}/resolve`, {
-        method: 'POST',
-      });
+  useEffect(() => {
+    fetchAlerts();
+  }, [fetchAlerts]);
 
-      if (response.ok) {
-        fetchAlerts(); // Refresh alerts
-      } else {
+  const markAsResolved = useCallback(
+    async (alertId: string) => {
+      try {
+        const response = await fetch(`/api/safety/alerts/${alertId}/resolve`, {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          fetchAlerts(); // Refresh alerts
+        } else {
+          alert('Failed to resolve alert');
+        }
+      } catch (error) {
+        console.error('Failed to resolve alert:', error);
         alert('Failed to resolve alert');
       }
-    } catch (error) {
-      console.error('Failed to resolve alert:', error);
-      alert('Failed to resolve alert');
-    }
-  };
+    },
+    [fetchAlerts]
+  );
 
   const getSeverityBadge = (level: number) => {
     switch (level) {

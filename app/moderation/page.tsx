@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface SafetyEvent {
   id: string;
@@ -24,11 +24,7 @@ export default function ModerationDashboard() {
   );
   const [selectedEvent, setSelectedEvent] = useState<SafetyEvent | null>(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [filter]);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/moderation/events?filter=${filter}`);
@@ -39,7 +35,11 @@ export default function ModerationDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const reviewEvent = async (
     eventId: string,

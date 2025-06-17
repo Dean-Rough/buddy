@@ -148,11 +148,7 @@ export class TimeManager {
     const child = await prisma.childAccount.findUnique({
       where: { id: childAccountId },
       include: {
-        parent: {
-          include: {
-            parentSettings: true,
-          },
-        },
+        parent: true,
       },
     });
 
@@ -160,7 +156,10 @@ export class TimeManager {
       throw new Error('Child account not found or no parent associated');
     }
 
-    const parentSettings = child.parent.parentSettings;
+    // Get parent settings separately
+    const parentSettings = await prisma.parentSettings.findUnique({
+      where: { parentClerkUserId: child.parent.clerkUserId },
+    });
 
     return {
       dailyTimeLimitMinutes: parentSettings?.dailyTimeLimitMinutes || undefined,
@@ -547,7 +546,7 @@ export class TimeManager {
         },
         update: {
           totalMinutes: sessionMinutes,
-          lastActivity: now,
+          updatedAt: now,
         },
         create: {
           parentClerkUserId: '', // Will be filled by parent relationship

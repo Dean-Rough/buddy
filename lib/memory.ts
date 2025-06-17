@@ -204,6 +204,44 @@ export async function extractMemoriesFromMessage(
 }
 
 /**
+ * Recall memories for a child (alias for getMemories to match roadmap spec)
+ */
+export async function recallMemory(
+  childAccountId: string,
+  memoryType?: string,
+  limit: number = 20
+): Promise<MemoryEntry[]> {
+  return getMemories(childAccountId, memoryType, limit);
+}
+
+/**
+ * Update emotional patterns for a child
+ */
+export async function updateEmotionalPattern(
+  context: MemoryContext,
+  emotion: string,
+  intensity: number,
+  trigger?: string
+): Promise<void> {
+  const memory: MemoryEntry = {
+    type: 'emotional_pattern',
+    key: emotion.toLowerCase(),
+    value: JSON.stringify({
+      emotion,
+      intensity,
+      trigger,
+      timestamp: new Date().toISOString(),
+    }),
+    confidence: 0.8,
+    context: trigger
+      ? `Emotional response to: ${trigger}`
+      : 'Emotional state update',
+  };
+
+  await storeMemory(context, memory);
+}
+
+/**
  * Update memory reference timestamp
  */
 export async function referenceMemory(

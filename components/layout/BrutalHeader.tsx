@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import BrutalButton from '../ui/BrutalButton';
 
@@ -21,7 +22,13 @@ export function BrutalHeader({
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center">
-            <img src="/onda-logo-black.svg" alt="Onda" className="h-8 mr-2" />
+            <Image
+              src="/onda-logo-black.svg"
+              alt="Onda"
+              width={144}
+              height={144}
+              className="mr-2"
+            />
           </div>
 
           {/* Desktop Navigation */}

@@ -48,35 +48,32 @@ export async function getConversationContext(
     let context = await prisma.conversationContext.findFirst({
       where: {
         childAccountId,
-        ...(sessionId && { sessionId }),
         // Consider context active if updated within last 24 hours
-        lastActivityAt: {
+        lastUpdated: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
       },
       orderBy: {
-        lastActivityAt: 'desc',
+        lastUpdated: 'desc',
       },
     });
 
     if (!context) {
       // Create new context
-      const newSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      
+      const newSessionId =
+        sessionId ||
+        `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
       context = await prisma.conversationContext.create({
         data: {
           childAccountId,
-          sessionId: newSessionId,
-          currentTopic: 'greeting',
-          emotionalState: JSON.stringify({
-            primaryEmotion: 'neutral',
-            intensity: 5,
-            confidence: 0.5,
-            triggers: [],
-            timestamp: new Date(),
-          }),
-          conversationFlow: JSON.stringify([]),
-          metadata: JSON.stringify({}),
+          conversationId: `conv_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          topics: ['greeting'],
+          mood: 'neutral',
+          interests: [],
+          unknownTerms: [],
+          knowledgeUsed: [],
+          trendingContext: [],
         },
       });
     }
@@ -84,16 +81,22 @@ export async function getConversationContext(
     return {
       id: context.id,
       childAccountId: context.childAccountId,
-      sessionId: context.sessionId,
-      currentTopic: context.currentTopic || undefined,
-      emotionalState: JSON.parse(context.emotionalState) as EmotionalState,
-      conversationFlow: JSON.parse(context.conversationFlow) as TopicFlow[],
-      lastActivityAt: context.lastActivityAt,
-      metadata: JSON.parse(context.metadata),
+      sessionId: `session_${context.id}`,
+      currentTopic: context.topics[0] || undefined,
+      emotionalState: {
+        primaryEmotion: context.mood || 'neutral',
+        intensity: 5,
+        confidence: 0.5,
+        triggers: [],
+        timestamp: context.lastUpdated,
+      } as EmotionalState,
+      conversationFlow: [] as TopicFlow[],
+      lastActivityAt: context.lastUpdated,
+      metadata: {},
     };
   } catch (error) {
     console.error('Error getting conversation context:', error);
-    
+
     // Return default context if database fails
     return {
       id: 'default',
@@ -130,20 +133,33 @@ export async function updateConversationContext(
       return;
     }
 
-    const currentEmotionalState = JSON.parse(existingContext.emotionalState) as EmotionalState;
-    const currentFlow = JSON.parse(existingContext.conversationFlow) as TopicFlow[];
-    const currentMetadata = JSON.parse(existingContext.metadata);
+    const currentEmotionalState = {
+      primaryEmotion: existingContext.mood || 'neutral',
+      intensity: 5,
+      confidence: 0.5,
+      triggers: [],
+      timestamp: existingContext.lastUpdated,
+    } as EmotionalState;
+    const currentFlow = [] as TopicFlow[];
+    const currentMetadata = {};
 
     // Update emotional state
-    const updatedEmotionalState = update.emotionalState 
-      ? { ...currentEmotionalState, ...update.emotionalState, timestamp: new Date() }
+    const updatedEmotionalState = update.emotionalState
+      ? {
+          ...currentEmotionalState,
+          ...update.emotionalState,
+          timestamp: new Date(),
+        }
       : currentEmotionalState;
 
     // Update conversation flow if topic changed
     let updatedFlow = [...currentFlow];
-    if (update.newTopic && update.newTopic !== existingContext.currentTopic) {
+    if (update.newTopic && update.newTopic !== existingContext.topics[0]) {
       // End current topic if exists
-      if (updatedFlow.length > 0 && !updatedFlow[updatedFlow.length - 1].endedAt) {
+      if (
+        updatedFlow.length > 0 &&
+        !updatedFlow[updatedFlow.length - 1].endedAt
+      ) {
         updatedFlow[updatedFlow.length - 1].endedAt = new Date();
       }
 
@@ -159,27 +175,29 @@ export async function updateConversationContext(
       // Add key message to current topic
       const currentTopicIndex = updatedFlow.length - 1;
       updatedFlow[currentTopicIndex].keyMessages.push(update.keyMessage);
-      
+
       // Update emotional context if emotion changed significantly
-      const lastEmotion = updatedFlow[currentTopicIndex].emotionalContext.slice(-1)[0];
+      const lastEmotion =
+        updatedFlow[currentTopicIndex].emotionalContext.slice(-1)[0];
       if (lastEmotion !== updatedEmotionalState.primaryEmotion) {
-        updatedFlow[currentTopicIndex].emotionalContext.push(updatedEmotionalState.primaryEmotion);
+        updatedFlow[currentTopicIndex].emotionalContext.push(
+          updatedEmotionalState.primaryEmotion
+        );
       }
     }
 
     // Update metadata
-    const updatedMetadata = update.metadata 
+    const updatedMetadata = update.metadata
       ? { ...currentMetadata, ...update.metadata }
       : currentMetadata;
 
     await prisma.conversationContext.update({
       where: { id: contextId },
       data: {
-        currentTopic: update.newTopic || existingContext.currentTopic,
-        emotionalState: JSON.stringify(updatedEmotionalState),
-        conversationFlow: JSON.stringify(updatedFlow),
-        metadata: JSON.stringify(updatedMetadata),
-        lastActivityAt: new Date(),
+        topics: update.newTopic ? [update.newTopic, ...existingContext.topics.slice(0, 4)] : existingContext.topics,
+        mood: updatedEmotionalState.primaryEmotion,
+        lastUpdated: new Date(),
+        messageCount: { increment: 1 },
       },
     });
   } catch (error) {
@@ -192,14 +210,46 @@ export async function updateConversationContext(
  */
 export function analyzeEmotionalState(message: string): EmotionalState {
   const emotionPatterns = [
-    { emotion: 'happy', patterns: [/happy|excited|joy|great|awesome|love|amazing/i], intensity: 8 },
-    { emotion: 'sad', patterns: [/sad|cry|tear|depressed|down|blue/i], intensity: 3 },
-    { emotion: 'angry', patterns: [/angry|mad|furious|annoyed|frustrated/i], intensity: 7 },
-    { emotion: 'scared', patterns: [/scared|afraid|frightened|terrified|worry/i], intensity: 4 },
-    { emotion: 'anxious', patterns: [/anxious|nervous|worried|stress/i], intensity: 5 },
-    { emotion: 'confused', patterns: [/confused|don't understand|unclear|puzzled/i], intensity: 5 },
-    { emotion: 'bored', patterns: [/bored|boring|tired|sleepy/i], intensity: 4 },
-    { emotion: 'curious', patterns: [/wonder|curious|how|why|what if|interesting/i], intensity: 6 },
+    {
+      emotion: 'happy',
+      patterns: [/happy|excited|joy|great|awesome|love|amazing/i],
+      intensity: 8,
+    },
+    {
+      emotion: 'sad',
+      patterns: [/sad|cry|tear|depressed|down|blue/i],
+      intensity: 3,
+    },
+    {
+      emotion: 'angry',
+      patterns: [/angry|mad|furious|annoyed|frustrated/i],
+      intensity: 7,
+    },
+    {
+      emotion: 'scared',
+      patterns: [/scared|afraid|frightened|terrified|worry/i],
+      intensity: 4,
+    },
+    {
+      emotion: 'anxious',
+      patterns: [/anxious|nervous|worried|stress/i],
+      intensity: 5,
+    },
+    {
+      emotion: 'confused',
+      patterns: [/confused|don't understand|unclear|puzzled/i],
+      intensity: 5,
+    },
+    {
+      emotion: 'bored',
+      patterns: [/bored|boring|tired|sleepy/i],
+      intensity: 4,
+    },
+    {
+      emotion: 'curious',
+      patterns: [/wonder|curious|how|why|what if|interesting/i],
+      intensity: 6,
+    },
   ];
 
   let detectedEmotion = 'neutral';
@@ -207,7 +257,11 @@ export function analyzeEmotionalState(message: string): EmotionalState {
   let intensity = 5;
   const triggers: string[] = [];
 
-  for (const { emotion, patterns, intensity: emotionIntensity } of emotionPatterns) {
+  for (const {
+    emotion,
+    patterns,
+    intensity: emotionIntensity,
+  } of emotionPatterns) {
     for (const pattern of patterns) {
       const matches = message.match(pattern);
       if (matches) {
@@ -236,14 +290,32 @@ export function analyzeEmotionalState(message: string): EmotionalState {
  */
 export function extractTopic(message: string): string {
   const topicPatterns = [
-    { topic: 'school', patterns: [/school|teacher|homework|class|student|learn/i] },
-    { topic: 'family', patterns: [/mom|dad|parent|sibling|brother|sister|family/i] },
+    {
+      topic: 'school',
+      patterns: [/school|teacher|homework|class|student|learn/i],
+    },
+    {
+      topic: 'family',
+      patterns: [/mom|dad|parent|sibling|brother|sister|family/i],
+    },
     { topic: 'friends', patterns: [/friend|buddy|classmate|play.*with/i] },
-    { topic: 'hobbies', patterns: [/hobby|like.*to|enjoy|play|game|sport|music|art/i] },
-    { topic: 'food', patterns: [/food|eat|hungry|lunch|dinner|snack|favorite.*food/i] },
+    {
+      topic: 'hobbies',
+      patterns: [/hobby|like.*to|enjoy|play|game|sport|music|art/i],
+    },
+    {
+      topic: 'food',
+      patterns: [/food|eat|hungry|lunch|dinner|snack|favorite.*food/i],
+    },
     { topic: 'animals', patterns: [/animal|pet|dog|cat|bird|fish|zoo/i] },
-    { topic: 'technology', patterns: [/computer|game|phone|tablet|video|app/i] },
-    { topic: 'feelings', patterns: [/feel|emotion|sad|happy|angry|scared|worried/i] },
+    {
+      topic: 'technology',
+      patterns: [/computer|game|phone|tablet|video|app/i],
+    },
+    {
+      topic: 'feelings',
+      patterns: [/feel|emotion|sad|happy|angry|scared|worried/i],
+    },
     { topic: 'help', patterns: [/help|problem|don't know|confused|need/i] },
     { topic: 'stories', patterns: [/story|book|read|once upon|tell.*about/i] },
   ];
@@ -278,12 +350,18 @@ export async function generateContextSummary(
     const context: ConversationContext = {
       id: contextData.id,
       childAccountId: contextData.childAccountId,
-      sessionId: contextData.sessionId,
-      currentTopic: contextData.currentTopic || undefined,
-      emotionalState: JSON.parse(contextData.emotionalState),
-      conversationFlow: JSON.parse(contextData.conversationFlow),
-      lastActivityAt: contextData.lastActivityAt,
-      metadata: JSON.parse(contextData.metadata),
+      sessionId: `session_${contextData.id}`,
+      currentTopic: contextData.topics[0] || undefined,
+      emotionalState: {
+        primaryEmotion: contextData.mood || 'neutral',
+        intensity: 5,
+        confidence: 0.5,
+        triggers: [],
+        timestamp: contextData.lastUpdated,
+      },
+      conversationFlow: [],
+      lastActivityAt: contextData.lastUpdated,
+      metadata: {},
     };
 
     const summaryParts: string[] = [];
@@ -300,9 +378,12 @@ export async function generateContextSummary(
 
     // Recent conversation flow
     if (context.conversationFlow.length > 0) {
-      const recentTopics = context.conversationFlow.slice(-3).map(flow => 
-        `${flow.topic} (emotions: ${flow.emotionalContext.join(', ')})`
-      );
+      const recentTopics = context.conversationFlow
+        .slice(-3)
+        .map(
+          flow =>
+            `${flow.topic} (emotions: ${flow.emotionalContext.join(', ')})`
+        );
       summaryParts.push(`Recent topics: ${recentTopics.join(' → ')}`);
     }
 
@@ -338,14 +419,15 @@ export async function processMessage(
     if (isFromChild) {
       // Analyze emotional state
       const newEmotionalState = analyzeEmotionalState(message);
-      
+
       // Extract topic
       const newTopic = extractTopic(message);
-      
+
       // Check if this is a significant emotional shift
-      const emotionalShift = Math.abs(
-        newEmotionalState.intensity - context.emotionalState.intensity
-      ) > 2;
+      const emotionalShift =
+        Math.abs(
+          newEmotionalState.intensity - context.emotionalState.intensity
+        ) > 2;
 
       // Update context
       await updateConversationContext(context.id, {
@@ -387,21 +469,24 @@ export async function processMessage(
     return await getConversationContext(childAccountId, sessionId);
   } catch (error) {
     console.error('Error processing message:', error);
-    return context;
+    // Return basic context in case of error
+    return await getConversationContext(childAccountId, sessionId);
   }
 }
 
 /**
  * Clean up old conversation contexts (for data retention)
  */
-export async function cleanupOldContexts(retentionDays: number = 7): Promise<void> {
+export async function cleanupOldContexts(
+  retentionDays: number = 7
+): Promise<void> {
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
     await prisma.conversationContext.deleteMany({
       where: {
-        lastActivityAt: {
+        lastUpdated: {
           lt: cutoffDate,
         },
       },

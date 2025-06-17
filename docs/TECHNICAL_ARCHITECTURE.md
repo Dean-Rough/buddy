@@ -5,6 +5,7 @@
 **Confirmed Implementation**: Next.js 14.2.29 with production-grade safety architecture
 
 ### Core Technology Stack
+
 - **Frontend**: Next.js 14.2.29 (App Router), React 18.2.0, TypeScript 5.1.6
 - **Backend**: Next.js API Routes with Node.js runtime
 - **Database**: NeonDB (PostgreSQL) with Prisma ORM 5.6.0
@@ -18,6 +19,7 @@
 ### Database Architecture
 
 #### Unified Clerk-Based Models
+
 ```typescript
 // Primary entity relationships
 Parent (Clerk user) 1:N ChildAccount (Clerk sub-accounts)
@@ -28,6 +30,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 #### Core Tables
+
 - **ChildAccount**: Unified child accounts with Clerk user IDs
 - **Conversation/Message**: Chat history with safety metadata
 - **SafetyEvent**: Escalation tracking and parent notifications
@@ -38,6 +41,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### AI Safety Architecture
 
 #### Dual-Layer Validation System
+
 ```typescript
 // lib/ai/safety.ts - Production implementation
 1. Input Processing → Rule-based patterns → AI validation
@@ -46,12 +50,14 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 **Safety Levels**:
+
 - **Level 0**: Safe content (allow normally)
 - **Level 1**: Monitor (log for patterns)
 - **Level 2**: Warn (gentle redirection + parent notification)
 - **Level 3**: Escalate (block + immediate parent alert)
 
 #### Context-Aware Safety
+
 - Age-appropriate responses (6-8, 9-11, 12+ groups)
 - Conversation history analysis
 - Emotional state consideration
@@ -60,6 +66,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### API Architecture
 
 #### Core Endpoints
+
 ```typescript
 /api/chat/               // Main chat with dual safety validation
 /api/parent/             // Dashboard, PIN management, settings
@@ -70,6 +77,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 #### Authentication Flow
+
 ```typescript
 1. Parent: Standard Clerk auth (email/password)
 2. Child: Username/PIN authentication via Clerk
@@ -80,6 +88,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Parent Dashboard Architecture
 
 #### PIN Protection System
+
 ```typescript
 // components/parent/auth/PinEntry.tsx
 - 4-digit PIN with bcrypt hashing
@@ -89,6 +98,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 #### Dashboard Tabs
+
 ```typescript
 1. Overview: Child profiles, activity summaries, recent alerts
 2. Time Limits: Daily/weekly limits with natural ending system
@@ -99,6 +109,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Chat Interface Architecture
 
 #### Real-Time Chat System
+
 ```typescript
 // components/chat/BrutalChatInterface.tsx
 - Real-time typing animations (masks safety processing)
@@ -109,6 +120,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 #### Message Processing Flow
+
 ```typescript
 1. User Input → Safety validation → Context analysis
 2. AI Response Generation → Output safety check
@@ -119,6 +131,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Email Summary System
 
 #### Production-Ready Pipeline
+
 ```typescript
 // lib/email-summary/ - Complete implementation
 1. WeeklyDataCollector: Aggregate conversation data
@@ -131,6 +144,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Voice Integration
 
 #### Cartesia TTS Implementation
+
 ```typescript
 // app/api/voice/synthesize/route.ts
 - Text cleaning for natural speech
@@ -143,6 +157,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Testing Architecture
 
 #### Comprehensive Testing Strategy
+
 ```typescript
 // Safety-first testing approach
 1. Unit Tests: Vitest for component and function testing
@@ -154,6 +169,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Security Implementation
 
 #### COPPA-Compliant Security
+
 - All child data legally owned by parent accounts
 - Encrypted data at rest and in transit
 - Complete audit trails for compliance
@@ -161,6 +177,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 - Rate limiting on authentication attempts
 
 #### Data Protection
+
 - Automatic data retention limits (90-day default)
 - Parent-controlled data export and deletion
 - Granular privacy controls and visibility settings
@@ -169,12 +186,14 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Performance Optimization
 
 #### Response Time Targets
+
 - Chat messages: <200ms average response time
 - Safety processing: <100ms dual-layer validation
 - Voice synthesis: <2 seconds text-to-speech
 - Email summaries: <30 seconds generation time
 
 #### Scalability Features
+
 - Database indexing for conversation queries
 - Safety pattern caching for common scenarios
 - Vector search for knowledge retrieval
@@ -183,6 +202,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ### Deployment Architecture
 
 #### Vercel Production Setup
+
 ```typescript
 // vercel.json configuration
 - Next.js 14 deployment optimization
@@ -192,6 +212,7 @@ Parent 1:N WeeklySummary (automated email summaries)
 ```
 
 #### Environment Requirements
+
 ```bash
 # Core services
 DATABASE_URL=                    # NeonDB connection
@@ -211,6 +232,7 @@ WEBHOOK_SECRET=                  # Clerk webhooks
 ### Monitoring & Analytics
 
 #### Real-Time Monitoring
+
 - Safety system performance tracking
 - Conversation quality metrics
 - Parent engagement analytics
@@ -218,6 +240,7 @@ WEBHOOK_SECRET=                  # Clerk webhooks
 - Error monitoring and alerting
 
 #### Parent Analytics
+
 - Child activity summaries
 - Mood and topic trend analysis
 - Safety event tracking and resolution

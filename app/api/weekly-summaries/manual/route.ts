@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -24,13 +24,13 @@ export async function POST(req: NextRequest) {
     const parent = await prisma.parent.findUnique({
       where: { clerkUserId: userId },
       include: {
-        children: {
+        childAccounts: {
           where: { id: childAccountId },
         },
       },
     });
 
-    if (!parent || parent.children.length === 0) {
+    if (!parent || parent.childAccounts.length === 0) {
       return NextResponse.json(
         { error: 'Child not found or access denied' },
         { status: 404 }
@@ -61,8 +61,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log(`Generating manual summary for child ${childAccountId} by parent ${userId}`);
-    
+    console.log(
+      `Generating manual summary for child ${childAccountId} by parent ${userId}`
+    );
+
     const generator = new WeeklySummaryGenerator();
     await generator.generateManualSummary(
       userId,
@@ -75,13 +77,12 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Weekly summary generated and email sent successfully',
     });
-
   } catch (error) {
     console.error('Error generating manual summary:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate weekly summary',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

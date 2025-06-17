@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PERSONA_VOICES, isVoiceAvailable } from '@/lib/voice';
+import { isVoiceAvailable } from '@/lib/voice';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
 
@@ -44,7 +44,11 @@ export default function VoiceSettings({
       if (savedSettings) {
         try {
           const parsed = JSON.parse(savedSettings);
-          setSettings({ ...DEFAULT_SETTINGS, ...parsed, persona: currentPersona });
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            persona: currentPersona,
+          });
         } catch (error) {
           console.error('Error parsing voice settings:', error);
           setSettings({ ...DEFAULT_SETTINGS, persona: currentPersona });
@@ -74,16 +78,21 @@ export default function VoiceSettings({
 
     try {
       const testTexts = {
-        'friendly-raccoon': "Hey there! I'm your friendly raccoon buddy. We're gonna have so much fun chatting together!",
-        'wise-jellyfish': "Hello, young explorer. I'm here to share wisdom and help you discover wonderful things about the world.",
-        'chill-robot': "Greetings, human. I am your robotic companion, ready to assist with your queries and adventures.",
+        'friendly-raccoon':
+          "Hey there! I'm your friendly raccoon buddy. We're gonna have so much fun chatting together!",
+        'wise-jellyfish':
+          "Hello, young explorer. I'm here to share wisdom and help you discover wonderful things about the world.",
+        'chill-robot':
+          'Greetings, human. I am your robotic companion, ready to assist with your queries and adventures.',
       };
 
-      const testText = testTexts[currentPersona as keyof typeof testTexts] || testTexts['friendly-raccoon'];
-      
+      const testText =
+        testTexts[currentPersona as keyof typeof testTexts] ||
+        testTexts['friendly-raccoon'];
+
       // Import voice synthesis
       const { synthesizeSpeech } = await import('@/lib/voice');
-      
+
       const audioBuffer = await synthesizeSpeech({
         text: testText,
         persona: currentPersona,
@@ -96,7 +105,7 @@ export default function VoiceSettings({
         const audio = new Audio(URL.createObjectURL(blob));
         audio.volume = settings.volume;
         audio.playbackRate = settings.speed;
-        
+
         await audio.play();
       }
     } catch (error) {
@@ -106,18 +115,12 @@ export default function VoiceSettings({
     }
   };
 
-  const personas = Object.keys(PERSONA_VOICES);
-
   return (
-    <BrutalCard variant={whisperMode ? 'purple' : 'blue'} className="max-w-md">
+    <BrutalCard variant={whisperMode ? 'pink' : 'blue'} className="max-w-md">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-rokano text-lg">VOICE SETTINGS</h3>
         {onClose && (
-          <BrutalButton
-            variant="white"
-            size="small"
-            onClick={onClose}
-          >
+          <BrutalButton variant="white" size="small" onClick={onClose}>
             ✕
           </BrutalButton>
         )}
@@ -134,7 +137,9 @@ export default function VoiceSettings({
       <div className="space-y-4">
         {/* Voice Enabled Toggle */}
         <div className="flex justify-between items-center">
-          <label className="font-avotica font-bold text-sm">Voice Enabled</label>
+          <label className="font-avotica font-bold text-sm">
+            Voice Enabled
+          </label>
           <button
             onClick={() => updateSettings({ enabled: !settings.enabled })}
             className={`w-12 h-6 rounded-full transition-colors ${
@@ -163,7 +168,9 @@ export default function VoiceSettings({
                 max="1"
                 step="0.1"
                 value={settings.volume}
-                onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
+                onChange={e =>
+                  updateSettings({ volume: parseFloat(e.target.value) })
+                }
                 className="w-full accent-blue-500"
               />
             </div>
@@ -179,7 +186,9 @@ export default function VoiceSettings({
                 max="1.5"
                 step="0.1"
                 value={settings.speed}
-                onChange={(e) => updateSettings({ speed: parseFloat(e.target.value) })}
+                onChange={e =>
+                  updateSettings({ speed: parseFloat(e.target.value) })
+                }
                 className="w-full accent-blue-500"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -192,8 +201,12 @@ export default function VoiceSettings({
             {/* Auto-play Toggle */}
             <div className="flex justify-between items-center">
               <div>
-                <label className="font-avotica font-bold text-sm">Auto-play Messages</label>
-                <p className="text-xs text-gray-600">Automatically play voice for AI responses</p>
+                <label className="font-avotica font-bold text-sm">
+                  Auto-play Messages
+                </label>
+                <p className="text-xs text-gray-600">
+                  Automatically play voice for AI responses
+                </p>
               </div>
               <button
                 onClick={() => updateSettings({ autoPlay: !settings.autoPlay })}
@@ -212,7 +225,10 @@ export default function VoiceSettings({
             {/* Voice Preview */}
             <div>
               <label className="font-avotica font-bold text-sm mb-2 block">
-                Current Voice: {currentPersona.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                Current Voice:{' '}
+                {currentPersona
+                  .replace('-', ' ')
+                  .replace(/\b\w/g, l => l.toUpperCase())}
               </label>
               <div className="bg-white/50 p-3 brutal-shadow-small text-center">
                 <p className="text-xs text-gray-600 mb-2">
@@ -236,7 +252,8 @@ export default function VoiceSettings({
                   🌙 Whisper Mode Active
                 </h5>
                 <p className="text-xs text-purple-700">
-                  Voice is automatically adjusted for a calming, gentle experience
+                  Voice is automatically adjusted for a calming, gentle
+                  experience
                 </p>
               </div>
             )}

@@ -92,7 +92,7 @@ test.describe('Alert Management', () => {
         },
         loaded: true,
       };
-      
+
       // Mock useUser hook response
       (window as any).__useUser = {
         user: {
@@ -105,7 +105,7 @@ test.describe('Alert Management', () => {
     });
 
     // Mock auth routes to return authenticated state
-    await page.route('/api/auth/**', async (route) => {
+    await page.route('/api/auth/**', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -114,7 +114,7 @@ test.describe('Alert Management', () => {
     });
 
     // Mock the parent route to bypass PIN verification in tests
-    await page.route('/api/parent/**', async (route) => {
+    await page.route('/api/parent/**', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -123,7 +123,7 @@ test.describe('Alert Management', () => {
     });
 
     // Mock API routes
-    await page.route('/api/children', async (route) => {
+    await page.route('/api/children', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -131,7 +131,7 @@ test.describe('Alert Management', () => {
       });
     });
 
-    await page.route('/api/safety/alerts', async (route) => {
+    await page.route('/api/safety/alerts', async route => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
           status: 200,
@@ -141,7 +141,7 @@ test.describe('Alert Management', () => {
       }
     });
 
-    await page.route('/api/safety/alerts/batch-resolve', async (route) => {
+    await page.route('/api/safety/alerts/batch-resolve', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -153,7 +153,7 @@ test.describe('Alert Management', () => {
       });
     });
 
-    await page.route('/api/safety/alerts/*/transcript', async (route) => {
+    await page.route('/api/safety/alerts/*/transcript', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -167,7 +167,7 @@ test.describe('Alert Management', () => {
 
     // Wait for page to load
     await expect(page.locator('h1')).toContainText('ALERT MANAGEMENT');
-    
+
     // Check if alerts are displayed
     await expect(page.locator('text=Inappropriate Language')).toBeVisible();
     await expect(page.locator('text=Emotional Distress')).toBeVisible();
@@ -179,7 +179,7 @@ test.describe('Alert Management', () => {
 
     // Wait for filters to load
     await expect(page.locator('text=FILTERS')).toBeVisible();
-    
+
     // Check filter dropdowns
     await expect(page.locator('text=Severity')).toBeVisible();
     await expect(page.locator('text=Status')).toBeVisible();
@@ -301,7 +301,9 @@ test.describe('Alert Management', () => {
     await page.locator('text=✕').click();
 
     // Modal should be closed
-    await expect(page.locator('text=CONVERSATION TRANSCRIPT')).not.toBeVisible();
+    await expect(
+      page.locator('text=CONVERSATION TRANSCRIPT')
+    ).not.toBeVisible();
   });
 
   test('displays correct severity badges', async ({ page }) => {
@@ -325,7 +327,7 @@ test.describe('Alert Management', () => {
     // Check status badges
     const activeBadges = page.locator('text=🔴 Active');
     const resolvedBadges = page.locator('text=✅ Resolved');
-    
+
     await expect(activeBadges).toHaveCount(2); // alerts 1 and 3
     await expect(resolvedBadges).toHaveCount(1); // alert 2
   });
@@ -345,7 +347,7 @@ test.describe('Alert Management', () => {
 
   test('shows no alerts message when no data', async ({ page }) => {
     // Override alerts API to return empty array
-    await page.route('/api/safety/alerts', async (route) => {
+    await page.route('/api/safety/alerts', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -356,7 +358,9 @@ test.describe('Alert Management', () => {
     await page.goto('/parent/alerts');
 
     // Should show no alerts message
-    await expect(page.locator('text=No alerts match your filters')).toBeVisible();
+    await expect(
+      page.locator('text=No alerts match your filters')
+    ).toBeVisible();
   });
 
   test('displays alert details correctly', async ({ page }) => {
@@ -367,8 +371,10 @@ test.describe('Alert Management', () => {
 
     // Check that alert details are displayed
     await expect(page.locator('text=Emma')).toBeVisible(); // Child name
-    await expect(page.locator('text=Some concerning message content')).toBeVisible(); // Trigger content
-    
+    await expect(
+      page.locator('text=Some concerning message content')
+    ).toBeVisible(); // Trigger content
+
     // Check timestamp formatting (should show relative time)
     await expect(page.locator('text=1d ago')).toBeVisible();
   });
@@ -381,11 +387,17 @@ test.describe('Alert Management', () => {
 
     // Open event type filter
     const eventTypeSelect = page.locator('select').nth(4); // Fifth select is event type
-    
+
     // Check that all event types are available
-    await expect(eventTypeSelect.locator('option[value="inappropriate_language"]')).toBeAttached();
-    await expect(eventTypeSelect.locator('option[value="emotional_distress"]')).toBeAttached();
-    await expect(eventTypeSelect.locator('option[value="personal_info_shared"]')).toBeAttached();
+    await expect(
+      eventTypeSelect.locator('option[value="inappropriate_language"]')
+    ).toBeAttached();
+    await expect(
+      eventTypeSelect.locator('option[value="emotional_distress"]')
+    ).toBeAttached();
+    await expect(
+      eventTypeSelect.locator('option[value="personal_info_shared"]')
+    ).toBeAttached();
   });
 
   test('date range filter works correctly', async ({ page }) => {

@@ -38,12 +38,12 @@ export async function setupDashboardPin(data: PinSetupData): Promise<boolean> {
       create: {
         parentClerkUserId: data.parentClerkUserId,
         pinHash,
-        pinSetAt: new Date(),
+        pinCreatedAt: new Date(),
         failedAttempts: 0,
       },
       update: {
         pinHash,
-        pinSetAt: new Date(),
+        pinChangedAt: new Date(),
         failedAttempts: 0,
         lockedUntil: null,
       },
@@ -100,7 +100,7 @@ export async function verifyDashboardPin(
         where: { parentClerkUserId },
         data: {
           failedAttempts: 0,
-          lastAccessAt: new Date(),
+          lastSuccessfulAccess: new Date(),
           lockedUntil: null,
         },
       });
@@ -194,7 +194,7 @@ export async function changeDashboardPin(
       where: { parentClerkUserId },
       data: {
         pinHash,
-        pinSetAt: new Date(),
+        pinChangedAt: new Date(),
         failedAttempts: 0,
         lockedUntil: null,
       },

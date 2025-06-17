@@ -13,7 +13,11 @@
   },
   "overrides": [
     {
-      "files": ["lib/knowledge/knowledge-base.ts", "lib/natural-exit-generator.ts", "lib/time-management.ts"],
+      "files": [
+        "lib/knowledge/knowledge-base.ts",
+        "lib/natural-exit-generator.ts",
+        "lib/time-management.ts"
+      ],
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
       }

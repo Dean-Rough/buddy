@@ -15,7 +15,7 @@ interface PinStatus {
 
 export default function ParentDashboard() {
   return (
-    <AuthGuard requiredUserType="parent">
+    <AuthGuard>
       <ParentDashboardWithPin />
     </AuthGuard>
   );

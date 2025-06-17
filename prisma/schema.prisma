@@ -32,6 +32,12 @@ model Parent {
   childAccounts ChildAccount[]
   notifications ParentNotification[]
   
+  // Calendar integration relations
+  calendarCredentials       CalendarCredentials[]
+  calendarPrivacyRules     CalendarPrivacyRule[]
+  familyCalendarContext    FamilyCalendarContext?
+  calendarComplianceAudits CalendarComplianceAudit[]
+  
   @@map("parents")
 }
 
@@ -50,6 +56,7 @@ model ChildAccount {
   persona         String  @default("friendly-raccoon")
   languageLevel   String  @default("foundation") @map("language_level")
   preferredName   String? @map("preferred_name")
+  parentNotes     String? @map("parent_notes") // Sensitivities, allergies, disabilities, etc.
   
   // Privacy controls
   visibilityLevel String @default("highlights") @map("visibility_level")
@@ -580,4 +587,267 @@ model WeeklySummary {
   @@index([childAccountId, weekStart(sort: Desc)])
   @@index([emailSent, weekStart])
   @@map("weekly_summaries")
+}
+
+// ========================================
+// SAFETY METRICS & MONITORING SYSTEM
+// ========================================
+
+// Individual safety evaluation metrics
+model SafetyMetric {
+  id              String    @id @default(cuid())
+  timestamp       DateTime  @default(now())
+  metricType      String    @map("metric_type") // SafetyMetricType enum values
+  value           Float     // Metric value (1 for binary, time in ms for duration, etc.)
+  
+  // Context
+  metadata        Json?     // Additional context data
+  childAge        Int?      @map("child_age")
+  severityLevel   Int?      @map("severity_level")
+  
+  // Relations to alerts
+  alertMetrics    SafetyAlertMetric[]
+  
+  @@index([timestamp(sort: Desc)])
+  @@index([metricType, timestamp(sort: Desc)])
+  @@index([childAge, timestamp(sort: Desc)])
+  @@index([severityLevel, timestamp(sort: Desc)])
+  @@map("safety_metrics")
+}
+
+// Safety system alerts for performance degradation
+model SafetyAlert {
+  id              String    @id @default(cuid())
+  alertType       String    @map("alert_type") // SafetyAlertType enum values
+  severity        String    // LOW, MEDIUM, HIGH, CRITICAL
+  message         String    @db.Text
+  timestamp       DateTime  @default(now())
+  resolved        Boolean   @default(false)
+  resolvedAt      DateTime? @map("resolved_at")
+  resolvedBy      String?   @map("resolved_by")
+  
+  // Relations
+  metrics         SafetyAlertMetric[]
+  
+  @@index([resolved, severity, timestamp(sort: Desc)])
+  @@index([alertType, timestamp(sort: Desc)])
+  @@index([severity, timestamp(sort: Desc)])
+  @@map("safety_alerts")
+}
+
+// Junction table for alert-metric relationships
+model SafetyAlertMetric {
+  id          String       @id @default(cuid())
+  alertId     String       @map("alert_id")
+  metricId    String       @map("metric_id")
+  
+  // Relations
+  alert       SafetyAlert  @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  metric      SafetyMetric @relation(fields: [metricId], references: [id], onDelete: Cascade)
+  
+  @@unique([alertId, metricId])
+  @@map("safety_alert_metrics")
+}
+
+// ======================
+// CALENDAR INTEGRATION MODELS
+// COPPA-Compliant Family Calendar System
+// ======================
+
+// Calendar provider credentials (encrypted storage)
+model CalendarCredentials {
+  id                    String   @id @default(cuid())
+  parentClerkUserId     String   @map("parent_clerk_user_id")
+  provider              String   // 'google', 'outlook', 'apple'
+  
+  // OAuth tokens (encrypted)
+  accessToken           String   @map("access_token") @db.Text
+  refreshToken          String?  @map("refresh_token") @db.Text
+  tokenExpiry           DateTime? @map("token_expiry")
+  
+  // Encrypted credential storage for COPPA compliance
+  encryptedCredentials  String   @map("encrypted_credentials") @db.Text
+  
+  // Sync tracking
+  lastSyncAt            DateTime? @map("last_sync_at")
+  isActive              Boolean  @default(true) @map("is_active")
+  
+  // Timestamps
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  parent                Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  events                CalendarEvent[]
+  webhooks              CalendarWebhook[]
+  
+  @@index([parentClerkUserId, provider])
+  @@index([provider, isActive])
+  @@index([lastSyncAt])
+  @@map("calendar_credentials")
+}
+
+// Privacy-filtered calendar events
+model CalendarEvent {
+  id                    String   @id @default(cuid())
+  calendarCredentialsId String   @map("calendar_credentials_id")
+  externalEventId       String   @map("external_event_id")
+  provider              String   // 'google', 'outlook', 'apple'
+  
+  // Event details (privacy-filtered)
+  title                 String
+  startDate             DateTime @map("start_date")
+  endDate               DateTime @map("end_date")
+  isAllDay              Boolean  @default(false) @map("is_all_day")
+  
+  // Privacy and child safety
+  isChildRelevant       Boolean  @default(false) @map("is_child_relevant")
+  privacyLevel          String   @map("privacy_level") // 'public', 'family', 'private', 'filtered'
+  sanitizedTitle        String?  @map("sanitized_title")
+  
+  // Original data (encrypted, for parent reference only)
+  originalTitle         String   @map("original_title") @db.Text
+  location              String?
+  description           String?  @db.Text
+  
+  // System fields
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  lastSyncAt            DateTime @default(now()) @map("last_sync_at")
+  
+  // Relations
+  credentials           CalendarCredentials @relation(fields: [calendarCredentialsId], references: [id], onDelete: Cascade)
+  
+  @@index([calendarCredentialsId, startDate])
+  @@index([isChildRelevant, privacyLevel])
+  @@index([provider, startDate])
+  @@index([lastSyncAt])
+  @@map("calendar_events")
+}
+
+// Real-time webhook subscriptions
+model CalendarWebhook {
+  id                    String   @id @default(cuid())
+  calendarCredentialsId String   @map("calendar_credentials_id")
+  provider              String   // 'google', 'outlook' (apple doesn't support webhooks)
+  webhookUrl            String   @map("webhook_url")
+  externalWebhookId     String   @map("external_webhook_id")
+  
+  // Status tracking
+  isActive              Boolean  @default(true) @map("is_active")
+  lastTriggeredAt       DateTime? @map("last_triggered_at")
+  
+  // Timestamps
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  credentials           CalendarCredentials @relation(fields: [calendarCredentialsId], references: [id], onDelete: Cascade)
+  
+  @@index([provider, isActive])
+  @@index([calendarCredentialsId])
+  @@map("calendar_webhooks")
+}
+
+// Parent-defined privacy filter rules
+model CalendarPrivacyRule {
+  id                String   @id @default(cuid())
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  ruleType          String   @map("rule_type") // 'keyword_block', 'keyword_allow', 'time_filter', 'location_filter'
+  pattern           String   // Regex pattern or keyword
+  isActive          Boolean  @default(true) @map("is_active")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  parent            Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  
+  @@index([parentClerkUserId, isActive])
+  @@index([ruleType, isActive])
+  @@map("calendar_privacy_rules")
+}
+
+// Family calendar context for child conversations
+model FamilyCalendarContext {
+  id                    String   @id @default(cuid())
+  parentClerkUserId     String   @unique @map("parent_clerk_user_id")
+  childAccountIds       String[] @map("child_account_ids")
+  
+  // Privacy settings
+  shareUpcomingEvents   Boolean  @default(true) @map("share_upcoming_events")
+  eventLookaheadDays    Int      @default(7) @map("event_lookahead_days")
+  filterPrivateEvents   Boolean  @default(true) @map("filter_private_events")
+  allowLocationSharing  Boolean  @default(false) @map("allow_location_sharing")
+  
+  // Cached data (refreshed on sync)
+  lastSyncAt            DateTime? @map("last_sync_at")
+  childSafeEventCount   Int      @default(0) @map("child_safe_event_count")
+  
+  // Timestamps
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  parent                Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  
+  @@index([parentClerkUserId])
+  @@map("family_calendar_contexts")
+}
+
+// COPPA compliance audit log
+model CalendarComplianceAudit {
+  id                String   @id @default(cuid())
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  childAccountIds   String[] @map("child_account_ids")
+  
+  // Audit details
+  action            String   // 'sync', 'view', 'export', 'delete', 'privacy_filter'
+  dataType          String   @map("data_type") // 'calendar_event', 'credentials', 'privacy_filter', 'consent'
+  dataIds           String[] @map("data_ids")
+  
+  // Compliance tracking
+  complianceStatus  String   @map("compliance_status") // 'compliant', 'violations_detected', 'sanitized'
+  violationCount    Int      @default(0) @map("violation_count")
+  complianceNotes   String?  @map("compliance_notes") @db.Text
+  
+  // System metadata
+  timestamp         DateTime @default(now())
+  userAgent         String?  @map("user_agent")
+  ipAddressHash     String?  @map("ip_address_hash") // Hashed for privacy
+  
+  // Relations
+  parent            Parent @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  
+  @@index([parentClerkUserId, timestamp(sort: Desc)])
+  @@index([action, timestamp(sort: Desc)])
+  @@index([complianceStatus, timestamp(sort: Desc)])
+  @@map("calendar_compliance_audits")
+}
+
+// Calendar sync performance metrics
+model CalendarSyncMetric {
+  id                String   @id @default(cuid())
+  credentialsId     String   @map("credentials_id")
+  provider          String   // 'google', 'outlook', 'apple'
+  
+  // Sync performance
+  syncDuration      Int      @map("sync_duration") // milliseconds
+  eventsProcessed   Int      @map("events_processed")
+  eventsAdded       Int      @map("events_added")
+  eventsUpdated     Int      @map("events_updated")
+  eventsRemoved     Int      @map("events_removed")
+  errorCount        Int      @default(0) @map("error_count")
+  
+  // Quality metrics
+  privacyFilterTime Int?     @map("privacy_filter_time") // milliseconds
+  complianceCheck   Boolean  @default(true) @map("compliance_check")
+  
+  // Timestamps
+  syncStarted       DateTime @map("sync_started")
+  syncCompleted     DateTime @default(now()) @map("sync_completed")
+  
+  @@index([provider, syncCompleted(sort: Desc)])
+  @@index([credentialsId, syncCompleted(sort: Desc)])
+  @@index([syncDuration, eventsProcessed])
+  @@map("calendar_sync_metrics")
 }

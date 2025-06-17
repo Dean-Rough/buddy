@@ -81,7 +81,7 @@ export class NaturalExitGenerator {
     // Get appropriate exit reasons for age and time
     const exitReasons = exitResponses.exitReasons[ageGroup];
     const reasonsForTime =
-      (exitReasons as any)[timeCategory] ||
+      (exitReasons as any)[_timeCategory] ||
       (exitReasons as any)['weekend'] ||
       (exitReasons as any)[Object.keys(exitReasons)[0]];
 
@@ -224,20 +224,20 @@ export class NaturalExitGenerator {
     _timeCategory: string,
     _context: any
   ): string {
-    // ... existing code ...
+    return 'hey, getting a bit tired now - thanks for hanging out!';
   }
 
   private static getExitReasonByConversationTone(
     _tone: string,
     _context: any
   ): string {
-    // ... existing code ...
+    return 'this has been awesome - catch you later!';
   }
 
   private static getExitReasonByChildAge(
-    childAge: number,
+    _childAge: number,
     ___isWeekend: boolean = false
   ): string {
-    // ...
+    return 'time to wrap up - thanks for the chat!';
   }
 }

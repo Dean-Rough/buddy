@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface WhisperModeTransitionProps {
   isWhisperMode: boolean;
@@ -59,7 +59,6 @@ export default function WhisperModeTransition({
     // Transition phases
     const phaseOne = duration * 0.3; // 30% - fade to overlay
     const phaseTwo = duration * 0.4; // 40% - change colors
-    const phaseThree = duration * 0.3; // 30% - fade from overlay
 
     // Phase 1: Fade to overlay
     setTimeout(() => {
@@ -167,7 +166,8 @@ export default function WhisperModeTransition({
 
       <style jsx>{`
         @keyframes gentleBreathing {
-          0%, 100% {
+          0%,
+          100% {
             transform: scale(1);
           }
           50% {
@@ -216,7 +216,11 @@ export default function WhisperModeTransition({
           position: absolute;
           width: 4px;
           height: 4px;
-          background: radial-gradient(circle, rgba(147, 51, 234, 0.4) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(147, 51, 234, 0.4) 0%,
+            transparent 70%
+          );
           border-radius: 50%;
           animation: floatUp linear infinite;
           pointer-events: none;
@@ -231,7 +235,10 @@ export default function WhisperModeTransition({
         .ripple {
           position: absolute;
           inset: 0;
-          border: 2px solid ${isWhisperMode ? 'rgba(147, 51, 234, 0.3)' : 'rgba(59, 130, 246, 0.3)'};
+          border: 2px solid
+            ${isWhisperMode
+              ? 'rgba(147, 51, 234, 0.3)'
+              : 'rgba(59, 130, 246, 0.3)'};
           border-radius: 50%;
           animation: rippleOut 2s ease-out infinite;
         }
@@ -298,7 +305,5 @@ export function shouldTriggerWhisperMode(message: string): boolean {
   ];
 
   const lowercaseMessage = message.toLowerCase();
-  return distressPatterns.some(pattern => 
-    pattern.test(lowercaseMessage)
-  );
+  return distressPatterns.some(pattern => pattern.test(lowercaseMessage));
 }

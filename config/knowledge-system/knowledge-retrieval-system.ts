@@ -74,7 +74,11 @@ export class YouthKnowledgeBase {
     const embedding = await this.getEmbedding(query);
     const vectorResults = await this.searchVectors(embedding, childAge);
 
-    if (vectorResults.matches && vectorResults.matches[0]?.score && vectorResults.matches[0].score > 0.85) {
+    if (
+      vectorResults.matches &&
+      vectorResults.matches[0]?.score &&
+      vectorResults.matches[0].score > 0.85
+    ) {
       const firstMatch = vectorResults.matches[0];
       const knowledge = await this.getEntryById(firstMatch.id);
       if (knowledge) {
@@ -100,7 +104,7 @@ export class YouthKnowledgeBase {
       const newEntry = await this.createKnowledgeEntry({
         query,
         content: searchResult,
-        childAge
+        childAge,
       });
       return {
         found: true,
@@ -262,7 +266,11 @@ export class YouthKnowledgeBase {
       content: this.simplifyForAge(content, childAge),
       source: item.displayLink,
       safetyScore,
-      relevanceScore: this.calculateRelevance({ content, title: item.title }, query, childAge),
+      relevanceScore: this.calculateRelevance(
+        { content, title: item.title },
+        query,
+        childAge
+      ),
       processedAt: new Date(),
     };
 
@@ -467,7 +475,7 @@ export class TrendingMonitor {
     const trends: TrendingTopic[] = [];
 
     for (const key of keys) {
-      const data = await this.redis.hgetall(key) as { [key: string]: string };
+      const data = (await this.redis.hgetall(key)) as { [key: string]: string };
       if (!data || Object.keys(data).length === 0) continue;
 
       // Calculate relevance for age group
@@ -648,7 +656,10 @@ export class KnowledgeUpdater {
 
       if (definition.found && definition.confidence > 0.7) {
         // Add to permanent knowledge base
-        await this.storeSlangTerm(term.term, String(definition.knowledge) || '');
+        await this.storeSlangTerm(
+          term.term,
+          String(definition.knowledge) || ''
+        );
       }
     }
   }
@@ -691,7 +702,10 @@ export class KnowledgeUpdater {
     return null;
   }
 
-  private async storeSlangTerm(term: string, definition: string): Promise<void> {
+  private async storeSlangTerm(
+    term: string,
+    definition: string
+  ): Promise<void> {
     // TODO: Implement slang term storage
   }
 }

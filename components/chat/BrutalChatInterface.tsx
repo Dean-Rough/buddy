@@ -84,15 +84,149 @@ export default function BrutalChatInterface({
   }, [writingMessage]);
 
   useEffect(() => {
-    // Welcome message with personality
-    const welcomeMessage: Message = {
-      id: 'welcome',
-      content: `yo ${childProfile.name}! 🤘 i'm buddy, your ai friend who's actually cool. what's good today?`,
-      role: 'assistant',
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
+    generateContextualWelcome();
   }, [childProfile.name]);
+
+  const generateContextualWelcome = async () => {
+    try {
+      // Get the last conversation to reference
+      const response = await fetch(`/api/chat/last-context?childAccountId=${childProfile.id}`);
+      let welcomeContent = `yo ${childProfile.name}! 🤘 what's good today?`;
+      
+      if (response.ok) {
+        const lastContext = await response.json();
+        if (lastContext.hasContext) {
+          welcomeContent = generateOrganicGreeting(childProfile.name, lastContext);
+        }
+      }
+      
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        content: welcomeContent,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    } catch (error) {
+      console.error('Error generating contextual welcome:', error);
+      // Fallback to simple greeting
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        content: `yo ${childProfile.name}! 🤘 what's good today?`,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }
+  };
+
+  const generateOrganicGreeting = (name: string, context: any): string => {
+    const { lastTopic, lastMood, timeAgo, keyTopics } = context;
+    
+    // Time-based greetings
+    const timeBasedGreetings = [
+      `hey ${name}! how was your day?`,
+      `what's up ${name}? good day today?`,
+      `yo ${name}! how've you been?`,
+      `hey there ${name}! what's new?`,
+    ];
+
+    // Topic-specific follow-ups
+    const topicGreetings: Record<string, string[]> = {
+      'school': [
+        `hey ${name}! how was school today?`,
+        `yo ${name}! did you have that test you mentioned?`,
+        `what's up ${name}? how'd school go?`,
+        `hey ${name}! learn anything cool at school today?`,
+      ],
+      'family': [
+        `hey ${name}! how's the family doing?`,
+        `yo ${name}! how was dinner with everyone?`,
+        `what's up ${name}? how are things at home?`,
+      ],
+      'friends': [
+        `hey ${name}! did you hang out with your friends?`,
+        `yo ${name}! how was hanging with the crew?`,
+        `what's up ${name}? catch up with your buddies lately?`,
+      ],
+      'games': [
+        `hey ${name}! play any cool games lately?`,
+        `yo ${name}! beat that level you were stuck on?`,
+        `what's up ${name}? any new gaming adventures?`,
+      ],
+      'sports': [
+        `hey ${name}! how was practice?`,
+        `yo ${name}! how'd your game go?`,
+        `what's up ${name}? been staying active?`,
+      ],
+      'animals': [
+        `hey ${name}! how's your pet doing?`,
+        `yo ${name}! any fun animal stories today?`,
+        `what's up ${name}? see any cool animals lately?`,
+      ],
+      'art': [
+        `hey ${name}! been creating anything cool?`,
+        `yo ${name}! finish that drawing you were working on?`,
+        `what's up ${name}? any new art projects?`,
+      ],
+      'music': [
+        `hey ${name}! been jamming to any good music?`,
+        `yo ${name}! learn any new songs?`,
+        `what's up ${name}? what's on your playlist today?`,
+      ],
+    };
+
+    // Mood-based greetings
+    if (lastMood === 'excited' || lastMood === 'happy') {
+      return `hey ${name}! still feeling good about things? 😊`;
+    }
+    if (lastMood === 'worried' || lastMood === 'anxious') {
+      return `hey ${name}, how are you feeling today? hope things are going better! 💪`;
+    }
+
+    // Use topic-specific greetings if we have a clear last topic
+    if (lastTopic && topicGreetings[lastTopic]) {
+      const greetings = topicGreetings[lastTopic];
+      return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+
+    // Check for specific topics mentioned
+    if (keyTopics.includes('party') || keyTopics.includes('birthday')) {
+      return `hey ${name}! how was that party? 🎉`;
+    }
+    if (keyTopics.includes('test') || keyTopics.includes('exam')) {
+      return `yo ${name}! how'd that test go?`;
+    }
+    if (keyTopics.includes('movie') || keyTopics.includes('film')) {
+      return `hey ${name}! did you watch that movie?`;
+    }
+    if (keyTopics.includes('vacation') || keyTopics.includes('trip')) {
+      return `yo ${name}! how was your trip? tell me everything! ✈️`;
+    }
+    if (keyTopics.includes('sleepover')) {
+      return `hey ${name}! how was the sleepover? did you guys stay up all night? 😴`;
+    }
+
+    // Time-sensitive greetings based on when we last talked
+    if (timeAgo === 'today') {
+      return `hey ${name}! back so soon? what's happening? 😄`;
+    }
+    if (timeAgo === 'yesterday') {
+      return `yo ${name}! how was the rest of yesterday?`;
+    }
+    if (timeAgo === 'this_week') {
+      return `hey ${name}! good to see you again! how's your week going?`;
+    }
+
+    // Fall back to topic-based if available
+    if (keyTopics.length > 0) {
+      const topic = keyTopics[0];
+      return `hey ${name}! how's everything going with ${topic}?`;
+    }
+
+    // Default friendly greeting
+    return timeBasedGreetings[Math.floor(Math.random() * timeBasedGreetings.length)];
+  };
 
   const enableAudio = () => {
     setAudioEnabled(true);
@@ -278,7 +412,7 @@ export default function BrutalChatInterface({
   return (
     <div className="h-screen paper-bg flex flex-col">
       {/* Brutal Header */}
-      <div className="brutal-header flex justify-between items-center">
+      <div className="brutal-header flex justify-between items-center" style={{ backgroundColor: '#2563eb' }}>
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-yellow-400 border-3 border-black flex items-center justify-center brutal-shadow-small">
             <span className="font-rokano text-xl font-bold">
@@ -296,6 +430,14 @@ export default function BrutalChatInterface({
         </div>
 
         <div className="flex gap-2">
+          <BrutalButton
+            variant="blue"
+            size="small"
+            onClick={() => router.push('/parent')}
+            className="text-white font-bold"
+          >
+            PARENT
+          </BrutalButton>
           <BrutalButton
             variant="purple"
             size="small"

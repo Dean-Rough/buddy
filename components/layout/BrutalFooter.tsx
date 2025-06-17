@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Sparkles, Shield } from 'lucide-react';
 import BrutalButton from '../ui/BrutalButton';
 import { useAuthFlow } from '@/lib/useAuthFlow';
@@ -15,7 +16,13 @@ export function BrutalFooter({}: BrutalFooterProps) {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <img src="/onda-logo-black.svg" alt="Onda" className="h-8 mb-4" />
+            <Image
+              src="/onda-logo-black.svg"
+              alt="Onda"
+              width={96}
+              height={96}
+              className="mb-4"
+            />
             <p className="font-avotica text-gray-700 mb-4">
               The AI companion that actually gets kids. Safe, smart, and
               genuinely fun.
@@ -23,10 +30,11 @@ export function BrutalFooter({}: BrutalFooterProps) {
             <div className="flex gap-4">
               <div className="w-10 h-10 bg-yellow-400 border-3 border-white brutal-shadow-sm">
                 <div className="w-full h-full flex items-center justify-center">
-                  <img
+                  <Image
                     src="/onda-icon-black.svg"
                     alt="Onda Icon"
-                    className="w-6 h-6"
+                    width={24}
+                    height={24}
                   />
                 </div>
               </div>

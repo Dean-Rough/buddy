@@ -1,0 +1,92 @@
+config:
+  target: 'http://localhost:4288'
+  phases:
+    # Stress test with high load
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 100
+      name: 'Stress ramp-up'
+    - duration: 120
+      arrivalRate: 100
+      name: 'High stress load'
+    - duration: 60
+      arrivalRate: 100
+      rampTo: 10
+      name: 'Stress cool-down'
+  variables:
+    childAccountId: 'stress-test-{{$randomString()}}'
+    sessionId: 'stress-session-{{$randomString()}}'
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    publish-metrics:
+      - type: 'statsd'
+        host: 'localhost'
+        port: 8125
+        prefix: 'onda.loadtest'
+  processor: './load-processor.js'
+
+scenarios:
+  # Heavy chat load testing
+  - name: 'Heavy Chat Load'
+    weight: 70
+    flow:
+      - function: 'setRandomMessage'
+      - post:
+          url: '/api/chat/message'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            message: '{{ testMessage }}'
+            childAccountId: '{{ childAccountId }}'
+            sessionId: '{{ sessionId }}'
+          afterResponse: 'measureChatProcessing'
+          capture:
+            - json: '$.timeStatus.minutesRemaining'
+              as: 'timeRemaining'
+            - json: '$.safety.blocked'
+              as: 'blocked'
+
+  # Concurrent safety validations
+  - name: 'Safety Validation Stress'
+    weight: 20
+    flow:
+      - function: 'setRandomMessage'
+      - post:
+          url: '/api/safety/validate'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            message: '{{ testMessage }}'
+            childAge: '{{ $randomInt(6, 12) }}'
+          afterResponse: 'measureSafetyProcessing'
+
+  # Time status flood
+  - name: 'Time Status Checks'
+    weight: 10
+    flow:
+      - get:
+          url: '/api/chat/time-status'
+          qs:
+            childAccountId: '{{ childAccountId }}'
+          afterResponse: 'measureTimeCheck'
+
+# Strict performance expectations for stress testing
+expects:
+  # Under stress, allow higher response times but still reasonable
+  - stat: 'response_time.p95'
+    value: 5000
+    op: '<'
+    comment: '95% of responses should be under 5s even under stress'
+
+  # Safety processing under stress
+  - stat: 'safety_processing_time.p95'
+    value: 15000
+    op: '<'
+    comment: 'Safety processing should remain under 15s under stress'
+
+  # Error rate should remain manageable
+  - stat: 'http.response.5xx.rate'
+    value: 0.1
+    op: '<'
+    comment: 'Server error rate should be under 10% even under stress'

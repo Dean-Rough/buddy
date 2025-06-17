@@ -15,17 +15,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (authHeader !== `Bearer ${expectedSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { maxRetries } = await req.json();
     const retryLimit = maxRetries || 3;
 
-    console.log(`Retrying failed weekly summaries (max retries: ${retryLimit})...`);
-    
+    console.log(
+      `Retrying failed weekly summaries (max retries: ${retryLimit})...`
+    );
+
     const generator = new WeeklySummaryGenerator();
     await generator.retryFailedSummaries(retryLimit);
 
@@ -37,13 +36,12 @@ export async function POST(req: NextRequest) {
       message: 'Failed summaries retry completed',
       stats,
     });
-
   } catch (error) {
     console.error('Error retrying failed summaries:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to retry summaries',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

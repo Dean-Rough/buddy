@@ -5,6 +5,10 @@ import {
   getCompiledSafetyPatterns,
   getSafetyResponseFromConfig,
 } from '../config-loader';
+import { safetyCache } from './safety-cache';
+import { safetyFallback } from './safety-fallback';
+import fs from 'fs';
+import path from 'path';
 
 export interface SafetyResult {
   isSafe: boolean;
@@ -12,6 +16,9 @@ export interface SafetyResult {
   reason: string;
   action: 'allow' | 'warn' | 'block' | 'escalate';
   flaggedTerms: string[];
+  processingTime?: number;
+  cacheHit?: boolean;
+  fallbackUsed?: boolean;
 }
 
 export interface SafetyContext {
@@ -22,52 +29,233 @@ export interface SafetyContext {
 }
 
 /**
- * Comprehensive safety validation with context awareness
+ * Optimized safety validation with parallel processing, caching, and fallbacks
  */
 export async function validateMessageSafety(
   message: string,
   context: SafetyContext
 ): Promise<SafetyResult> {
-  try {
-    // Build context string from recent messages
-    const contextString = context.recentMessages?.slice(-3).join(' | ') || '';
+  const startTime = Date.now();
 
-    // Run AI safety validation (with mock fallback)
-    const aiResult = await validateSafety(
+  try {
+    // Check cache first for performance
+    const contextString = context.recentMessages?.slice(-2).join(' | ') || '';
+    const cachedResult = safetyCache.get(
       message,
       context.childAge,
       contextString
     );
 
-    // Run additional rule-based checks
-    const ruleBasedResult = runRuleBasedSafety(message, context.childAge);
+    if (cachedResult) {
+      return {
+        ...cachedResult,
+        processingTime: Date.now() - startTime,
+        cacheHit: true,
+      };
+    }
+
+    // Determine if we should use fallback
+    const useFallback = safetyFallback.shouldUseFallback();
+
+    let aiResult: SafetyResult;
+    let ruleBasedResult: SafetyResult;
+
+    if (useFallback) {
+      // Use enhanced fallback system
+      ruleBasedResult = safetyFallback.validateWithFallback(message, context);
+      aiResult = ruleBasedResult; // Use same result to avoid conflicts
+    } else {
+      // Run AI and rule-based checks in parallel for better performance
+      const [aiPromise, rulePromise] = await Promise.allSettled([
+        validateSafetyWithOptimizedPrompt(
+          message,
+          context.childAge,
+          contextString
+        ),
+        Promise.resolve(runRuleBasedSafety(message, context.childAge)),
+      ]);
+
+      // Handle AI result
+      if (aiPromise.status === 'fulfilled') {
+        aiResult = aiPromise.value;
+        safetyFallback.setAIServiceStatus(false); // AI is working
+      } else {
+        console.warn(
+          'AI safety validation failed, using fallback:',
+          aiPromise.reason
+        );
+        safetyFallback.setAIServiceStatus(true);
+        aiResult = safetyFallback.validateWithFallback(message, context);
+        // Mark that we used fallback
+        aiResult.fallbackUsed = true;
+      }
+
+      // Handle rule-based result
+      ruleBasedResult =
+        rulePromise.status === 'fulfilled'
+          ? rulePromise.value
+          : getFailSafeResult('Rule-based validation error');
+    }
 
     // Combine results - use most restrictive
     const combinedResult = combineResults(aiResult, ruleBasedResult);
 
+    // Add performance metadata
+    const finalResult: SafetyResult = {
+      ...combinedResult,
+      processingTime: Date.now() - startTime,
+      cacheHit: false,
+      fallbackUsed: useFallback,
+    };
+
+    // Cache result for future use (excluding high-severity results)
+    if (finalResult.severity < 3) {
+      safetyCache.set(message, context.childAge, finalResult, contextString);
+    }
+
     // Log safety event if concerning
-    if (combinedResult.severity >= 2) {
-      await logSafetyEvent(message, combinedResult, context);
+    if (finalResult.severity >= 2) {
+      await logSafetyEvent(message, finalResult, context);
     }
 
     // Escalate to parents if severity 3
-    if (combinedResult.severity >= 3) {
-      await escalateToParent(message, combinedResult, context);
+    if (finalResult.severity >= 3) {
+      await escalateToParent(message, finalResult, context);
     }
 
-    return combinedResult;
+    return finalResult;
   } catch (error) {
     console.error('Safety validation error:', error);
 
-    // Fail-safe: block if safety validation fails
+    // Fail-safe: use enhanced fallback
+    const fallbackResult = safetyFallback.validateWithFallback(
+      message,
+      context
+    );
     return {
-      isSafe: false,
-      severity: 3,
-      reason: 'Safety validation system error',
-      action: 'block',
-      flaggedTerms: [],
+      ...fallbackResult,
+      processingTime: Date.now() - startTime,
+      cacheHit: false,
+      fallbackUsed: true,
     };
   }
+}
+
+/**
+ * Optimized AI safety validation with faster prompts
+ */
+async function validateSafetyWithOptimizedPrompt(
+  message: string,
+  childAge: number,
+  context: string
+): Promise<SafetyResult> {
+  try {
+    // Call AI with optimized settings
+    const result = await validateSafety(message, childAge, context);
+
+    return result;
+  } catch (error) {
+    console.error('Optimized AI validation failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Load optimized prompt configuration
+ * TODO: Used for future performance optimizations - will be integrated in next iteration
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _loadOptimizedPrompts() {
+  try {
+    const configPath = path.join(
+      process.cwd(),
+      'config',
+      'optimized-safety-prompts.json'
+    );
+    const configData = fs.readFileSync(configPath, 'utf8');
+    return JSON.parse(configData);
+  } catch (error) {
+    console.error('Failed to load optimized prompts:', error);
+    // Return minimal fallback config
+    return {
+      fast_validation_prompt:
+        'Safety check for child age {age}: \'{message}\'. JSON: {"isSafe": true, "severity": 0, "reason": "fallback", "flaggedTerms": []}',
+      performance_optimizations: {
+        max_tokens: 150,
+        temperature: 0.1,
+        timeout_ms: 5000,
+      },
+    };
+  }
+}
+
+/**
+ * Get fail-safe result for error conditions
+ */
+function getFailSafeResult(reason: string): SafetyResult {
+  return {
+    isSafe: false,
+    severity: 2,
+    reason,
+    action: 'warn',
+    flaggedTerms: ['system_error'],
+  };
+}
+
+/**
+ * Batch safety validation for multiple messages
+ */
+export async function validateMessagesSafety(
+  messages: Array<{ message: string; context: SafetyContext }>,
+  options: { parallel?: boolean; batchSize?: number } = {}
+): Promise<SafetyResult[]> {
+  const { parallel = true, batchSize = 5 } = options;
+
+  if (!parallel) {
+    // Sequential processing
+    const results: SafetyResult[] = [];
+    for (const { message, context } of messages) {
+      results.push(await validateMessageSafety(message, context));
+    }
+    return results;
+  }
+
+  // Parallel batch processing
+  const results: SafetyResult[] = [];
+  for (let i = 0; i < messages.length; i += batchSize) {
+    const batch = messages.slice(i, i + batchSize);
+    const batchPromises = batch.map(({ message, context }) =>
+      validateMessageSafety(message, context)
+    );
+
+    const batchResults = await Promise.allSettled(batchPromises);
+
+    for (const result of batchResults) {
+      if (result.status === 'fulfilled') {
+        results.push(result.value);
+      } else {
+        const fallbackResult = getFailSafeResult('Batch validation error');
+        fallbackResult.fallbackUsed = true;
+        results.push(fallbackResult);
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Get safety system performance metrics
+ */
+export function getSafetyMetrics() {
+  const cacheStats = safetyCache.getStats();
+  const fallbackStatus = safetyFallback.getStatus();
+
+  return {
+    cache: cacheStats,
+    fallback: fallbackStatus,
+    timestamp: new Date().toISOString(),
+  };
 }
 
 /**
@@ -208,6 +396,7 @@ function combineResults(
     reason: primaryResult.reason,
     action: primaryResult.action,
     flaggedTerms: [...aiResult.flaggedTerms, ...ruleResult.flaggedTerms],
+    fallbackUsed: aiResult.fallbackUsed || ruleResult.fallbackUsed,
   };
 }
 

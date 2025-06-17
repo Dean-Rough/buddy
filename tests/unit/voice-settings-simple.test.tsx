@@ -131,7 +131,7 @@ describe('VoiceSettings - Basic Functionality', () => {
 
   it('shows close button when onClose prop is provided', () => {
     const mockOnClose = vi.fn();
-    
+
     render(
       <VoiceSettings
         currentPersona="friendly-raccoon"
@@ -142,7 +142,7 @@ describe('VoiceSettings - Basic Functionality', () => {
 
     const closeButton = screen.getByText('✕');
     expect(closeButton).toBeInTheDocument();
-    
+
     fireEvent.click(closeButton);
     expect(mockOnClose).toHaveBeenCalled();
   });

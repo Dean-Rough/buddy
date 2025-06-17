@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import BrutalChatInterface from '@/components/chat/BrutalChatInterface';
@@ -115,34 +116,5 @@ function ChatPageContent() {
     router.push('/parent');
   };
 
-  return (
-    <div className="min-h-screen bg-[#FFF8E1]">
-      {/* Chat Header */}
-      <header className="bg-white border-b-5 border-black p-4">
-        <div className="flex justify-between items-center max-w-6xl mx-auto">
-          <div className="flex items-center">
-            <img src="/onda-logo-black.svg" alt="Onda" className="h-8 mr-4" />
-            <h1 className="font-rokano text-2xl">CHAT</h1>
-          </div>
-
-          <div className="flex gap-3">
-            <BrutalButton
-              onClick={handleParentDashboard}
-              variant="blue"
-              size="small"
-            >
-              PARENT DASHBOARD
-            </BrutalButton>
-
-            <BrutalButton onClick={handleSignOut} variant="orange" size="small">
-              SIGN OUT
-            </BrutalButton>
-          </div>
-        </div>
-      </header>
-
-      {/* Chat Interface */}
-      <BrutalChatInterface childProfile={childProfile} />
-    </div>
-  );
+  return <BrutalChatInterface childProfile={childProfile} />;
 }

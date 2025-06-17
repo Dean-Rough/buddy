@@ -9,15 +9,23 @@ global.fetch = vi.fn();
 // Mock the UI components
 vi.mock('@/components/ui/BrutalCard', () => ({
   default: function BrutalCard({ children, className, variant }: any) {
-    return <div className={`brutal-card ${variant} ${className}`}>{children}</div>;
+    return (
+      <div className={`brutal-card ${variant} ${className}`}>{children}</div>
+    );
   },
 }));
 
 vi.mock('@/components/ui/BrutalButton', () => ({
-  default: function BrutalButton({ children, onClick, variant, size, disabled }: any) {
+  default: function BrutalButton({
+    children,
+    onClick,
+    variant,
+    size,
+    disabled,
+  }: any) {
     return (
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         className={`brutal-button ${variant} ${size}`}
         disabled={disabled}
       >
@@ -210,9 +218,9 @@ describe('WeeklySummaryManager', () => {
   it('handles API errors gracefully', async () => {
     // Mock console.error to avoid error output in tests
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     // Mock failed API response
-    (global.fetch as any).mockImplementationOnce(() => 
+    (global.fetch as any).mockImplementationOnce(() =>
       Promise.reject(new Error('Network error'))
     );
 
@@ -244,7 +252,7 @@ describe('WeeklySummaryManager', () => {
 
   it('displays no summaries state when no data', async () => {
     // Mock empty stats
-    (global.fetch as any).mockImplementationOnce(() => 
+    (global.fetch as any).mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         json: async () => ({
@@ -257,7 +265,9 @@ describe('WeeklySummaryManager', () => {
     render(<WeeklySummaryManager children={mockChildren} />);
 
     await waitFor(() => {
-      expect(screen.getByText('No weekly summaries generated yet')).toBeInTheDocument();
+      expect(
+        screen.getByText('No weekly summaries generated yet')
+      ).toBeInTheDocument();
     });
   });
 
@@ -265,9 +275,15 @@ describe('WeeklySummaryManager', () => {
     render(<WeeklySummaryManager children={mockChildren} />);
 
     await waitFor(() => {
-      expect(screen.getByText('💡 How Weekly Summaries Work')).toBeInTheDocument();
-      expect(screen.getByText(/Automatically generated every Sunday/)).toBeInTheDocument();
-      expect(screen.getByText(/Uses AI to provide insights/)).toBeInTheDocument();
+      expect(
+        screen.getByText('💡 How Weekly Summaries Work')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Automatically generated every Sunday/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Uses AI to provide insights/)
+      ).toBeInTheDocument();
       expect(screen.getByText(/Estimated cost: ~\$0.0003/)).toBeInTheDocument();
     });
   });
@@ -277,8 +293,12 @@ describe('WeeklySummaryManager', () => {
 
     await waitFor(() => {
       // Check week date ranges
-      expect(screen.getByText('Week: Dec 9, 2024 - Dec 15, 2024')).toBeInTheDocument();
-      expect(screen.getByText('Week: Dec 2, 2024 - Dec 8, 2024')).toBeInTheDocument();
+      expect(
+        screen.getByText('Week: Dec 9, 2024 - Dec 15, 2024')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Week: Dec 2, 2024 - Dec 8, 2024')
+      ).toBeInTheDocument();
     });
   });
 

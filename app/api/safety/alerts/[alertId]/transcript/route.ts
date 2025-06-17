@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -26,7 +26,7 @@ export async function GET(
     const parent = await prisma.parent.findUnique({
       where: { clerkUserId: userId },
       include: {
-        children: true,
+        childAccounts: true,
       },
     });
 
@@ -37,6 +37,9 @@ export async function GET(
     // Get the alert and verify ownership
     const alert = await prisma.safetyEvent.findUnique({
       where: { id: alertId },
+      include: {
+        childAccount: true,
+      },
     });
 
     if (!alert) {
@@ -44,8 +47,8 @@ export async function GET(
     }
 
     // Verify the alert belongs to one of this parent's children
-    const childNames = parent.children.map(child => child.name);
-    if (!childNames.includes(alert.childName)) {
+    const childAccountIds = parent.childAccounts.map((child: any) => child.id);
+    if (!childAccountIds.includes(alert.childAccountId)) {
       return NextResponse.json(
         { error: 'This alert does not belong to your children' },
         { status: 403 }
@@ -54,10 +57,10 @@ export async function GET(
 
     // Get the conversation associated with this alert
     let transcript = null;
-    
+
     if (alert.conversationId) {
       // For new Clerk-based conversations
-      const conversation = await prisma.newConversation.findUnique({
+      const conversation = await prisma.conversation.findUnique({
         where: { id: alert.conversationId },
         include: {
           messages: {
@@ -75,38 +78,8 @@ export async function GET(
       if (conversation) {
         transcript = {
           conversationId: conversation.id,
-          childId: conversation.childId,
-          startedAt: conversation.createdAt,
-          messages: conversation.messages.map(msg => ({
-            id: msg.id,
-            content: msg.content,
-            role: msg.role,
-            timestamp: msg.createdAt,
-          })),
-        };
-      }
-    } else if (alert.sessionId) {
-      // For legacy PIN-based conversations
-      const conversation = await prisma.conversation.findUnique({
-        where: { id: alert.sessionId },
-        include: {
-          messages: {
-            orderBy: { createdAt: 'asc' },
-            select: {
-              id: true,
-              content: true,
-              role: true,
-              createdAt: true,
-            },
-          },
-        },
-      });
-
-      if (conversation) {
-        transcript = {
-          conversationId: conversation.id,
-          childId: conversation.childId,
-          startedAt: conversation.startTime,
+          childId: conversation.childAccountId,
+          startedAt: conversation.startedAt,
           messages: conversation.messages.map(msg => ({
             id: msg.id,
             content: msg.content,
@@ -125,7 +98,7 @@ export async function GET(
           severityLevel: alert.severityLevel,
           triggerContent: alert.triggerContent,
           detectedAt: alert.detectedAt,
-          childName: alert.childName,
+          childName: alert.childAccount.name,
         },
         transcript: null,
         message: 'No conversation transcript available for this alert',
@@ -135,16 +108,13 @@ export async function GET(
     // Log the transcript access for audit purposes
     await prisma.parentNotification.create({
       data: {
-        parentId: parent.id,
-        type: 'TRANSCRIPT_ACCESS',
-        title: 'Transcript Accessed',
-        message: `Accessed conversation transcript for alert: ${alert.eventType}`,
-        metadata: {
-          alertId: alert.id,
-          childName: alert.childName,
-          accessedAt: new Date(),
-        },
-        read: false,
+        parentClerkUserId: parent.clerkUserId,
+        childAccountId: alert.childAccountId,
+        notificationType: 'TRANSCRIPT_ACCESS',
+        subject: 'Transcript Accessed',
+        content: `Accessed conversation transcript for alert: ${alert.eventType}`,
+        deliveryMethod: 'system',
+        safetyEventId: alert.id,
       },
     });
 
@@ -155,11 +125,10 @@ export async function GET(
         severityLevel: alert.severityLevel,
         triggerContent: alert.triggerContent,
         detectedAt: alert.detectedAt,
-        childName: alert.childName,
+        childName: alert.childAccount.name,
       },
       transcript,
     });
-
   } catch (error) {
     console.error('Error fetching transcript:', error);
     return NextResponse.json(

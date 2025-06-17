@@ -17,7 +17,8 @@ export async function generateChatResponse(
   persona: string = 'friendly-raccoon',
   memoryContext: string = '',
   whisperMode: boolean = false,
-  childName?: string
+  childName?: string,
+  parentNotes?: string
 ) {
   try {
     // If no OpenAI API key, return a friendly mock response
@@ -54,7 +55,8 @@ export async function generateChatResponse(
       childName,
       context.detectedMood,
       context.recentTopics,
-      context.engagementLevel
+      context.engagementLevel,
+      parentNotes
     );
 
     const response = await openai.chat.completions.create({

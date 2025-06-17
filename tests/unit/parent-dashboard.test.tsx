@@ -19,15 +19,23 @@ global.fetch = vi.fn();
 // Mock the UI components
 vi.mock('@/components/ui/BrutalCard', () => ({
   default: function BrutalCard({ children, className, variant }: any) {
-    return <div className={`brutal-card ${variant} ${className}`}>{children}</div>;
+    return (
+      <div className={`brutal-card ${variant} ${className}`}>{children}</div>
+    );
   },
 }));
 
 vi.mock('@/components/ui/BrutalButton', () => ({
-  default: function BrutalButton({ children, onClick, variant, size, disabled }: any) {
+  default: function BrutalButton({
+    children,
+    onClick,
+    variant,
+    size,
+    disabled,
+  }: any) {
     return (
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         className={`brutal-button ${variant} ${size}`}
         disabled={disabled}
       >
@@ -39,13 +47,7 @@ vi.mock('@/components/ui/BrutalButton', () => ({
 
 vi.mock('@/components/ui/BrutalInput', () => ({
   default: function BrutalInput({ onChange, value, ...props }: any) {
-    return (
-      <input 
-        {...props}
-        value={value}
-        onChange={onChange}
-      />
-    );
+    return <input {...props} value={value} onChange={onChange} />;
   },
 }));
 
@@ -251,7 +253,7 @@ describe('ParentDashboardOverview', () => {
 
     // Click on Jake to select him
     fireEvent.click(screen.getByText('Jake (11)'));
-    
+
     await waitFor(() => {
       const jakeButton = screen.getByText('Jake (11)');
       expect(jakeButton).toHaveClass('brutal-button blue');
@@ -284,7 +286,7 @@ describe('ChildProfileCreator', () => {
 
   it('renders form fields correctly', () => {
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
@@ -299,7 +301,7 @@ describe('ChildProfileCreator', () => {
 
   it('validates form inputs correctly', async () => {
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
@@ -318,20 +320,22 @@ describe('ChildProfileCreator', () => {
 
   it('validates age range correctly', async () => {
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
     );
 
     const ageInput = screen.getByPlaceholderText('9');
-    
+
     // Test age too low
     fireEvent.change(ageInput, { target: { value: '5' } });
     fireEvent.click(screen.getByText('CREATE ACCOUNT'));
 
     await waitFor(() => {
-      expect(screen.getByText('Age must be between 6 and 12')).toBeInTheDocument();
+      expect(
+        screen.getByText('Age must be between 6 and 12')
+      ).toBeInTheDocument();
     });
 
     // Test age too high
@@ -339,20 +343,22 @@ describe('ChildProfileCreator', () => {
     fireEvent.click(screen.getByText('CREATE ACCOUNT'));
 
     await waitFor(() => {
-      expect(screen.getByText('Age must be between 6 and 12')).toBeInTheDocument();
+      expect(
+        screen.getByText('Age must be between 6 and 12')
+      ).toBeInTheDocument();
     });
   });
 
   it('validates PIN confirmation', async () => {
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
     );
 
     const pinInputs = screen.getAllByPlaceholderText('••••');
-    
+
     fireEvent.change(pinInputs[0], { target: { value: '1234' } });
     fireEvent.change(pinInputs[1], { target: { value: '5678' } });
     fireEvent.click(screen.getByText('CREATE ACCOUNT'));
@@ -378,23 +384,23 @@ describe('ChildProfileCreator', () => {
     });
 
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
     );
 
     // Fill out form
-    fireEvent.change(screen.getByPlaceholderText('Emma Smith'), { 
-      target: { value: 'Test Child' } 
+    fireEvent.change(screen.getByPlaceholderText('Emma Smith'), {
+      target: { value: 'Test Child' },
     });
-    fireEvent.change(screen.getByPlaceholderText('emma_cool'), { 
-      target: { value: 'testchild' } 
+    fireEvent.change(screen.getByPlaceholderText('emma_cool'), {
+      target: { value: 'testchild' },
     });
-    fireEvent.change(screen.getByPlaceholderText('9'), { 
-      target: { value: '8' } 
+    fireEvent.change(screen.getByPlaceholderText('9'), {
+      target: { value: '8' },
     });
-    
+
     const pinInputs = screen.getAllByPlaceholderText('••••');
     fireEvent.change(pinInputs[0], { target: { value: '1234' } });
     fireEvent.change(pinInputs[1], { target: { value: '1234' } });
@@ -421,23 +427,23 @@ describe('ChildProfileCreator', () => {
     });
 
     render(
-      <ChildProfileCreator 
+      <ChildProfileCreator
         onChildCreated={mockOnChildCreated}
         onCancel={mockOnCancel}
       />
     );
 
     // Fill out form with valid data
-    fireEvent.change(screen.getByPlaceholderText('Emma Smith'), { 
-      target: { value: 'Test Child' } 
+    fireEvent.change(screen.getByPlaceholderText('Emma Smith'), {
+      target: { value: 'Test Child' },
     });
-    fireEvent.change(screen.getByPlaceholderText('emma_cool'), { 
-      target: { value: 'existinguser' } 
+    fireEvent.change(screen.getByPlaceholderText('emma_cool'), {
+      target: { value: 'existinguser' },
     });
-    fireEvent.change(screen.getByPlaceholderText('9'), { 
-      target: { value: '8' } 
+    fireEvent.change(screen.getByPlaceholderText('9'), {
+      target: { value: '8' },
     });
-    
+
     const pinInputs = screen.getAllByPlaceholderText('••••');
     fireEvent.change(pinInputs[0], { target: { value: '1234' } });
     fireEvent.change(pinInputs[1], { target: { value: '1234' } });
@@ -445,7 +451,9 @@ describe('ChildProfileCreator', () => {
     fireEvent.click(screen.getByText('CREATE ACCOUNT'));
 
     await waitFor(() => {
-      expect(screen.getByText('This username is already taken')).toBeInTheDocument();
+      expect(
+        screen.getByText('This username is already taken')
+      ).toBeInTheDocument();
     });
   });
 });
@@ -477,7 +485,9 @@ describe('ActivityCard', () => {
   it('displays mood summary correctly', () => {
     render(<ActivityCard usage={mockUsage} childName="Emma" />);
 
-    expect(screen.getByText('happy and excited about learning')).toBeInTheDocument();
+    expect(
+      screen.getByText('happy and excited about learning')
+    ).toBeInTheDocument();
     expect(screen.getByText('😊')).toBeInTheDocument(); // happy emoji
   });
 
@@ -573,7 +583,9 @@ describe('AlertCenter', () => {
     fireEvent.click(screen.getByText('Inappropriate Language'));
 
     await waitFor(() => {
-      expect(screen.getByText('Some concerning message content')).toBeInTheDocument();
+      expect(
+        screen.getByText('Some concerning message content')
+      ).toBeInTheDocument();
       expect(screen.getByText('MARK RESOLVED')).toBeInTheDocument();
     });
   });
@@ -681,7 +693,9 @@ describe('MoodChart', () => {
     render(<MoodChart childId={null} usageData={[]} />);
 
     expect(screen.getByText('📊')).toBeInTheDocument();
-    expect(screen.getByText('Select a child to view mood trends')).toBeInTheDocument();
+    expect(
+      screen.getByText('Select a child to view mood trends')
+    ).toBeInTheDocument();
   });
 
   it('displays no data state', () => {

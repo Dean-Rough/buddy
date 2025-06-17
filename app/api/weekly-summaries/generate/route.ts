@@ -15,14 +15,11 @@ export async function POST(req: NextRequest) {
     }
 
     if (authHeader !== `Bearer ${expectedSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('Starting weekly summary generation...');
-    
+
     const generator = new WeeklySummaryGenerator();
     await generator.generateWeeklySummaries();
 
@@ -34,13 +31,12 @@ export async function POST(req: NextRequest) {
       message: 'Weekly summaries generated successfully',
       stats,
     });
-
   } catch (error) {
     console.error('Error generating weekly summaries:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate weekly summaries',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

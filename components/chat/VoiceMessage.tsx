@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface VoiceMessageProps {
   text: string;
@@ -23,21 +23,7 @@ export default function VoiceMessage({
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  useEffect(() => {
-    // Temporarily disable voice generation until Cartesia is configured
-    if (process.env.NEXT_PUBLIC_VOICE_ENABLED === 'true') {
-      generateAudio();
-    }
-
-    return () => {
-      // Cleanup audio URL when component unmounts
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
-    };
-  }, [text, persona, childAge, whisperMode]);
-
-  const generateAudio = async () => {
+  const generateAudio = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -68,7 +54,21 @@ export default function VoiceMessage({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [text, persona, childAge, whisperMode]);
+
+  useEffect(() => {
+    // Temporarily disable voice generation until Cartesia is configured
+    if (process.env.NEXT_PUBLIC_VOICE_ENABLED === 'true') {
+      generateAudio();
+    }
+
+    return () => {
+      // Cleanup audio URL when component unmounts
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl, generateAudio]);
 
   const playAudio = () => {
     if (audioRef.current && audioUrl) {

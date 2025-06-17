@@ -46,8 +46,11 @@ export default function PinSetup() {
       });
 
       if (response.ok) {
-        // Redirect to dashboard
+        // Add a small delay to ensure database update is complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Force refresh the parent page to re-check PIN status
         router.push('/parent');
+        router.refresh();
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to set up PIN');

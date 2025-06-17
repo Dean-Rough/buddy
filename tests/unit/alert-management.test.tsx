@@ -15,15 +15,23 @@ global.fetch = vi.fn();
 // Mock the UI components
 vi.mock('@/components/ui/BrutalCard', () => ({
   default: function BrutalCard({ children, className, variant }: any) {
-    return <div className={`brutal-card ${variant} ${className}`}>{children}</div>;
+    return (
+      <div className={`brutal-card ${variant} ${className}`}>{children}</div>
+    );
   },
 }));
 
 vi.mock('@/components/ui/BrutalButton', () => ({
-  default: function BrutalButton({ children, onClick, variant, size, disabled }: any) {
+  default: function BrutalButton({
+    children,
+    onClick,
+    variant,
+    size,
+    disabled,
+  }: any) {
     return (
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         className={`brutal-button ${variant} ${size}`}
         disabled={disabled}
       >
@@ -35,13 +43,7 @@ vi.mock('@/components/ui/BrutalButton', () => ({
 
 vi.mock('@/components/ui/BrutalInput', () => ({
   default: function BrutalInput({ onChange, value, ...props }: any) {
-    return (
-      <input 
-        {...props}
-        value={value}
-        onChange={onChange}
-      />
-    );
+    return <input {...props} value={value} onChange={onChange} />;
   },
 }));
 
@@ -108,7 +110,11 @@ describe('AlertManagement', () => {
 
     // Mock successful API responses with proper routing
     (global.fetch as any).mockImplementation((url: string) => {
-      if (url.includes('/api/safety/alerts') && !url.includes('batch-resolve') && !url.includes('transcript')) {
+      if (
+        url.includes('/api/safety/alerts') &&
+        !url.includes('batch-resolve') &&
+        !url.includes('transcript')
+      ) {
         return Promise.resolve({
           ok: true,
           json: async () => mockAlerts,
@@ -214,8 +220,12 @@ describe('AlertManagement', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Emotional Distress')).toBeInTheDocument();
-      expect(screen.queryByText('Inappropriate Language')).not.toBeInTheDocument();
-      expect(screen.queryByText('Personal Info Shared')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Inappropriate Language')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Personal Info Shared')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -232,8 +242,12 @@ describe('AlertManagement', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Emotional Distress')).toBeInTheDocument();
-      expect(screen.queryByText('Inappropriate Language')).not.toBeInTheDocument();
-      expect(screen.queryByText('Personal Info Shared')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Inappropriate Language')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Personal Info Shared')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -282,7 +296,9 @@ describe('AlertManagement', () => {
     });
 
     // Click select all checkbox
-    const selectAllCheckbox = screen.getByRole('checkbox', { name: /Select All/ });
+    const selectAllCheckbox = screen.getByRole('checkbox', {
+      name: /Select All/,
+    });
     fireEvent.click(selectAllCheckbox);
 
     await waitFor(() => {
@@ -298,7 +314,9 @@ describe('AlertManagement', () => {
     });
 
     // Select some alerts
-    const selectAllCheckbox = screen.getByRole('checkbox', { name: /Select All/ });
+    const selectAllCheckbox = screen.getByRole('checkbox', {
+      name: /Select All/,
+    });
     fireEvent.click(selectAllCheckbox);
 
     await waitFor(() => {
@@ -363,7 +381,9 @@ describe('AlertManagement', () => {
     fireEvent.click(closeButton);
 
     await waitFor(() => {
-      expect(screen.queryByText('CONVERSATION TRANSCRIPT')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('CONVERSATION TRANSCRIPT')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -383,7 +403,7 @@ describe('AlertManagement', () => {
     await waitFor(() => {
       const activeBadges = screen.getAllByText('🔴 Active');
       const resolvedBadges = screen.getAllByText('✅ Resolved');
-      
+
       expect(activeBadges.length).toBe(2); // alerts 1 and 3
       expect(resolvedBadges.length).toBe(1); // alert 2
     });
@@ -429,7 +449,9 @@ describe('AlertManagement', () => {
     render(<AlertManagement />);
 
     await waitFor(() => {
-      expect(screen.getByText('No alerts match your filters')).toBeInTheDocument();
+      expect(
+        screen.getByText('No alerts match your filters')
+      ).toBeInTheDocument();
     });
   });
 });

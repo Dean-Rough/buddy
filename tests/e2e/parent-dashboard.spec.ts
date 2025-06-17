@@ -80,7 +80,7 @@ test.describe('Parent Dashboard Overview', () => {
         },
         loaded: true,
       };
-      
+
       // Mock useUser hook response
       (window as any).__useUser = {
         user: {
@@ -93,7 +93,7 @@ test.describe('Parent Dashboard Overview', () => {
     });
 
     // Mock auth routes to return authenticated state
-    await page.route('/api/auth/**', async (route) => {
+    await page.route('/api/auth/**', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -102,7 +102,7 @@ test.describe('Parent Dashboard Overview', () => {
     });
 
     // Mock the parent route to bypass PIN verification in tests
-    await page.route('/api/parent/**', async (route) => {
+    await page.route('/api/parent/**', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -111,7 +111,7 @@ test.describe('Parent Dashboard Overview', () => {
     });
 
     // Mock API routes
-    await page.route('/api/children', async (route) => {
+    await page.route('/api/children', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -119,7 +119,7 @@ test.describe('Parent Dashboard Overview', () => {
       });
     });
 
-    await page.route('/api/usage*', async (route) => {
+    await page.route('/api/usage*', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -127,7 +127,7 @@ test.describe('Parent Dashboard Overview', () => {
       });
     });
 
-    await page.route('/api/parent/settings*', async (route) => {
+    await page.route('/api/parent/settings*', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -138,7 +138,7 @@ test.describe('Parent Dashboard Overview', () => {
       });
     });
 
-    await page.route('/api/safety/alerts*', async (route) => {
+    await page.route('/api/safety/alerts*', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -149,11 +149,11 @@ test.describe('Parent Dashboard Overview', () => {
 
   test('displays parent dashboard with children data', async ({ page }) => {
     // Intercept the page navigation and directly serve the dashboard
-    await page.route('/parent/dashboard', async (route) => {
+    await page.route('/parent/dashboard', async route => {
       // Get the actual dashboard page HTML by navigating in a separate page
       const context = page.context();
       const dashboardPage = await context.newPage();
-      
+
       // Mock authentication at the browser level for the dashboard page
       await dashboardPage.addInitScript(() => {
         (window as any).__clerk_user = {
@@ -161,15 +161,18 @@ test.describe('Parent Dashboard Overview', () => {
           emailAddresses: [{ emailAddress: 'parent@test.com' }],
         };
       });
-      
+
       await dashboardPage.goto('http://localhost:4288');
       const content = await dashboardPage.content();
       await dashboardPage.close();
-      
+
       await route.fulfill({
         status: 200,
         contentType: 'text/html',
-        body: content.replace('<title>SIGN IN | Onda AI</title>', '<title>PARENT DASHBOARD | Onda AI</title>'),
+        body: content.replace(
+          '<title>SIGN IN | Onda AI</title>',
+          '<title>PARENT DASHBOARD | Onda AI</title>'
+        ),
       });
     });
 
@@ -177,7 +180,7 @@ test.describe('Parent Dashboard Overview', () => {
 
     // Wait for dashboard to load
     await expect(page.locator('h1')).toContainText('PARENT DASHBOARD');
-    
+
     // Check if children are displayed
     await expect(page.locator('text=Emma (9)')).toBeVisible();
     await expect(page.locator('text=Jake (11)')).toBeVisible();
@@ -225,10 +228,18 @@ test.describe('Parent Dashboard Overview', () => {
     await page.waitForSelector('text=QUICK STATS');
 
     // Check quick stats values
-    await expect(page.locator('text=Total Children:').locator('..').locator('text=2')).toBeVisible();
-    await expect(page.locator('text=This Week\'s Sessions:').locator('..').locator('text=5')).toBeVisible(); // 3+2
-    await expect(page.locator('text=Total Chat Time:').locator('..').locator('text=75 min')).toBeVisible(); // 45+30
-    await expect(page.locator('text=Active Alerts:').locator('..').locator('text=1')).toBeVisible();
+    await expect(
+      page.locator('text=Total Children:').locator('..').locator('text=2')
+    ).toBeVisible();
+    await expect(
+      page.locator("text=This Week's Sessions:").locator('..').locator('text=5')
+    ).toBeVisible(); // 3+2
+    await expect(
+      page.locator('text=Total Chat Time:').locator('..').locator('text=75 min')
+    ).toBeVisible(); // 45+30
+    await expect(
+      page.locator('text=Active Alerts:').locator('..').locator('text=1')
+    ).toBeVisible();
   });
 
   test('displays mood chart for selected child', async ({ page }) => {
@@ -250,8 +261,12 @@ test.describe('Parent Dashboard Overview', () => {
     await page.waitForSelector('text=ALERT CENTER');
 
     // Check alert summary
-    await expect(page.locator('text=Active Alerts').locator('..').locator('text=1')).toBeVisible();
-    await expect(page.locator('text=Resolved').locator('..').locator('text=0')).toBeVisible();
+    await expect(
+      page.locator('text=Active Alerts').locator('..').locator('text=1')
+    ).toBeVisible();
+    await expect(
+      page.locator('text=Resolved').locator('..').locator('text=0')
+    ).toBeVisible();
 
     // Check active alert display
     await expect(page.locator('text=Inappropriate Language')).toBeVisible();
@@ -269,7 +284,9 @@ test.describe('Parent Dashboard Overview', () => {
     await page.click('text=Inappropriate Language');
 
     // Check modal opens
-    await expect(page.locator('text=Some concerning message content')).toBeVisible();
+    await expect(
+      page.locator('text=Some concerning message content')
+    ).toBeVisible();
     await expect(page.locator('text=MARK RESOLVED')).toBeVisible();
     await expect(page.locator('text=CLOSE')).toBeVisible();
   });
@@ -286,10 +303,14 @@ test.describe('Parent Dashboard Overview', () => {
     await page.click('text=CLOSE');
 
     // Modal should be closed
-    await expect(page.locator('text=Some concerning message content')).not.toBeVisible();
+    await expect(
+      page.locator('text=Some concerning message content')
+    ).not.toBeVisible();
   });
 
-  test('opens child creator modal when add child button is clicked', async ({ page }) => {
+  test('opens child creator modal when add child button is clicked', async ({
+    page,
+  }) => {
     await page.goto('/parent/dashboard');
 
     // Wait for dashboard to load and click add child
@@ -345,19 +366,25 @@ test.describe('Parent Dashboard Overview', () => {
     // Test age too low
     await page.fill('input[placeholder="9"]', '5');
     await page.click('text=CREATE ACCOUNT');
-    await expect(page.locator('text=Age must be between 6 and 12')).toBeVisible();
+    await expect(
+      page.locator('text=Age must be between 6 and 12')
+    ).toBeVisible();
 
     // Test age too high
     await page.fill('input[placeholder="9"]', '13');
     await page.click('text=CREATE ACCOUNT');
-    await expect(page.locator('text=Age must be between 6 and 12')).toBeVisible();
+    await expect(
+      page.locator('text=Age must be between 6 and 12')
+    ).toBeVisible();
 
     // Test valid age
     await page.fill('input[placeholder="9"]', '8');
     // Error should clear (we don't need to submit, just check error clears)
   });
 
-  test('validates PIN confirmation in child creation form', async ({ page }) => {
+  test('validates PIN confirmation in child creation form', async ({
+    page,
+  }) => {
     await page.goto('/parent/dashboard');
 
     // Open modal
@@ -376,7 +403,7 @@ test.describe('Parent Dashboard Overview', () => {
 
   test('shows no children state when no children exist', async ({ page }) => {
     // Override children API to return empty array
-    await page.route('/api/children', async (route) => {
+    await page.route('/api/children', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -388,13 +415,17 @@ test.describe('Parent Dashboard Overview', () => {
 
     // Check no children state
     await expect(page.locator('text=GET STARTED')).toBeVisible();
-    await expect(page.locator('text=Add your first child account')).toBeVisible();
+    await expect(
+      page.locator('text=Add your first child account')
+    ).toBeVisible();
     await expect(page.locator('text=ADD CHILD ACCOUNT')).toBeVisible();
   });
 
-  test('shows mood chart placeholder when no child selected', async ({ page }) => {
+  test('shows mood chart placeholder when no child selected', async ({
+    page,
+  }) => {
     // Override to return no children
-    await page.route('/api/children', async (route) => {
+    await page.route('/api/children', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -404,14 +435,14 @@ test.describe('Parent Dashboard Overview', () => {
 
     // Navigate to page and mock child selection somehow
     await page.goto('/parent/dashboard');
-    
+
     // Since there are no children, the mood chart should show placeholder
     // This test case might need adjustment based on actual implementation
   });
 
   test('displays alert center with no alerts state', async ({ page }) => {
     // Override alerts API to return empty array
-    await page.route('/api/safety/alerts*', async (route) => {
+    await page.route('/api/safety/alerts*', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -427,7 +458,9 @@ test.describe('Parent Dashboard Overview', () => {
     // Check no alerts state
     await expect(page.locator('text=🛡️')).toBeVisible();
     await expect(page.locator('text=No safety alerts')).toBeVisible();
-    await expect(page.locator('text=All conversations are safe!')).toBeVisible();
+    await expect(
+      page.locator('text=All conversations are safe!')
+    ).toBeVisible();
   });
 
   test('can refresh alerts using refresh button', async ({ page }) => {

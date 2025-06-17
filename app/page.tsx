@@ -1,6 +1,7 @@
 'use client';
 
 import BrutalButton from '@/components/ui/BrutalButton';
+import Image from 'next/image';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalHeader from '@/components/layout/BrutalHeader';
 import BrutalFooter from '@/components/layout/BrutalFooter';
@@ -26,7 +27,12 @@ export default function BrutalLandingPage() {
       >
         <div className="container mx-auto px-8 py-24 text-center text-on-video">
           <div className="flex justify-center mb-6">
-            <img src="/onda-logo-white.svg" alt="Onda" className="h-16" />
+            <Image
+              src="/onda-logo-white.svg"
+              alt="Onda"
+              width={192}
+              height={192}
+            />
           </div>
           <h1 className="font-rokano text-4xl text-white mb-6">
             BIG ANSWERS FOR LITTLE MINDS

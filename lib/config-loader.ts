@@ -37,9 +37,17 @@ interface SafetyRules {
 interface Persona {
   name: string;
   personality: string;
-  catchphrase: string;
+  catchphrase?: string;
+  catchphrases?: string[];
   interests: string[];
   speaking_style: string;
+  age_adaptations?: Record<
+    string,
+    {
+      style_adjustments?: string;
+      vocabulary_level?: string;
+    }
+  >;
 }
 
 // Removed unused AgeGroup interface
@@ -56,11 +64,34 @@ interface AIPersonas {
 interface SystemPrompts {
   version: string;
   chatPromptTemplate: string;
-  whisperModeInstructions: string;
-  memoryContextTemplate: string;
-  safetyPromptTemplate: string;
-  contextInfoTemplate: string;
-  safetyResponses: Record<string, Record<string, string>>;
+  ageSpecificStyles: Record<
+    string,
+    {
+      school_year: string;
+      style: string;
+      vocabulary_notes: string;
+      interests: string;
+    }
+  >;
+  culturalKnowledge: {
+    gaming: Record<string, string>;
+    youtube: Record<string, string>;
+    tiktok: Record<string, string>;
+    uk_specific: Record<string, string>;
+    current_slang: Record<string, string[]>;
+  };
+  responsePatterns: Record<string, Record<string, string[]>>;
+  modeInstructions: {
+    normal: string;
+    whisper: string;
+    coach?: string;
+  };
+  safetyResponses: Record<string, Record<string, string | string[]>>;
+  // Optional properties for backwards compatibility
+  whisperModeInstructions?: string;
+  memoryContextTemplate?: string;
+  safetyPromptTemplate?: string;
+  contextInfoTemplate?: string;
 }
 
 let safetyRulesCache: SafetyRules | null = null;
@@ -198,7 +229,8 @@ export function buildSystemPrompt(
   childName?: string,
   detectedMood?: string,
   recentTopics?: string[],
-  engagementLevel?: string
+  engagementLevel?: string,
+  parentNotes?: string
 ): string {
   const prompts = loadSystemPrompts();
   const personas = loadAIPersonas();
@@ -208,14 +240,13 @@ export function buildSystemPrompt(
 
   // Get age-specific data
   const schoolYear = age - 5; // UK school year calculation
-  const ageSpecificStyle =
+  const ageSpecificData =
     prompts.ageSpecificStyles[age.toString()] || prompts.ageSpecificStyles['9']; // Default to age 9 style
+  const ageSpecificStyle =
+    ageSpecificData?.style || 'Friendly and age-appropriate conversation style';
 
-  // Get cultural knowledge for the age
-  const culturalKnowledge =
-    prompts.culturalKnowledge[
-      age <= 8 ? 'young' : age <= 10 ? 'middle' : 'older'
-    ];
+  // Get cultural knowledge for the age (use all cultural knowledge)
+  const culturalKnowledge = prompts.culturalKnowledge;
 
   // Get persona age adaptation
   const personaAgeAdaptation =
@@ -226,11 +257,11 @@ export function buildSystemPrompt(
   // Get response patterns based on detected state
   const excitementLevel =
     detectedMood === 'excited'
-      ? 'high'
+      ? 'excitement_matching'
       : detectedMood === 'sad'
-        ? 'sympathetic'
-        : 'normal';
-  const responsePatterns = prompts.responsePatterns[excitementLevel];
+        ? 'sympathy_responses'
+        : 'humor_responses';
+  const responsePatterns = prompts.responsePatterns[excitementLevel] || {};
 
   // Build personality instructions combining persona and age adaptations
   const personalityInstructions = `${personaData.speaking_style}
@@ -273,7 +304,8 @@ ${personaAgeAdaptation.vocabulary_level || ''}`;
       .replace(/{response_patterns}/g, JSON.stringify(responsePatterns))
       .replace(/{time_context}/g, timeContext)
       .replace(/{memory_context}/g, memoryContext)
-      .replace(/{mode_instructions}/g, modeInstructions);
+      .replace(/{mode_instructions}/g, modeInstructions)
+      .replace(/{parent_notes}/g, parentNotes || 'none');
 
     return prompt;
   }
@@ -286,9 +318,11 @@ You're chatting with a ${age} year old child (UK Year ${schoolYear}).
 ${personalityInstructions}
 
 Cultural Knowledge:
-- Games: ${culturalKnowledge.games.join(', ')}
-- YouTubers: ${culturalKnowledge.youtubers.join(', ')}
-- Shows: ${culturalKnowledge.shows.join(', ')}
+- Gaming: ${Object.values(culturalKnowledge.gaming || {}).join(', ')}
+- YouTube: ${Object.values(culturalKnowledge.youtube || {}).join(', ')}
+- Current Slang: ${Object.values(culturalKnowledge.current_slang || {})
+    .flat()
+    .join(', ')}
 
 Age-Specific Style: ${ageSpecificStyle}
 
@@ -298,6 +332,10 @@ Catchphrases: ${personaData.catchphrases?.join(', ') || 'none'}
 ${modeInstructions}
 
 ${memoryContext ? `Previous conversation context: ${memoryContext}` : ''}
+
+${parentNotes ? `IMPORTANT - Parent notes about this child: ${parentNotes}
+
+Please be mindful of these sensitivities when chatting and adjust your responses accordingly. For example, avoid suggesting physical activities if they have mobility limitations, don't mention foods they're allergic to, be gentle if they have anxiety triggers, etc.` : ''}
 
 Current mood: ${detectedMood || 'neutral'}
 Time: ${timeContext}

@@ -33,12 +33,15 @@ interface WeeklySummaryManagerProps {
   children: Array<{ id: string; name: string }>;
 }
 
-export default function WeeklySummaryManager({ children }: WeeklySummaryManagerProps) {
+export default function WeeklySummaryManager({
+  children,
+}: WeeklySummaryManagerProps) {
   const [stats, setStats] = useState<SummaryStats | null>(null);
-  const [loading, setLoading] = useState(false);
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const loadStats = async () => {
+    setLoading(true);
     try {
       const response = await fetch('/api/weekly-summaries/stats');
       if (response.ok) {
@@ -47,6 +50,8 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
       }
     } catch (error) {
       console.error('Error loading summary stats:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,9 +59,12 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
     loadStats();
   }, []);
 
-  const handleGenerateManualSummary = async (childId: string, childName: string) => {
+  const handleGenerateManualSummary = async (
+    childId: string,
+    childName: string
+  ) => {
     setGeneratingFor(childId);
-    
+
     try {
       const response = await fetch('/api/weekly-summaries/manual', {
         method: 'POST',
@@ -119,11 +127,15 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
         <div className="mb-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <div className="bg-white/50 p-2 brutal-shadow-small text-center">
-              <div className="font-bold text-lg">{stats.parentStats.totalSummaries}</div>
+              <div className="font-bold text-lg">
+                {stats.parentStats.totalSummaries}
+              </div>
               <div className="text-xs text-gray-600">Total</div>
             </div>
             <div className="bg-white/50 p-2 brutal-shadow-small text-center">
-              <div className="font-bold text-lg">{stats.parentStats.emailsSent}</div>
+              <div className="font-bold text-lg">
+                {stats.parentStats.emailsSent}
+              </div>
               <div className="text-xs text-gray-600">Sent</div>
             </div>
             <div className="bg-white/50 p-2 brutal-shadow-small text-center">
@@ -134,7 +146,10 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
             </div>
             <div className="bg-white/50 p-2 brutal-shadow-small text-center">
               <div className="font-bold text-lg text-green-600">
-                $0.{Math.round(stats.parentStats.averageTokenCost * 0.0003 * 100).toString().padStart(2, '0')}
+                $0.
+                {Math.round(stats.parentStats.averageTokenCost * 0.0003 * 100)
+                  .toString()
+                  .padStart(2, '0')}
               </div>
               <div className="text-xs text-gray-600">Est. Cost</div>
             </div>
@@ -144,18 +159,27 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
 
       {/* Manual Summary Generation */}
       <div className="mb-6">
-        <h4 className="font-avotica font-bold text-sm mb-3">Generate Manual Summary</h4>
+        <h4 className="font-avotica font-bold text-sm mb-3">
+          Generate Manual Summary
+        </h4>
         <div className="space-y-2">
           {children.map(child => (
-            <div key={child.id} className="flex justify-between items-center p-3 bg-white/50 brutal-shadow-small">
+            <div
+              key={child.id}
+              className="flex justify-between items-center p-3 bg-white/50 brutal-shadow-small"
+            >
               <span className="font-avotica font-bold">{child.name}</span>
               <BrutalButton
                 variant="green"
                 size="small"
-                onClick={() => handleGenerateManualSummary(child.id, child.name)}
+                onClick={() =>
+                  handleGenerateManualSummary(child.id, child.name)
+                }
                 disabled={generatingFor === child.id}
               >
-                {generatingFor === child.id ? 'GENERATING...' : 'GENERATE SUMMARY'}
+                {generatingFor === child.id
+                  ? 'GENERATING...'
+                  : 'GENERATE SUMMARY'}
               </BrutalButton>
             </div>
           ))}
@@ -165,29 +189,40 @@ export default function WeeklySummaryManager({ children }: WeeklySummaryManagerP
       {/* Recent Summaries */}
       {stats && stats.recentSummaries.length > 0 && (
         <div>
-          <h4 className="font-avotica font-bold text-sm mb-3">Recent Summaries</h4>
+          <h4 className="font-avotica font-bold text-sm mb-3">
+            Recent Summaries
+          </h4>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {stats.recentSummaries.map(summary => (
-              <div key={summary.id} className="p-3 bg-white/50 brutal-shadow-small">
+              <div
+                key={summary.id}
+                className="p-3 bg-white/50 brutal-shadow-small"
+              >
                 <div className="flex justify-between items-start mb-1">
-                  <span className="font-avotica font-bold">{summary.childName}</span>
-                  <span className={`text-xs px-2 py-1 brutal-shadow-small border ${
-                    summary.emailSent 
-                      ? 'bg-green-100 text-green-800 border-green-300' 
-                      : 'bg-yellow-100 text-yellow-800 border-yellow-300'
-                  }`}>
+                  <span className="font-avotica font-bold">
+                    {summary.childName}
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-1 brutal-shadow-small border ${
+                      summary.emailSent
+                        ? 'bg-green-100 text-green-800 border-green-300'
+                        : 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                    }`}
+                  >
                     {summary.emailSent ? '✅ Sent' : '⏳ Pending'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-600 grid grid-cols-2 gap-2">
-                  <div>Week: {formatDate(summary.weekStart)} - {formatDate(summary.weekEnd)}</div>
+                  <div>
+                    Week: {formatDate(summary.weekStart)} -{' '}
+                    {formatDate(summary.weekEnd)}
+                  </div>
                   <div>Sessions: {summary.sessionCount}</div>
                   <div>Chat Time: {formatMinutes(summary.totalChatTime)}</div>
                   <div>
-                    {summary.emailSent && summary.emailSentAt 
+                    {summary.emailSent && summary.emailSentAt
                       ? `Sent: ${formatDate(summary.emailSentAt)}`
-                      : `Created: ${formatDate(summary.createdAt)}`
-                    }
+                      : `Created: ${formatDate(summary.createdAt)}`}
                   </div>
                 </div>
               </div>

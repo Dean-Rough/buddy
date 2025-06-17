@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const parent = await prisma.parent.findUnique({
       where: { clerkUserId: userId },
       include: {
-        children: true,
+        childAccounts: true,
       },
     });
 
@@ -31,13 +31,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Parent not found' }, { status: 404 });
     }
 
-    const childNames = parent.children.map(child => child.name);
+    const childAccountIds = parent.childAccounts.map(child => child.id);
 
     // Verify all alerts belong to this parent's children
     const alerts = await prisma.safetyEvent.findMany({
       where: {
         id: { in: alertIds },
-        childName: { in: childNames },
+        childAccountId: { in: childAccountIds },
       },
     });
 
@@ -52,31 +52,26 @@ export async function POST(req: NextRequest) {
     const updateResult = await prisma.safetyEvent.updateMany({
       where: {
         id: { in: alertIds },
-        resolved: false, // Only update unresolved alerts
+        status: 'active', // Only update active alerts
       },
       data: {
-        resolved: true,
         status: 'resolved',
         resolvedAt: new Date(),
-        resolution: resolution || 'reviewed_by_parent',
-        resolutionNotes: notes || 'Bulk resolved via alert management system',
+        moderatorDecision: resolution || 'reviewed_by_parent',
+        moderatorNotes: notes || 'Bulk resolved via alert management system',
       },
     });
 
     // Log the batch resolution action
     await prisma.parentNotification.create({
       data: {
-        parentId: parent.id,
-        type: 'BATCH_ALERT_RESOLUTION',
-        title: 'Bulk Alert Resolution',
-        message: `Resolved ${updateResult.count} safety alerts`,
-        metadata: {
-          alertIds,
-          resolution,
-          notes,
-          resolvedCount: updateResult.count,
-        },
-        read: true, // Mark as read since it's an action they initiated
+        parentClerkUserId: parent.clerkUserId,
+        childAccountId: childAccountIds[0] || '', // Use first child or empty string
+        notificationType: 'BATCH_ALERT_RESOLUTION',
+        subject: 'Bulk Alert Resolution',
+        content: `Resolved ${updateResult.count} safety alerts`,
+        deliveryMethod: 'dashboard',
+        status: 'sent',
       },
     });
 
@@ -85,7 +80,6 @@ export async function POST(req: NextRequest) {
       resolvedCount: updateResult.count,
       message: `Successfully resolved ${updateResult.count} alerts`,
     });
-
   } catch (error) {
     console.error('Error in batch resolve alerts:', error);
     return NextResponse.json(

@@ -175,7 +175,7 @@ export class YouthKnowledgeBase {
 
       return null;
     } catch (_error) {
-      console.error('Cache retrieval __error:', error);
+      console.error('Cache retrieval error:', _error);
       return null;
     }
   }
@@ -212,7 +212,7 @@ export class YouthKnowledgeBase {
         },
       });
     } catch (_error) {
-      console.error('Cache storage __error:', error);
+      console.error('Cache storage error:', _error);
     }
   }
 
@@ -243,7 +243,7 @@ export class YouthKnowledgeBase {
 
       return null;
     } catch (_error) {
-      console.error('Database query __error:', error);
+      console.error('Database query error:', _error);
       return null;
     }
   }
@@ -290,7 +290,7 @@ export class YouthKnowledgeBase {
             await this.trackKnowledgeUsage(entry.id, age, query, match.score);
             return {
               knowledge: this.mapPrismaToKnowledge(entry),
-              confidence: match.score,
+              confidence: match.score || 0,
             };
           }
         }
@@ -298,7 +298,7 @@ export class YouthKnowledgeBase {
 
       return null;
     } catch (_error) {
-      console.error('Vector search __error:', error);
+      console.error('Vector search error:', _error);
       return null;
     }
   }
@@ -365,7 +365,7 @@ export class YouthKnowledgeBase {
 
       return null;
     } catch (_error) {
-      console.error('Safe web search __error:', error);
+      console.error('Safe web search error:', _error);
       return null;
     }
   }
@@ -411,7 +411,7 @@ export class YouthKnowledgeBase {
 
       return this.mapPrismaToKnowledge(entry);
     } catch (_error) {
-      console.error('Knowledge entry creation __error:', error);
+      console.error('Knowledge entry creation error:', _error);
       return null;
     }
   }
@@ -481,7 +481,7 @@ export class YouthKnowledgeBase {
       'natgeokids.com'
     );
 
-    return [...new Set(sources)];
+    return Array.from(new Set(sources));
   }
 
   private sanitizeSearchQuery(query: string, age: number): string {
@@ -595,7 +595,7 @@ export class YouthKnowledgeBase {
 
   private generateFallback(query: string, age: number): string {
     const fallbacks = {
-      game: [
+      gaming: [
         "haven't heard of that game yet - is it new? what's it like?",
         "don't know that one - what kind of game is it?",
         "that's a new one for me - is it on roblox or something else?",

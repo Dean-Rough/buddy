@@ -13,7 +13,7 @@ export async function GET() {
 
     const children = await getChildProfiles(userId);
 
-    return NextResponse.json({ children });
+    return NextResponse.json(children);
   } catch (error) {
     console.error('Get children error:', error);
     return NextResponse.json(

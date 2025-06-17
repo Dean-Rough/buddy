@@ -1,0 +1,216 @@
+{
+  "age_groups": {
+    "6-8": {
+      "description": "Young children developing basic communication and emotional skills",
+      "system_prompt": "You are a child development expert analyzing conversations with a young child (6-8 years old). Focus on play-based learning, basic emotions, family interactions, and early social skills. Use simple, positive language when describing the child's development. Parents at this stage want to understand their child's basic emotional and social growth.",
+      "analysis_focus": [
+        "Play and creativity patterns",
+        "Basic emotional expression and recognition",
+        "Family relationship development",
+        "Simple problem-solving attempts",
+        "Early social interaction skills",
+        "Language development and vocabulary growth"
+      ],
+      "concern_thresholds": {
+        "safety_sensitivity": "high",
+        "emotional_flagging": "gentle",
+        "development_delays": "supportive"
+      },
+      "parent_guidance_style": "encouraging and educational",
+      "vocabulary_level": "simple and clear"
+    },
+    "9-11": {
+      "description": "Middle-grade children developing independence and deeper relationships",
+      "system_prompt": "You are a child development expert analyzing conversations with a middle-grade child (9-11 years old). Focus on developing independence, school life, friendships, interests, and emotional regulation. Parents want to see academic and social development progress while being alerted to any concerns in a balanced way.",
+      "analysis_focus": [
+        "Academic engagement and school experience",
+        "Friendship formation and social dynamics",
+        "Interest exploration and hobby development",
+        "Emotional regulation and coping strategies",
+        "Independence and decision-making skills",
+        "Conflict resolution abilities",
+        "Self-confidence and identity formation"
+      ],
+      "concern_thresholds": {
+        "safety_sensitivity": "standard",
+        "emotional_flagging": "balanced",
+        "development_delays": "informative"
+      },
+      "parent_guidance_style": "balanced support and independence",
+      "vocabulary_level": "age-appropriate with some complexity"
+    },
+    "12+": {
+      "description": "Pre-teens and teens navigating identity, relationships, and increased responsibilities",
+      "system_prompt": "You are a child development expert analyzing conversations with a pre-teen/teen (12+ years old). Focus on identity development, complex friendships, academic pressures, emotional complexity, and emerging independence. Provide honest but supportive insights that help parents understand their child's developmental journey while respecting their growing autonomy.",
+      "analysis_focus": [
+        "Identity and value formation",
+        "Complex social relationship dynamics",
+        "Academic pressures and future planning",
+        "Emotional intelligence and empathy development",
+        "Independence and responsibility growth",
+        "Peer influence and social belonging",
+        "Self-advocacy and communication skills",
+        "Digital citizenship and online interactions"
+      ],
+      "concern_thresholds": {
+        "safety_sensitivity": "nuanced",
+        "emotional_flagging": "respectful",
+        "development_delays": "collaborative"
+      },
+      "parent_guidance_style": "respectful guidance and trust-building",
+      "vocabulary_level": "sophisticated and nuanced"
+    }
+  },
+  "prompt_templates": {
+    "mood_analysis": {
+      "6-8": "Look for basic emotions like happy, sad, excited, or worried. Focus on what makes the child feel good and any simple concerns. Describe emotional patterns in terms parents can easily understand and act on.",
+      "9-11": "Analyze emotional regulation, mood consistency, and emotional vocabulary development. Look for signs of stress, excitement about interests, and social emotional growth. Provide balanced insights about emotional maturity.",
+      "12+": "Examine complex emotional expression, emotional intelligence development, and mood patterns related to identity formation. Consider social pressures, academic stress, and relationship dynamics. Provide nuanced emotional insights."
+    },
+    "safety_assessment": {
+      "6-8": "Be highly sensitive to any concerning content. Focus on basic safety awareness, stranger danger understanding, and appropriate boundaries. Use gentle language to describe any concerns while being thorough in protection.",
+      "9-11": "Monitor for cyberbullying, peer pressure, academic stress, and social conflicts. Look for signs of risk-taking behavior or concerning online interactions. Balance safety awareness with normal developmental exploration.",
+      "12+": "Assess for more complex safety concerns including mental health indicators, risky behaviors, peer pressure, and digital safety. Provide thoughtful analysis that respects growing autonomy while maintaining protective awareness."
+    },
+    "social_development": {
+      "6-8": "Focus on basic social skills like sharing, taking turns, making friends, and family relationships. Look for kindness, empathy development, and cooperation. Highlight positive social interactions and gentle areas for growth.",
+      "9-11": "Analyze friendship quality, group dynamics, conflict resolution skills, and social confidence. Look for inclusion/exclusion patterns, leadership development, and peer relationship health. Provide insights about social maturity.",
+      "12+": "Examine complex social navigation, peer influence, relationship boundaries, and social identity development. Consider digital social interactions, group belonging, and emerging romantic interests. Provide sophisticated social insights."
+    },
+    "academic_engagement": {
+      "6-8": "Look for curiosity, interest in learning, and school adjustment. Focus on basic academic concepts, following instructions, and learning enthusiasm. Highlight creative thinking and problem-solving attempts.",
+      "9-11": "Analyze academic motivation, study habits, subject preferences, and learning challenges. Look for academic confidence, goal-setting, and educational interests. Provide insights about learning style and academic development.",
+      "12+": "Examine academic pressure management, future planning, subject mastery, and learning independence. Consider study strategies, academic goals, and career interests. Provide nuanced academic development insights."
+    },
+    "recommendations": {
+      "6-8": "Provide simple, actionable suggestions focused on play-based learning, routine establishment, and positive reinforcement. Suggest family activities, reading together, and creative play opportunities.",
+      "9-11": "Offer balanced recommendations for independence development, skill-building activities, and family connection. Suggest hobby exploration, social skill development, and academic support strategies.",
+      "12+": "Provide respectful recommendations that honor growing independence while maintaining family connection. Suggest communication strategies, trust-building activities, and guidance approaches."
+    }
+  },
+  "response_formatting": {
+    "summary_length": {
+      "6-8": "2-3 simple sentences focusing on positive development",
+      "9-11": "3-4 sentences with balanced development insights",
+      "12+": "4-5 sentences with nuanced developmental analysis"
+    },
+    "highlights_count": {
+      "6-8": "2-3 simple positive highlights",
+      "9-11": "3-4 balanced highlights showing growth",
+      "12+": "4-5 sophisticated highlights showing development"
+    },
+    "concerns_approach": {
+      "6-8": "Gentle, protective language with clear next steps",
+      "9-11": "Balanced concern expression with support suggestions",
+      "12+": "Respectful concern identification with collaborative solutions"
+    },
+    "recommendations_style": {
+      "6-8": "Simple, fun activities and gentle guidance",
+      "9-11": "Skill-building opportunities and balanced support",
+      "12+": "Collaborative approaches and trust-building strategies"
+    }
+  },
+  "safety_escalation": {
+    "immediate_concerns": [
+      "self-harm indicators",
+      "abuse mentions",
+      "dangerous behavior planning",
+      "severe distress signals"
+    ],
+    "moderate_concerns": [
+      "persistent sad mood",
+      "social isolation",
+      "academic struggles",
+      "peer conflicts"
+    ],
+    "monitoring_areas": [
+      "mood changes",
+      "interest shifts",
+      "social pattern changes",
+      "communication style changes"
+    ]
+  },
+  "developmental_milestones": {
+    "6-8": {
+      "emotional": [
+        "Basic emotion identification",
+        "Simple empathy",
+        "Comfort seeking"
+      ],
+      "social": [
+        "Parallel play to cooperative play",
+        "Friend preferences",
+        "Rule following"
+      ],
+      "cognitive": [
+        "Concrete thinking",
+        "Basic problem solving",
+        "Learning enthusiasm"
+      ],
+      "communication": ["Storytelling", "Question asking", "Opinion expression"]
+    },
+    "9-11": {
+      "emotional": [
+        "Emotion regulation strategies",
+        "Complex empathy",
+        "Mood awareness"
+      ],
+      "social": [
+        "Best friend relationships",
+        "Group dynamics",
+        "Conflict resolution"
+      ],
+      "cognitive": [
+        "Abstract thinking emergence",
+        "Planning skills",
+        "Interest specialization"
+      ],
+      "communication": [
+        "Persuasion attempts",
+        "Humor development",
+        "Perspective taking"
+      ]
+    },
+    "12+": {
+      "emotional": [
+        "Identity formation",
+        "Emotional complexity",
+        "Independence seeking"
+      ],
+      "social": [
+        "Peer group importance",
+        "Romantic interest",
+        "Social justice awareness"
+      ],
+      "cognitive": [
+        "Abstract reasoning",
+        "Future planning",
+        "Critical thinking"
+      ],
+      "communication": [
+        "Debate skills",
+        "Sarcasm use",
+        "Adult-like discussions"
+      ]
+    }
+  },
+  "cultural_considerations": {
+    "uk_specific": {
+      "school_system": [
+        "Primary school years",
+        "Secondary school transition",
+        "GCSE preparation"
+      ],
+      "social_context": [
+        "UK playground culture",
+        "British humor development",
+        "Local community involvement"
+      ],
+      "language_patterns": [
+        "British slang adoption",
+        "Regional accent influence",
+        "Politeness conventions"
+      ]
+    }
+  }
+}

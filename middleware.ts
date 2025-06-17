@@ -25,9 +25,22 @@ export default authMiddleware({
         (sessionClaims?.metadata as any)?.userType ||
         (sessionClaims?.unsafeMetadata as any)?.userType;
 
-      // All authenticated users should access /chat (unified experience)
-      if (userType === 'parent' || userType === 'child') {
-        // Redirect authenticated users away from landing page to chat
+      // Handle parent users
+      if (userType === 'parent') {
+        // Redirect authenticated parents away from landing page to parent dashboard
+        if (url.pathname === '/' || url.pathname === '/sign-in') {
+          return Response.redirect(new URL('/parent', req.url));
+        }
+
+        // Redirect away from onboarding if already authenticated
+        if (url.pathname.startsWith('/onboarding')) {
+          return Response.redirect(new URL('/parent', req.url));
+        }
+      }
+
+      // Handle child users
+      if (userType === 'child') {
+        // Redirect authenticated children away from landing page to chat
         if (url.pathname === '/' || url.pathname === '/sign-in') {
           return Response.redirect(new URL('/chat', req.url));
         }

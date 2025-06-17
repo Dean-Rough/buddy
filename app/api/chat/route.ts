@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Get child profile
     const child = await prisma.childAccount.findUnique({
       where: { id: childAccountId },
-      select: { id: true, name: true, age: true, persona: true },
+      select: { id: true, name: true, age: true, persona: true, parentNotes: true },
     });
 
     if (!child) {
@@ -175,7 +175,8 @@ export async function POST(request: NextRequest) {
       child.persona,
       memoryContext,
       whisperMode,
-      child.name
+      child.name,
+      child.parentNotes || undefined
     );
 
     // Step 4: Safety validate AI response (belt and suspenders)

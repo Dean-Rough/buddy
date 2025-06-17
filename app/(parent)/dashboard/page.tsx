@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ChildProfileCreator from '@/components/parent/ChildProfileCreator';
 import ActivityCard from '@/components/parent/ActivityCard';
 import AlertCenter from '@/components/parent/AlertCenter';
@@ -43,25 +43,16 @@ interface SafetyAlert {
   resolved: boolean;
 }
 
-interface ParentSettings {
-  emailSummaryEnabled: boolean;
-  emailSummaryFrequency: string;
-}
-
 export default function ParentDashboardOverview() {
   const { user, isLoaded } = useUser();
   const [children, setChildren] = useState<ChildAccount[]>([]);
-  const [settings, setSettings] = useState<ParentSettings>({
-    emailSummaryEnabled: true,
-    emailSummaryFrequency: 'weekly',
-  });
   const [recentUsage, setRecentUsage] = useState<DailyUsage[]>([]);
   const [safetyAlerts, setSafetyAlerts] = useState<SafetyAlert[]>([]);
   const [selectedChild, setSelectedChild] = useState<string>('');
   const [showChildCreator, setShowChildCreator] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       // Load children
       const childrenResponse = await fetch('/api/children');
@@ -86,19 +77,12 @@ export default function ParentDashboardOverview() {
         const alertsData = await alertsResponse.json();
         setSafetyAlerts(alertsData);
       }
-
-      // Load parent settings
-      const settingsResponse = await fetch('/api/parent/settings');
-      if (settingsResponse.ok) {
-        const settingsData = await settingsResponse.json();
-        setSettings(settingsData);
-      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedChild]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -254,7 +238,7 @@ export default function ParentDashboardOverview() {
                     <span className="font-bold">{children.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>This Week's Sessions:</span>
+                    <span>This Week&apos;s Sessions:</span>
                     <span className="font-bold">
                       {getSelectedChildUsage().reduce(
                         (sum, usage) => sum + usage.sessionCount,
@@ -268,7 +252,8 @@ export default function ParentDashboardOverview() {
                       {getSelectedChildUsage().reduce(
                         (sum, usage) => sum + usage.totalMinutes,
                         0
-                      )} min
+                      )}{' '}
+                      min
                     </span>
                   </div>
                   <div className="flex justify-between">

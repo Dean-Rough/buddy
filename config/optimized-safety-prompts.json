@@ -1,0 +1,77 @@
+{
+  "optimized_prompts": {
+    "base_system_prompt": "You are a child safety validator. Analyze the message for safety concerns. Respond ONLY with a JSON object.",
+    "response_schema": {
+      "isSafe": "boolean",
+      "severity": "number (0-3)",
+      "reason": "string (max 50 chars)",
+      "flaggedTerms": "array of strings"
+    },
+    "age_specific_context": {
+      "6-8": "Very young child. High sensitivity for any concerning content.",
+      "9-11": "School-age child. Monitor for bullying, academic stress, peer issues.",
+      "12+": "Pre-teen/teen. Consider identity development, peer pressure, emotional complexity."
+    },
+    "severity_guidelines": {
+      "0": "Safe content - no concerns",
+      "1": "Monitor - log for patterns but allow",
+      "2": "Concern - warn child and log for parent review",
+      "3": "Critical - block and immediately notify parents"
+    },
+    "optimization_techniques": {
+      "prompt_compression": "Use minimal, precise language",
+      "token_efficiency": "Prioritize essential safety checks only",
+      "response_format": "Structured JSON for consistent parsing",
+      "context_focus": "Include only relevant recent context (max 2 messages)"
+    }
+  },
+  "fast_validation_prompt": "Analyze child message for safety. Age: {age}. Context: {context}. Message: '{message}'. JSON response: {\"isSafe\": bool, \"severity\": 0-3, \"reason\": \"brief\", \"flaggedTerms\": [\"terms\"]}",
+  "batch_validation_prompt": "Analyze these {count} child messages for safety concerns. Age: {age}. Messages: {messages}. Return JSON array with same format for each message.",
+  "emotional_support_prompt": "Child (age {age}) expressing distress: '{message}'. Context: {context}. Safety analysis JSON: {\"isSafe\": bool, \"severity\": 0-3, \"reason\": \"brief\", \"supportNeeded\": bool, \"flaggedTerms\": []}",
+  "pattern_analysis_prompt": "Analyze conversation pattern for child (age {age}). Recent messages: {messages}. Detect concerning trends. JSON: {\"isSafe\": bool, \"severity\": 0-3, \"patterns\": [\"patterns\"], \"reason\": \"brief\"}",
+  "critical_assessment_prompt": "URGENT: Assess critical content from child (age {age}): '{message}'. Immediate safety analysis needed. JSON: {\"isSafe\": bool, \"severity\": 0-3, \"immediateAction\": \"string\", \"reason\": \"brief\"}",
+  "performance_optimizations": {
+    "max_tokens": 150,
+    "temperature": 0.1,
+    "top_p": 0.95,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "model_selection": "gpt-4o-mini",
+    "timeout_ms": 5000,
+    "retry_attempts": 2,
+    "batch_size": 5
+  },
+  "caching_strategies": {
+    "cache_duration_hours": 1,
+    "cache_similar_messages": true,
+    "normalize_before_cache": true,
+    "age_range_flexibility": 1,
+    "context_sensitivity": "low"
+  },
+  "fallback_triggers": {
+    "api_timeout_ms": 5000,
+    "consecutive_failures": 3,
+    "error_rate_threshold": 0.1,
+    "service_health_check_interval": 30000
+  },
+  "prompt_variants": {
+    "quick_scan": "Quick safety check: '{message}' (age {age}). Safe? JSON: {\"isSafe\": bool, \"severity\": 0-3}",
+    "detailed_analysis": "Detailed safety analysis for child (age {age}): '{message}'. Context: {context}. Full assessment JSON: {\"isSafe\": bool, \"severity\": 0-3, \"reason\": \"detailed\", \"recommendedAction\": \"string\", \"flaggedTerms\": []}",
+    "context_heavy": "Child conversation safety check. Age: {age}. Full context: {fullContext}. Current message: '{message}'. Comprehensive JSON analysis required.",
+    "emergency_triage": "EMERGENCY TRIAGE: '{message}' from {age}yr old. Immediate risk assessment JSON: {\"severity\": 0-3, \"immediateRisk\": bool, \"escalate\": bool}"
+  },
+  "response_time_targets": {
+    "quick_scan_ms": 500,
+    "standard_analysis_ms": 1500,
+    "detailed_analysis_ms": 3000,
+    "emergency_triage_ms": 1000,
+    "batch_processing_ms": 2000
+  },
+  "quality_metrics": {
+    "accuracy_threshold": 0.95,
+    "false_positive_max": 0.05,
+    "false_negative_max": 0.01,
+    "response_consistency": 0.9,
+    "cache_hit_target": 0.7
+  }
+}

@@ -13,14 +13,14 @@ vi.mock('@/lib/voice', () => ({
       stability: 0.8,
     },
     'wise-jellyfish': {
-      voiceId: 'voice2', 
+      voiceId: 'voice2',
       model: 'sonic-english',
       speed: 0.9,
       stability: 0.9,
     },
     'chill-robot': {
       voiceId: 'voice3',
-      model: 'sonic-english', 
+      model: 'sonic-english',
       speed: 1.0,
       stability: 0.8,
     },
@@ -32,15 +32,23 @@ vi.mock('@/lib/voice', () => ({
 // Mock the UI components
 vi.mock('@/components/ui/BrutalCard', () => ({
   default: function BrutalCard({ children, className, variant }: any) {
-    return <div className={`brutal-card ${variant} ${className}`}>{children}</div>;
+    return (
+      <div className={`brutal-card ${variant} ${className}`}>{children}</div>
+    );
   },
 }));
 
 vi.mock('@/components/ui/BrutalButton', () => ({
-  default: function BrutalButton({ children, onClick, variant, size, disabled }: any) {
+  default: function BrutalButton({
+    children,
+    onClick,
+    variant,
+    size,
+    disabled,
+  }: any) {
     return (
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         className={`brutal-button ${variant} ${size}`}
         disabled={disabled}
       >
@@ -108,7 +116,9 @@ describe('VoiceSettings', () => {
       />
     );
 
-    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('onda-voice-settings');
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
+      'onda-voice-settings'
+    );
   });
 
   it('toggles voice enabled setting', async () => {
@@ -119,10 +129,12 @@ describe('VoiceSettings', () => {
       />
     );
 
-    const voiceEnabledSection = screen.getByText('Voice Enabled').closest('div');
+    const voiceEnabledSection = screen
+      .getByText('Voice Enabled')
+      .closest('div');
     const toggleButton = voiceEnabledSection?.querySelector('button');
     expect(toggleButton).toBeInTheDocument();
-    
+
     fireEvent.click(toggleButton!);
 
     await waitFor(() => {
@@ -187,10 +199,11 @@ describe('VoiceSettings', () => {
       />
     );
 
-    const autoPlayToggle = screen.getByText('Auto-play Messages')
+    const autoPlayToggle = screen
+      .getByText('Auto-play Messages')
       .closest('div')
       ?.querySelector('button');
-    
+
     expect(autoPlayToggle).toBeInTheDocument();
     fireEvent.click(autoPlayToggle!);
 
@@ -211,7 +224,9 @@ describe('VoiceSettings', () => {
       />
     );
 
-    expect(screen.getByText('Current Voice: Wise Jellyfish')).toBeInTheDocument();
+    expect(
+      screen.getByText('Current Voice: Wise Jellyfish')
+    ).toBeInTheDocument();
   });
 
   it('shows whisper mode information when active', () => {
@@ -224,12 +239,14 @@ describe('VoiceSettings', () => {
     );
 
     expect(screen.getByText('🌙 Whisper Mode Active')).toBeInTheDocument();
-    expect(screen.getByText(/Voice is automatically adjusted for a calming/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Voice is automatically adjusted for a calming/)
+    ).toBeInTheDocument();
   });
 
   it('tests voice playback when test button clicked', async () => {
     const { synthesizeSpeech } = await import('@/lib/voice');
-    
+
     render(
       <VoiceSettings
         currentPersona="friendly-raccoon"
@@ -242,7 +259,9 @@ describe('VoiceSettings', () => {
 
     await waitFor(() => {
       expect(synthesizeSpeech).toHaveBeenCalledWith({
-        text: expect.stringContaining("Hey there! I'm your friendly raccoon buddy"),
+        text: expect.stringContaining(
+          "Hey there! I'm your friendly raccoon buddy"
+        ),
         persona: 'friendly-raccoon',
         childAge: 8,
         whisperMode: false,
@@ -264,7 +283,9 @@ describe('VoiceSettings', () => {
       />
     );
 
-    expect(screen.getByText(/Voice features require Cartesia API key/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Voice features require Cartesia API key/)
+    ).toBeInTheDocument();
   });
 
   it('calls onClose when close button clicked', () => {
@@ -324,7 +345,7 @@ describe('VoiceSettings', () => {
 
   it('handles voice synthesis errors gracefully', async () => {
     const { synthesizeSpeech } = await import('@/lib/voice');
-    synthesizeSpeech.mockRejectedValue(new Error('Synthesis failed'));
+    (synthesizeSpeech as any).mockRejectedValue(new Error('Synthesis failed'));
 
     render(
       <VoiceSettings
@@ -344,7 +365,7 @@ describe('VoiceSettings', () => {
 
   it('uses correct test text for different personas', async () => {
     const { synthesizeSpeech } = await import('@/lib/voice');
-    
+
     render(
       <VoiceSettings
         currentPersona="wise-jellyfish"
@@ -357,7 +378,7 @@ describe('VoiceSettings', () => {
 
     await waitFor(() => {
       expect(synthesizeSpeech).toHaveBeenCalledWith({
-        text: expect.stringContaining("Hello, young explorer"),
+        text: expect.stringContaining('Hello, young explorer'),
         persona: 'wise-jellyfish',
         childAge: 8,
         whisperMode: false,
@@ -374,7 +395,9 @@ describe('VoiceSettings', () => {
     );
 
     expect(screen.getByText('💡 Voice Features')).toBeInTheDocument();
-    expect(screen.getByText(/Age-appropriate speech speed/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Age-appropriate speech speed/)
+    ).toBeInTheDocument();
     expect(screen.getByText(/High-quality Cartesia TTS/)).toBeInTheDocument();
     expect(screen.getByText(/Cached for faster playback/)).toBeInTheDocument();
   });

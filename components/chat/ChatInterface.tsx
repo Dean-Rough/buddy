@@ -69,7 +69,7 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
-          childId: childProfile.id,
+          childAccountId: childProfile.id,
           conversationId,
         }),
       });
@@ -136,36 +136,36 @@ export default function ChatInterface({ childProfile }: ChatInterfaceProps) {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <div className="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div className="bg-blue-500 shadow-sm p-4 flex justify-between items-center">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+            <span className="text-blue-500 font-bold">
               {childProfile.name.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900">
+            <h2 className="font-semibold text-white">
               Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-sm text-gray-600">Chatting with Onda</p>
+            <p className="text-sm text-blue-100">Chatting with Onda</p>
           </div>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => router.push('/parent')}
-            className="text-sm text-green-600 hover:text-green-700 px-3 py-1 rounded border border-green-200 hover:bg-green-50"
+            className="text-sm text-white hover:text-blue-100 px-3 py-1 rounded border border-white/30 hover:bg-white/10"
           >
             Parent Dashboard
           </button>
           <button
             onClick={() => router.push('/whisper')}
-            className="text-sm text-purple-600 hover:text-purple-700 px-3 py-1 rounded border border-purple-200 hover:bg-purple-50"
+            className="text-sm text-white hover:text-blue-100 px-3 py-1 rounded border border-white/30 hover:bg-white/10"
           >
             Whisper Mode
           </button>
           <button
             onClick={logout}
-            className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded"
+            className="text-sm text-white hover:text-blue-100 px-3 py-1 rounded hover:bg-white/10"
           >
             Logout
           </button>

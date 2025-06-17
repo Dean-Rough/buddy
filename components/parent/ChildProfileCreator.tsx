@@ -32,8 +32,8 @@ export default function ChildProfileCreator({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -271,7 +271,7 @@ export default function ChildProfileCreator({
         </h4>
         <ul className="text-sm text-blue-700 space-y-1">
           <li>• All conversations are monitored for safety</li>
-          <li>• You'll receive alerts for any concerning content</li>
+          <li>• You&apos;ll receive alerts for any concerning content</li>
           <li>• Data is encrypted and COPPA compliant</li>
           <li>• You can delete the account and all data anytime</li>
         </ul>

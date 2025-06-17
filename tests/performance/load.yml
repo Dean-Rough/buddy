@@ -1,0 +1,134 @@
+config:
+  target: 'http://localhost:4288'
+  phases:
+    # Warm-up phase
+    - duration: 30
+      arrivalRate: 2
+      name: 'Warm-up'
+    # Ramp up
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: 'Ramp up load'
+    # Sustained load
+    - duration: 120
+      arrivalRate: 20
+      name: 'Sustained load'
+    # Peak load test
+    - duration: 60
+      arrivalRate: 20
+      rampTo: 50
+      name: 'Peak load'
+    # Cool down
+    - duration: 30
+      arrivalRate: 50
+      rampTo: 5
+      name: 'Cool down'
+  variables:
+    # Sample child account for testing
+    childAccountId: 'test-child-{{$randomString()}}'
+    sessionId: 'session-{{$randomString()}}'
+  plugins:
+    metrics-by-endpoint:
+      # Track metrics per endpoint
+      useOnlyRequestNames: true
+  processor: './load-processor.js'
+
+scenarios:
+  # Test chat message flow (most critical path)
+  - name: 'Chat Message Flow'
+    weight: 60
+    flow:
+      - post:
+          url: '/api/chat/message'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            message: "{{ $randomElement(['Hello!', 'How are you?', 'Tell me a joke', 'What is 2+2?', 'I feel sad today', 'Can you help me with homework?']) }}"
+            childAccountId: '{{ childAccountId }}'
+            sessionId: '{{ sessionId }}'
+          capture:
+            - json: '$.response'
+              as: 'chatResponse'
+            - json: '$.safety.blocked'
+              as: 'safetyBlocked'
+          expect:
+            - statusCode: [200, 400, 401, 422] # Accept auth errors in load test
+            - contentType: 'application/json'
+          measure:
+            - 'response_time'
+            - 'chat_processing_time'
+
+  # Test safety validation endpoint
+  - name: 'Safety Validation'
+    weight: 20
+    flow:
+      - post:
+          url: '/api/safety/validate'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            message: "{{ $randomElement(['This is a test message', 'Can you help me?', 'I want to learn about science']) }}"
+            childAge: '{{ $randomInt(6, 12) }}'
+          expect:
+            - statusCode: [200, 400, 401]
+            - contentType: 'application/json'
+          measure:
+            - 'safety_processing_time'
+
+  # Test time status checks
+  - name: 'Time Status Check'
+    weight: 10
+    flow:
+      - get:
+          url: '/api/chat/time-status'
+          qs:
+            childAccountId: '{{ childAccountId }}'
+          expect:
+            - statusCode: [200, 401, 404]
+            - contentType: 'application/json'
+          measure:
+            - 'time_check_duration'
+
+  # Test static content serving
+  - name: 'Static Content'
+    weight: 10
+    flow:
+      - get:
+          url: '/'
+          expect:
+            - statusCode: 200
+          measure:
+            - 'page_load_time'
+
+# Performance thresholds
+expects:
+  # API Response time should be under 2 seconds
+  - stat: 'response_time.p95'
+    value: 2000
+    op: '<'
+    comment: '95% of API responses should be under 2s'
+
+  # Safety processing should be under 10 seconds
+  - stat: 'safety_processing_time.p95'
+    value: 10000
+    op: '<'
+    comment: '95% of safety validations should be under 10s'
+
+  # Chat processing should be under 5 seconds
+  - stat: 'chat_processing_time.p95'
+    value: 5000
+    op: '<'
+    comment: '95% of chat responses should be under 5s'
+
+  # Error rate should be low (excluding auth errors which are expected)
+  - stat: 'http.response.5xx.rate'
+    value: 0.05
+    op: '<'
+    comment: 'Server error rate should be under 5%'
+
+  # Page load should be fast
+  - stat: 'page_load_time.p95'
+    value: 3000
+    op: '<'
+    comment: '95% of page loads should be under 3s'
