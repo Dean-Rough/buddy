@@ -7,6 +7,8 @@ import ChildProfileCreator from '@/components/parent/ChildProfileCreator';
 import ActivityCard from '@/components/parent/ActivityCard';
 import AlertCenter from '@/components/parent/AlertCenter';
 import MoodChart from '@/components/parent/MoodChart';
+import FamilyAnalyticsCard from '@/components/parent/FamilyAnalyticsCard';
+import SiblingInteractionInsights from '@/components/parent/SiblingInteractionInsights';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
 
@@ -198,76 +200,130 @@ export default function ParentDashboardOverview() {
           </div>
         ) : (
           /* Dashboard with Data */
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {/* Activity Summary Cards */}
-            <div className="xl:col-span-2 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {getSelectedChildUsage()
-                  .slice(0, 4)
-                  .map(usage => (
-                    <ActivityCard
-                      key={usage.id}
-                      usage={usage}
-                      childName={
-                        children.find(c => c.id === selectedChild)?.name || ''
-                      }
-                    />
-                  ))}
+          <div className="space-y-6">
+            {/* Multi-Child Analytics Row (show for families with 2+ children) */}
+            {children.length > 1 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <FamilyAnalyticsCard />
+                <SiblingInteractionInsights />
+              </div>
+            )}
+
+            {/* Individual Child Data */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* Activity Summary Cards */}
+              <div className="xl:col-span-2 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {getSelectedChildUsage()
+                    .slice(0, 4)
+                    .map(usage => (
+                      <ActivityCard
+                        key={usage.id}
+                        usage={usage}
+                        childName={
+                          children.find(c => c.id === selectedChild)?.name || ''
+                        }
+                      />
+                    ))}
+                </div>
+
+                {/* Mood Chart */}
+                <MoodChart
+                  childId={selectedChild}
+                  usageData={getSelectedChildUsage()}
+                />
               </div>
 
-              {/* Mood Chart */}
-              <MoodChart
-                childId={selectedChild}
-                usageData={getSelectedChildUsage()}
-              />
-            </div>
+              {/* Alert Center Sidebar */}
+              <div className="space-y-6">
+                <AlertCenter
+                  alerts={getSelectedChildAlerts()}
+                  onRefresh={loadDashboardData}
+                />
 
-            {/* Alert Center Sidebar */}
-            <div className="space-y-6">
-              <AlertCenter
-                alerts={getSelectedChildAlerts()}
-                onRefresh={loadDashboardData}
-              />
-
-              {/* Quick Stats */}
-              <BrutalCard variant="yellow">
-                <h3 className="font-rokano text-xl mb-4">QUICK STATS</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Total Children:</span>
-                    <span className="font-bold">{children.length}</span>
+                {/* Quick Stats */}
+                <BrutalCard variant="yellow">
+                  <h3 className="font-rokano text-xl mb-4">QUICK STATS</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total Children:</span>
+                      <span className="font-bold">{children.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>This Week&apos;s Sessions:</span>
+                      <span className="font-bold">
+                        {getSelectedChildUsage().reduce(
+                          (sum, usage) => sum + usage.sessionCount,
+                          0
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Chat Time:</span>
+                      <span className="font-bold">
+                        {getSelectedChildUsage().reduce(
+                          (sum, usage) => sum + usage.totalMinutes,
+                          0
+                        )}{' '}
+                        min
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Active Alerts:</span>
+                      <span className="font-bold text-red-600">
+                        {
+                          getSelectedChildAlerts().filter(
+                            alert => !alert.resolved
+                          ).length
+                        }
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>This Week&apos;s Sessions:</span>
-                    <span className="font-bold">
-                      {getSelectedChildUsage().reduce(
-                        (sum, usage) => sum + usage.sessionCount,
-                        0
+                </BrutalCard>
+
+                {/* Multi-Child Quick Insights (for single column layout) */}
+                {children.length > 1 && (
+                  <BrutalCard variant="blue">
+                    <h3 className="font-rokano text-lg mb-4">FAMILY OVERVIEW</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Active Today:</span>
+                        <span className="font-bold">
+                          {children.filter(child => 
+                            getSelectedChildUsage().some(usage => usage.sessionCount > 0)
+                          ).length}/{children.length}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Family Sessions:</span>
+                        <span className="font-bold">
+                          {children.reduce((total, child) => {
+                            const childUsage = recentUsage.filter(usage => 
+                              children.find(c => c.id === child.id)
+                            );
+                            return total + childUsage.reduce((sum, usage) => sum + usage.sessionCount, 0);
+                          }, 0)}
+                        </span>
+                      </div>
+                      {children.length <= 5 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <div className="text-xs text-gray-600 mb-2">Today&apos;s Activity</div>
+                          {children.map(child => (
+                            <div key={child.id} className="flex justify-between text-xs">
+                              <span>{child.name}:</span>
+                              <span>
+                                {recentUsage
+                                  .filter(usage => children.find(c => c.id === child.id))
+                                  .reduce((sum, usage) => sum + usage.totalMinutes, 0)} min
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Chat Time:</span>
-                    <span className="font-bold">
-                      {getSelectedChildUsage().reduce(
-                        (sum, usage) => sum + usage.totalMinutes,
-                        0
-                      )}{' '}
-                      min
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Active Alerts:</span>
-                    <span className="font-bold text-red-600">
-                      {
-                        getSelectedChildAlerts().filter(
-                          alert => !alert.resolved
-                        ).length
-                      }
-                    </span>
-                  </div>
-                </div>
-              </BrutalCard>
+                    </div>
+                  </BrutalCard>
+                )}
+              </div>
             </div>
           </div>
         )}

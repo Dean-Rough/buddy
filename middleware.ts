@@ -1,12 +1,33 @@
 import { authMiddleware } from '@clerk/nextjs';
+import { NextResponse } from 'next/server';
 
 export default authMiddleware({
+  // Add error handling
+  onError(error, req) {
+    console.error('Clerk middleware error:', error);
+    // For debugging in production, return 500 instead of default behavior
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Authentication middleware error',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal error',
+        path: req.nextUrl.pathname,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 500,
+        headers: {
+          'content-type': 'application/json',
+        },
+      }
+    );
+  },
   // Public routes that don't require authentication
   publicRoutes: [
     '/', // Landing page
     '/sign-in', // Clerk sign-in page
     '/sign-up', // Clerk sign-up page (if needed)
     '/api/auth/create-child', // Child account creation API
+    '/api/debug/middleware', // Debug route for troubleshooting
   ],
 
   // Routes that require authentication but handle user type internally

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { getMemoryContext, extractMemoriesFromMessage } from '@/lib/memory';
 import { TimeManager } from '@/lib/time-management';
 import { ContextAwareWarnings } from '@/lib/context-aware-warnings';
+import { SiblingInteractionManager } from '@/lib/multi-child/sibling-interaction';
 
 export async function POST(request: NextRequest) {
   try {
@@ -221,6 +222,35 @@ export async function POST(request: NextRequest) {
         messageCount: { increment: 2 },
         lastActivity: new Date(),
       },
+    });
+
+    // Step 6: Detect potential sibling interactions (async, don't block response)
+    const allTopics = conversation.messages
+      .flatMap(m => (conversation as any).topics || [])
+      .concat(recentMessages.flatMap(msg => {
+        // Extract topics from message content (simplified)
+        const topicPatterns = [
+          'minecraft', 'roblox', 'fortnite', 'pokemon', 'football', 'soccer',
+          'youtube', 'tiktok', 'school', 'homework', 'friends', 'family'
+        ];
+        return topicPatterns.filter(pattern => 
+          msg.toLowerCase().includes(pattern)
+        );
+      }));
+
+    // Detect sibling interaction without blocking the response
+    SiblingInteractionManager.detectSiblingInteraction(
+      child.id,
+      message,
+      [...new Set(allTopics)],
+      {
+        messageCount: conversation.messageCount + 2,
+        mood: conversationContext?.mood,
+        timeOfDay: new Date().getHours() < 12 ? 'morning' : 
+                   new Date().getHours() < 18 ? 'afternoon' : 'evening',
+      }
+    ).catch(error => {
+      console.error('Error detecting sibling interaction:', error);
     });
 
     // Generate time warning if needed
