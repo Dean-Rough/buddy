@@ -38,6 +38,11 @@ model Parent {
   familyCalendarContext    FamilyCalendarContext?
   calendarComplianceAudits CalendarComplianceAudit[]
   
+  // Content control relations
+  topicRules               TopicRule[]
+  contentAlerts            ContentAlert[]
+  educationalSuggestions   EducationalSuggestion[]
+  
   @@map("parents")
 }
 
@@ -72,6 +77,12 @@ model ChildAccount {
   conversationContexts  ConversationContext[]
   dailyUsage            DailyUsage[]
   weeklySummaries       WeeklySummary[]
+  
+  // Content control relations
+  topicRules            TopicRule[]
+  contentAlerts         ContentAlert[]
+  contentScores         ContentScore[]
+  educationalSuggestions EducationalSuggestion[]
   
   @@index([parentClerkUserId])
   @@index([username])
@@ -108,6 +119,8 @@ model Conversation {
   childAccount ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
   messages     Message[]
   safetyEvents SafetyEvent[]
+  contentAlerts ContentAlert[]
+  contentScores ContentScore[]
   
   @@index([childAccountId, startedAt(sort: Desc)])
   @@index([safetyLevel, startedAt(sort: Desc)])
@@ -139,6 +152,8 @@ model Message {
   // Relations
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   safetyEvents SafetyEvent[]
+  contentAlerts ContentAlert[]
+  contentScores ContentScore[]
   
   @@index([conversationId, createdAt])
   @@index([humanReviewed, safetyScore(sort: Desc)])
@@ -850,4 +865,143 @@ model CalendarSyncMetric {
   @@index([credentialsId, syncCompleted(sort: Desc)])
   @@index([syncDuration, eventsProcessed])
   @@map("calendar_sync_metrics")
+}
+
+// ========================================
+// ADVANCED CONTENT CONTROL SYSTEM
+// ========================================
+
+// Topic rules for content filtering and management
+model TopicRule {
+  id                String   @id @default(cuid())
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  childAccountId    String?  @map("child_account_id") // null means applies to all children
+  
+  // Rule definition
+  topic             String   @db.Text
+  category          String   // ContentCategory enum values
+  action            String   // TopicAction enum values: 'allow', 'block', 'monitor', 'redirect'
+  score             Int      // ContentScore enum values (1-5)
+  reason            String   @db.Text
+  
+  // Metadata
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  parent            Parent       @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  childAccount      ChildAccount? @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  
+  @@index([parentClerkUserId, updatedAt(sort: Desc)])
+  @@index([childAccountId, updatedAt(sort: Desc)])
+  @@index([category, action])
+  @@index([topic])
+  @@map("topic_rules")
+}
+
+// Content alerts for parent notifications
+model ContentAlert {
+  id                String   @id @default(cuid())
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  childAccountId    String   @map("child_account_id")
+  conversationId    String   @map("conversation_id")
+  messageId         String   @map("message_id")
+  
+  // Alert details
+  severity          String   // AlertSeverity enum: 'info', 'warning', 'critical'
+  category          String   // ContentCategory enum
+  topic             String   @db.Text
+  content           String   @db.Text // Limited content snippet
+  reason            String   @db.Text
+  action            String   // TopicAction taken
+  
+  // Status
+  acknowledged      Boolean  @default(false)
+  acknowledgedAt    DateTime? @map("acknowledged_at")
+  
+  // Timestamps
+  timestamp         DateTime @default(now())
+  
+  // Relations
+  parent            Parent       @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  childAccount      ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  message           Message      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  @@index([parentClerkUserId, timestamp(sort: Desc)])
+  @@index([childAccountId, timestamp(sort: Desc)])
+  @@index([severity, acknowledged])
+  @@index([category, timestamp(sort: Desc)])
+  @@map("content_alerts")
+}
+
+// Content appropriateness scoring history
+model ContentScore {
+  id                String   @id @default(cuid())
+  childAccountId    String   @map("child_account_id")
+  conversationId    String   @map("conversation_id")
+  messageId         String   @map("message_id")
+  
+  // Analysis results
+  topics            String[] // Extracted topics
+  category          String   // ContentCategory
+  score             Int      // Appropriateness score (1-5)
+  confidence        Decimal  @db.Decimal(3,2) // Confidence level (0-1)
+  flags             String[] // Warning flags
+  educationalValue  Decimal  @db.Decimal(3,2) // Educational value (0-1)
+  
+  // Processing metadata
+  analysisMethod    String   @map("analysis_method") // 'ai', 'rule_based', 'hybrid'
+  processingTime    Int      @map("processing_time") // milliseconds
+  
+  // Timestamps
+  analyzedAt        DateTime @default(now()) @map("analyzed_at")
+  
+  // Relations
+  childAccount      ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  message           Message      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  @@unique([messageId]) // One score per message
+  @@index([childAccountId, analyzedAt(sort: Desc)])
+  @@index([category, score])
+  @@index([score, educationalValue])
+  @@map("content_scores")
+}
+
+// Educational suggestions based on content analysis
+model EducationalSuggestion {
+  id                String   @id @default(cuid())
+  parentClerkUserId String   @map("parent_clerk_user_id")
+  childAccountId    String   @map("child_account_id")
+  
+  // Suggestion details
+  topic             String   @db.Text
+  category          String   // ContentCategory
+  suggestion        String   @db.Text
+  reason            String   @db.Text
+  resources         String[] // Educational resource links/descriptions
+  
+  // Status
+  presented         Boolean  @default(false)
+  presentedAt       DateTime? @map("presented_at")
+  parentViewed      Boolean  @default(false) @map("parent_viewed")
+  parentRating      Int?     @map("parent_rating") // 1-5 star rating
+  
+  // Source tracking
+  sourceType        String   @map("source_type") // 'conversation_analysis', 'parent_request', 'curriculum_based'
+  sourceId          String?  @map("source_id") // ID of source (conversation, message, etc.)
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  expiresAt         DateTime @map("expires_at")
+  
+  // Relations
+  parent            Parent       @relation(fields: [parentClerkUserId], references: [clerkUserId], onDelete: Cascade)
+  childAccount      ChildAccount @relation(fields: [childAccountId], references: [id], onDelete: Cascade)
+  
+  @@index([parentClerkUserId, createdAt(sort: Desc)])
+  @@index([childAccountId, presented, expiresAt])
+  @@index([category, parentRating])
+  @@map("educational_suggestions")
 }

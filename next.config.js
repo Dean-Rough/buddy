@@ -8,6 +8,10 @@ const nextConfig = {
     // Temporarily ignore ESLint errors during build
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    // Disable strict mode that might cause issues
+    swcMinify: false,
+  },
 };
 
 module.exports = nextConfig;

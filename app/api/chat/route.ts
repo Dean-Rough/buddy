@@ -6,6 +6,7 @@ import { getMemoryContext, extractMemoriesFromMessage } from '@/lib/memory';
 import { TimeManager } from '@/lib/time-management';
 import { ContextAwareWarnings } from '@/lib/context-aware-warnings';
 import { SiblingInteractionManager } from '@/lib/multi-child/sibling-interaction';
+import { RealTimeContentMonitor } from '@/lib/content-control/real-time-monitor';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,14 @@ export async function POST(request: NextRequest) {
     // Get child profile
     const child = await prisma.childAccount.findUnique({
       where: { id: childAccountId },
-      select: { id: true, name: true, age: true, persona: true, parentNotes: true },
+      select: { 
+        id: true, 
+        name: true, 
+        age: true, 
+        persona: true, 
+        parentNotes: true,
+        parentClerkUserId: true 
+      },
     });
 
     if (!child) {
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
       const safetyResponse = getSafetyResponse(safetyResult, child.age);
 
       // Still log the child's message (for parent review)
-      await prisma.message.create({
+      const childMessage = await prisma.message.create({
         data: {
           conversationId: conversation.id,
           content: message,
@@ -129,6 +137,21 @@ export async function POST(request: NextRequest) {
           safetyFlags: safetyResult.flaggedTerms,
         },
       });
+
+      // Perform content monitoring even for blocked messages
+      await RealTimeContentMonitor.monitorMessage(
+        child.parentClerkUserId,
+        child.id,
+        conversation.id,
+        childMessage.id,
+        message,
+        {
+          enableRealTimeAlerts: true,
+          parentNotificationThreshold: 1, // Lower threshold for blocked content
+          bypassForEmergency: false,
+          logAllAnalysis: true
+        }
+      );
 
       // Log safety response
       await prisma.message.create({
@@ -193,7 +216,7 @@ export async function POST(request: NextRequest) {
       : "I'm sorry, I'm having trouble thinking of a good response right now. Could you ask me something else?";
 
     // Step 5: Save messages to database
-    await prisma.message.create({
+    const childMessage = await prisma.message.create({
       data: {
         conversationId: conversation.id,
         content: message,
@@ -213,6 +236,23 @@ export async function POST(request: NextRequest) {
         safetyFlags: responseValidation.flaggedTerms,
         processingTimeMs: Date.now() - Date.now(), // TODO: implement proper timing
       },
+    });
+
+    // Step 5.5: Perform advanced content monitoring (async to not block response)
+    const contentMonitoringPromise = RealTimeContentMonitor.monitorMessage(
+      child.parentClerkUserId,
+      child.id,
+      conversation.id,
+      childMessage.id,
+      message,
+      {
+        enableRealTimeAlerts: true,
+        parentNotificationThreshold: 2, // Standard threshold for safe content
+        bypassForEmergency: false,
+        logAllAnalysis: true
+      }
+    ).catch(error => {
+      console.error('Content monitoring error:', error);
     });
 
     // Step 5: Update conversation stats
@@ -245,7 +285,7 @@ export async function POST(request: NextRequest) {
       [...new Set(allTopics)],
       {
         messageCount: conversation.messageCount + 2,
-        mood: conversationContext?.mood,
+        mood: conversationContext?.childMood || 'neutral',
         timeOfDay: new Date().getHours() < 12 ? 'morning' : 
                    new Date().getHours() < 18 ? 'afternoon' : 'evening',
       }
