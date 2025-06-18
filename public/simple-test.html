@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: white; 
+            color: black;
+        }
+        .success {
+            background: green;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple HTML Test</h1>
+    <div class="success">SUCCESS: Static files are serving correctly</div>
+    <p>This is a static HTML file served from /public/simple-test.html</p>
+    <p>If you see this, the Vercel deployment is working at the static file level.</p>
+    <script>
+        console.log('🔍 Simple HTML page loaded successfully');
+        document.body.innerHTML += '<div class="success">JavaScript is working</div>';
+    </script>
+</body>
+</html>
