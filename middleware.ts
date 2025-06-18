@@ -1,6 +1,13 @@
 import { authMiddleware } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 
+// Temporarily bypass Clerk for debugging
+export default function middleware() {
+  console.log('🔍 Middleware bypassed for debugging');
+  return NextResponse.next();
+}
+
+/* 
 export default authMiddleware({
   // Add error handling
   onError(error, req) {
@@ -109,6 +116,7 @@ export default authMiddleware({
     }
   },
 });
+*/
 
 export const config = {
   matcher: [
