@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import '../styles/fonts.css';
 import '../styles/brutalist.css';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Initialize why-did-you-render in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -23,11 +24,27 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Add debugging for production
+  if (typeof window !== 'undefined') {
+    console.log('🔍 Root Layout rendering on client');
+    window.addEventListener('error', (e) => {
+      console.error('🚨 Global error:', e.error);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('🚨 Unhandled promise rejection:', e.reason);
+    });
+  }
+
   return (
     <ClerkProvider>
       <html lang="en">
         <body className="font-avotica">
-          <main>{children}</main>
+          <div id="debug-info" style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '4px', fontSize: '12px', zIndex: 9999 }}>
+            Layout Loaded
+          </div>
+          <ErrorBoundary>
+            <main>{children}</main>
+          </ErrorBoundary>
         </body>
       </html>
     </ClerkProvider>

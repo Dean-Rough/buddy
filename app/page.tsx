@@ -11,6 +11,14 @@ import { Ban, Target, Eye, Shield, Users, Clock } from 'lucide-react';
 export default function BrutalLandingPage() {
   const { handleAuthFlow } = useAuthFlow();
 
+  // Add debugging
+  console.log('🔍 Landing page rendering');
+  
+  // Add error boundary
+  if (typeof window !== 'undefined') {
+    console.log('🔍 Landing page on client side');
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
