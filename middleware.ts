@@ -27,6 +27,8 @@ export default authMiddleware({
   // Public routes that don't require authentication
   publicRoutes: [
     '/', // Landing page
+    '/test', // Test page for debugging
+    '/debug-auth', // Auth debug page
     '/sign-in', // Clerk sign-in page
     '/sign-up', // Clerk sign-up page (if needed)
     '/api/auth/create-child', // Child account creation API
