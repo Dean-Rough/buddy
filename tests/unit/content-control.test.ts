@@ -3,13 +3,21 @@
  * Comprehensive testing for content filtering, topic management, and real-time monitoring
  */
 
-import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from 'vitest';
-import { 
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  beforeAll,
+  afterAll,
+} from 'vitest';
+import {
   AdvancedFilteringEngine,
   ContentCategory,
   TopicAction,
   ContentScore,
-  AlertSeverity
+  AlertSeverity,
 } from '@/lib/content-control/advanced-filtering-engine';
 import { TopicManagementService } from '@/lib/content-control/topic-management';
 import { RealTimeContentMonitor } from '@/lib/content-control/real-time-monitor';
@@ -23,31 +31,31 @@ vi.mock('@/lib/prisma', () => ({
       findMany: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
-      deleteMany: vi.fn()
+      deleteMany: vi.fn(),
     },
     contentAlert: {
       create: vi.fn(),
       findMany: vi.fn(),
-      updateMany: vi.fn()
+      updateMany: vi.fn(),
     },
     contentScore: {
       create: vi.fn(),
-      findMany: vi.fn()
+      findMany: vi.fn(),
     },
     childAccount: {
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
     },
     conversation: {
       findUnique: vi.fn(),
-      findMany: vi.fn()
+      findMany: vi.fn(),
     },
     parentSettings: {
-      upsert: vi.fn()
+      upsert: vi.fn(),
     },
     parentNotification: {
-      create: vi.fn()
-    }
-  }
+      create: vi.fn(),
+    },
+  },
 }));
 
 describe('AdvancedFilteringEngine', () => {
@@ -60,7 +68,10 @@ describe('AdvancedFilteringEngine', () => {
       const content = 'I want to learn about science and math homework';
       const childAge = 10;
 
-      const analysis = await AdvancedFilteringEngine.analyzeContent(content, childAge);
+      const analysis = await AdvancedFilteringEngine.analyzeContent(
+        content,
+        childAge
+      );
 
       expect(analysis.category).toBe(ContentCategory.EDUCATIONAL);
       expect(analysis.score).toBeGreaterThanOrEqual(ContentScore.GOOD);
@@ -74,7 +85,10 @@ describe('AdvancedFilteringEngine', () => {
       const content = 'I want to do something dangerous and harmful';
       const childAge = 8;
 
-      const analysis = await AdvancedFilteringEngine.analyzeContent(content, childAge);
+      const analysis = await AdvancedFilteringEngine.analyzeContent(
+        content,
+        childAge
+      );
 
       expect(analysis.score).toBeLessThanOrEqual(ContentScore.CONCERNING);
       expect(analysis.flags).toContain('concerning_content');
@@ -85,15 +99,21 @@ describe('AdvancedFilteringEngine', () => {
       const content = 'complex advanced theoretical physics concepts';
       const childAge = 6;
 
-      const analysis = await AdvancedFilteringEngine.analyzeContent(content, childAge);
+      const analysis = await AdvancedFilteringEngine.analyzeContent(
+        content,
+        childAge
+      );
 
       expect(analysis.flags).toContain('too_advanced');
     });
 
     it('should handle analysis errors gracefully', async () => {
       // Mock an error in content analysis
-      const originalExtractTopics = (AdvancedFilteringEngine as any).extractTopics;
-      (AdvancedFilteringEngine as any).extractTopics = vi.fn().mockRejectedValue(new Error('Analysis failed'));
+      const originalExtractTopics = (AdvancedFilteringEngine as any)
+        .extractTopics;
+      (AdvancedFilteringEngine as any).extractTopics = vi
+        .fn()
+        .mockRejectedValue(new Error('Analysis failed'));
 
       const content = 'test content';
       const analysis = await AdvancedFilteringEngine.analyzeContent(content, 8);
@@ -115,12 +135,14 @@ describe('AdvancedFilteringEngine', () => {
           id: 'rule1',
           topic: 'video games',
           action: TopicAction.MONITOR,
-          category: ContentCategory.ENTERTAINMENT
-        }
+          category: ContentCategory.ENTERTAINMENT,
+        },
       ];
 
       // Mock getApplicableRules
-      (AdvancedFilteringEngine as any).getApplicableRules = vi.fn().mockResolvedValue(mockRules);
+      (AdvancedFilteringEngine as any).getApplicableRules = vi
+        .fn()
+        .mockResolvedValue(mockRules);
 
       const analysis = {
         topics: ['video games', 'fun'],
@@ -129,7 +151,7 @@ describe('AdvancedFilteringEngine', () => {
         confidence: 0.8,
         flags: [],
         educationalValue: 0.3,
-        appropriatenessReason: 'Entertainment content'
+        appropriatenessReason: 'Entertainment content',
       };
 
       const result = await AdvancedFilteringEngine.applyTopicRules(
@@ -149,11 +171,13 @@ describe('AdvancedFilteringEngine', () => {
           id: 'rule1',
           topic: 'general',
           action: TopicAction.ALLOW,
-          category: ContentCategory.EDUCATIONAL
-        }
+          category: ContentCategory.EDUCATIONAL,
+        },
       ];
 
-      (AdvancedFilteringEngine as any).getApplicableRules = vi.fn().mockResolvedValue(mockRules);
+      (AdvancedFilteringEngine as any).getApplicableRules = vi
+        .fn()
+        .mockResolvedValue(mockRules);
 
       const analysis = {
         topics: ['math', 'learning'],
@@ -162,7 +186,7 @@ describe('AdvancedFilteringEngine', () => {
         confidence: 0.9,
         flags: [],
         educationalValue: 0.9,
-        appropriatenessReason: 'Educational content'
+        appropriatenessReason: 'Educational content',
       };
 
       const result = await AdvancedFilteringEngine.applyTopicRules(
@@ -176,7 +200,9 @@ describe('AdvancedFilteringEngine', () => {
     });
 
     it('should default to monitoring for concerning content', async () => {
-      (AdvancedFilteringEngine as any).getApplicableRules = vi.fn().mockResolvedValue([]);
+      (AdvancedFilteringEngine as any).getApplicableRules = vi
+        .fn()
+        .mockResolvedValue([]);
 
       const analysis = {
         topics: ['unknown'],
@@ -185,7 +211,7 @@ describe('AdvancedFilteringEngine', () => {
         confidence: 0.5,
         flags: ['concerning_flag'],
         educationalValue: 0.1,
-        appropriatenessReason: 'Concerning content'
+        appropriatenessReason: 'Concerning content',
       };
 
       const result = await AdvancedFilteringEngine.applyTopicRules(
@@ -217,7 +243,7 @@ describe('TopicManagementService', () => {
         score: ContentScore.GOOD,
         reason: 'Educational content should be encouraged',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       (prisma.topicRule.create as any).mockResolvedValue(mockRule);
@@ -227,7 +253,7 @@ describe('TopicManagementService', () => {
         childAccountId: 'child123',
         topic: 'homework',
         action: TopicAction.ALLOW,
-        reason: 'Educational content should be encouraged'
+        reason: 'Educational content should be encouraged',
       });
 
       expect(result).toEqual(mockRule);
@@ -237,8 +263,8 @@ describe('TopicManagementService', () => {
           childAccountId: 'child123',
           topic: 'homework',
           action: TopicAction.ALLOW,
-          reason: 'Educational content should be encouraged'
-        })
+          reason: 'Educational content should be encouraged',
+        }),
       });
     });
 
@@ -252,7 +278,7 @@ describe('TopicManagementService', () => {
         score: ContentScore.GOOD,
         reason: 'Educational content',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       (prisma.topicRule.create as any).mockResolvedValue(mockRule);
@@ -261,13 +287,13 @@ describe('TopicManagementService', () => {
         parentClerkUserId: 'parent123',
         topic: 'math homework',
         action: TopicAction.ALLOW,
-        reason: 'Educational content'
+        reason: 'Educational content',
       });
 
       expect(prisma.topicRule.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          category: ContentCategory.EDUCATIONAL
-        })
+          category: ContentCategory.EDUCATIONAL,
+        }),
       });
     });
   });
@@ -279,24 +305,28 @@ describe('TopicManagementService', () => {
           messages: [
             {
               content: 'I love playing minecraft with my friends',
-              createdAt: new Date()
+              createdAt: new Date(),
             },
             {
               content: 'Can we talk about minecraft again?',
-              createdAt: new Date()
-            }
-          ]
-        }
+              createdAt: new Date(),
+            },
+          ],
+        },
       ];
 
       const mockExistingRules = [];
 
-      (prisma.conversation.findMany as any).mockResolvedValue(mockConversations);
-      (TopicManagementService as any).getTopicRulesWithStats = vi.fn().mockResolvedValue(mockExistingRules);
+      (prisma.conversation.findMany as any).mockResolvedValue(
+        mockConversations
+      );
+      (TopicManagementService as any).getTopicRulesWithStats = vi
+        .fn()
+        .mockResolvedValue(mockExistingRules);
 
       // Mock child age
       (prisma.childAccount.findUnique as any).mockResolvedValue({
-        dateOfBirth: new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000) // 10 years old
+        dateOfBirth: new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000), // 10 years old
       });
 
       const suggestions = await TopicManagementService.getTopicSuggestions(
@@ -317,18 +347,20 @@ describe('TopicManagementService', () => {
           messages: [
             {
               content: 'I love playing minecraft',
-              createdAt: new Date()
-            }
-          ]
-        }
+              createdAt: new Date(),
+            },
+          ],
+        },
       ];
 
-      const mockExistingRules = [
-        { topic: 'minecraft' }
-      ];
+      const mockExistingRules = [{ topic: 'minecraft' }];
 
-      (prisma.conversation.findMany as any).mockResolvedValue(mockConversations);
-      (TopicManagementService as any).getTopicRulesWithStats = vi.fn().mockResolvedValue(mockExistingRules);
+      (prisma.conversation.findMany as any).mockResolvedValue(
+        mockConversations
+      );
+      (TopicManagementService as any).getTopicRulesWithStats = vi
+        .fn()
+        .mockResolvedValue(mockExistingRules);
 
       const suggestions = await TopicManagementService.getTopicSuggestions(
         'parent123',
@@ -350,13 +382,13 @@ describe('RealTimeContentMonitor', () => {
     it('should monitor message and return results', async () => {
       // Mock child age
       (prisma.childAccount.findUnique as any).mockResolvedValue({
-        dateOfBirth: new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000) // 10 years old
+        dateOfBirth: new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000), // 10 years old
       });
 
       // Mock conversation context
       (prisma.conversation.findUnique as any).mockResolvedValue({
         topics: ['games'],
-        mood: 'happy'
+        mood: 'happy',
       });
 
       // Mock content analysis
@@ -367,17 +399,19 @@ describe('RealTimeContentMonitor', () => {
         confidence: 0.8,
         flags: [],
         educationalValue: 0.3,
-        appropriatenessReason: 'Entertainment content'
+        appropriatenessReason: 'Entertainment content',
       };
 
       const originalAnalyzeContent = AdvancedFilteringEngine.analyzeContent;
-      AdvancedFilteringEngine.analyzeContent = vi.fn().mockResolvedValue(mockAnalysis);
+      AdvancedFilteringEngine.analyzeContent = vi
+        .fn()
+        .mockResolvedValue(mockAnalysis);
 
       // Mock rule application
       const originalApplyTopicRules = AdvancedFilteringEngine.applyTopicRules;
       AdvancedFilteringEngine.applyTopicRules = vi.fn().mockResolvedValue({
         action: TopicAction.ALLOW,
-        overrideReason: 'Default allow'
+        overrideReason: 'Default allow',
       });
 
       const result = await RealTimeContentMonitor.monitorMessage(
@@ -390,7 +424,7 @@ describe('RealTimeContentMonitor', () => {
           enableRealTimeAlerts: true,
           parentNotificationThreshold: 2,
           bypassForEmergency: false,
-          logAllAnalysis: true
+          logAllAnalysis: true,
         }
       );
 
@@ -407,12 +441,12 @@ describe('RealTimeContentMonitor', () => {
 
     it('should create alerts for concerning content', async () => {
       (prisma.childAccount.findUnique as any).mockResolvedValue({
-        dateOfBirth: new Date(Date.now() - 8 * 365 * 24 * 60 * 60 * 1000) // 8 years old
+        dateOfBirth: new Date(Date.now() - 8 * 365 * 24 * 60 * 60 * 1000), // 8 years old
       });
 
       (prisma.conversation.findUnique as any).mockResolvedValue({
         topics: [],
-        mood: 'neutral'
+        mood: 'neutral',
       });
 
       const mockAnalysis = {
@@ -422,21 +456,24 @@ describe('RealTimeContentMonitor', () => {
         confidence: 0.9,
         flags: ['concerning_content'],
         educationalValue: 0.0,
-        appropriatenessReason: 'Inappropriate content detected'
+        appropriatenessReason: 'Inappropriate content detected',
       };
 
       const originalAnalyzeContent = AdvancedFilteringEngine.analyzeContent;
-      AdvancedFilteringEngine.analyzeContent = vi.fn().mockResolvedValue(mockAnalysis);
+      AdvancedFilteringEngine.analyzeContent = vi
+        .fn()
+        .mockResolvedValue(mockAnalysis);
 
       const originalApplyTopicRules = AdvancedFilteringEngine.applyTopicRules;
       AdvancedFilteringEngine.applyTopicRules = vi.fn().mockResolvedValue({
-        action: TopicAction.BLOCK
+        action: TopicAction.BLOCK,
       });
 
-      const originalCreateContentAlert = AdvancedFilteringEngine.createContentAlert;
+      const originalCreateContentAlert =
+        AdvancedFilteringEngine.createContentAlert;
       AdvancedFilteringEngine.createContentAlert = vi.fn().mockResolvedValue({
         id: 'alert123',
-        severity: AlertSeverity.CRITICAL
+        severity: AlertSeverity.CRITICAL,
       });
 
       const result = await RealTimeContentMonitor.monitorMessage(
@@ -449,7 +486,7 @@ describe('RealTimeContentMonitor', () => {
           enableRealTimeAlerts: true,
           parentNotificationThreshold: 3,
           bypassForEmergency: false,
-          logAllAnalysis: true
+          logAllAnalysis: true,
         }
       );
 
@@ -467,7 +504,9 @@ describe('RealTimeContentMonitor', () => {
     it('should handle monitoring errors gracefully', async () => {
       // Mock the private getChildAge method to throw an error
       const originalGetChildAge = (RealTimeContentMonitor as any).getChildAge;
-      (RealTimeContentMonitor as any).getChildAge = vi.fn().mockRejectedValue(new Error('Database error'));
+      (RealTimeContentMonitor as any).getChildAge = vi
+        .fn()
+        .mockRejectedValue(new Error('Database error'));
 
       const result = await RealTimeContentMonitor.monitorMessage(
         'parent123',
@@ -479,14 +518,16 @@ describe('RealTimeContentMonitor', () => {
           enableRealTimeAlerts: true,
           parentNotificationThreshold: 2,
           bypassForEmergency: false,
-          logAllAnalysis: true
+          logAllAnalysis: true,
         }
       );
 
       expect(result.allowed).toBe(true); // Fail-safe
       expect(result.action).toBe(TopicAction.MONITOR);
       expect(result.score).toBe(2); // Concerning due to error
-      expect(result.warnings).toContain('Content analysis failed - manual review recommended');
+      expect(result.warnings).toContain(
+        'Content analysis failed - manual review recommended'
+      );
 
       // Restore original method
       (RealTimeContentMonitor as any).getChildAge = originalGetChildAge;
@@ -500,8 +541,8 @@ describe('RealTimeContentMonitor', () => {
           id: 'alert1',
           parentClerkUserId: 'parent123',
           category: ContentCategory.ENTERTAINMENT,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       ];
 
       const mockScores = [
@@ -510,15 +551,15 @@ describe('RealTimeContentMonitor', () => {
           childAccountId: 'child123',
           category: ContentCategory.ENTERTAINMENT,
           score: 3,
-          analyzedAt: new Date()
+          analyzedAt: new Date(),
         },
         {
           id: 'score2',
           childAccountId: 'child123',
           category: ContentCategory.EDUCATIONAL,
           score: 5,
-          analyzedAt: new Date()
-        }
+          analyzedAt: new Date(),
+        },
       ];
 
       (prisma.contentAlert.findMany as any).mockResolvedValue(mockAlerts);
@@ -553,12 +594,12 @@ describe('RealTimeContentMonitor', () => {
         where: {
           id: { in: ['alert1', 'alert2'] },
           parentClerkUserId: 'parent123',
-          acknowledged: false
+          acknowledged: false,
         },
         data: {
           acknowledged: true,
-          acknowledgedAt: expect.any(Date)
-        }
+          acknowledgedAt: expect.any(Date),
+        },
       });
     });
   });
@@ -569,42 +610,45 @@ describe('Integration Tests', () => {
     // Mock complete workflow: analyze -> apply rules -> monitor -> alert
     const content = 'I want to talk about inappropriate things';
     const childAge = 8;
-    
+
     // Mock all the database calls
     (prisma.childAccount.findUnique as any).mockResolvedValue({
-      dateOfBirth: new Date(Date.now() - childAge * 365 * 24 * 60 * 60 * 1000)
+      dateOfBirth: new Date(Date.now() - childAge * 365 * 24 * 60 * 60 * 1000),
     });
-    
+
     (prisma.conversation.findUnique as any).mockResolvedValue({
       topics: [],
-      mood: 'neutral'
+      mood: 'neutral',
     });
-    
+
     (prisma.topicRule.findMany as any).mockResolvedValue([
       {
         id: 'rule1',
         topic: 'things', // Match the word "things" in the content
         action: TopicAction.BLOCK,
-        category: ContentCategory.SOCIAL
-      }
+        category: ContentCategory.SOCIAL,
+      },
     ]);
-    
+
     (prisma.contentAlert.create as any).mockResolvedValue({
       id: 'alert123',
-      severity: AlertSeverity.CRITICAL
+      severity: AlertSeverity.CRITICAL,
     });
 
     // Test the complete workflow
-    const analysis = await AdvancedFilteringEngine.analyzeContent(content, childAge);
+    const analysis = await AdvancedFilteringEngine.analyzeContent(
+      content,
+      childAge
+    );
     expect(analysis.category).toBe(ContentCategory.SOCIAL); // Content contains "talk" so categorized as social
-    
+
     const ruleResult = await AdvancedFilteringEngine.applyTopicRules(
       'parent123',
       'child123',
       analysis
     );
     expect(ruleResult.action).toBe(TopicAction.MONITOR); // Default behavior for concerning content
-    
+
     const monitorResult = await RealTimeContentMonitor.monitorMessage(
       'parent123',
       'child123',
@@ -615,10 +659,10 @@ describe('Integration Tests', () => {
         enableRealTimeAlerts: true,
         parentNotificationThreshold: 1,
         bypassForEmergency: false,
-        logAllAnalysis: true
+        logAllAnalysis: true,
       }
     );
-    
+
     expect(monitorResult.allowed).toBe(true); // Monitor allows but logs
     expect(monitorResult.alertCreated).toBe(true); // Alert created due to concerning content flags
   });
@@ -630,14 +674,14 @@ describe('Content Control API Integration', () => {
     (prisma.topicRule.create as any).mockResolvedValue({
       id: 'rule123',
       topic: 'homework',
-      action: TopicAction.ALLOW
+      action: TopicAction.ALLOW,
     });
 
     const rule = await TopicManagementService.createTopicRule({
       parentClerkUserId: 'parent123',
       topic: 'homework',
       action: TopicAction.ALLOW,
-      reason: 'Educational content'
+      reason: 'Educational content',
     });
 
     expect(rule.topic).toBe('homework');
@@ -653,8 +697,12 @@ describe('Content Control API Integration', () => {
       'parent123',
       'child123',
       [
-        { topic: 'minecraft', action: TopicAction.ALLOW, reason: 'Creative game' },
-        { topic: 'homework', action: TopicAction.ALLOW, reason: 'Educational' }
+        {
+          topic: 'minecraft',
+          action: TopicAction.ALLOW,
+          reason: 'Creative game',
+        },
+        { topic: 'homework', action: TopicAction.ALLOW, reason: 'Educational' },
       ]
     );
 

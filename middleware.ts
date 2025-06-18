@@ -9,7 +9,10 @@ export default authMiddleware({
     return new NextResponse(
       JSON.stringify({
         error: 'Authentication middleware error',
-        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal error',
+        details:
+          process.env.NODE_ENV === 'development'
+            ? error.message
+            : 'Internal error',
         path: req.nextUrl.pathname,
         timestamp: new Date().toISOString(),
       }),

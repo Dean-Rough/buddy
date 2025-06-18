@@ -515,8 +515,12 @@ Return a JSON response with this structure:
       main_interests: ['Regular conversation topics'],
       learning_moments: `${data.childName} had ${data.totalSessions} chat sessions this week totaling ${data.totalChatTime} minutes.`,
       social_emotional: 'Active participation in conversations',
-      safety_status: data.safetyEvents.length > 0 ? 'needs_attention' : 'all_good',
-      safety_details: data.safetyEvents.length > 0 ? 'Some safety events detected - please review' : 'No safety concerns',
+      safety_status:
+        data.safetyEvents.length > 0 ? 'needs_attention' : 'all_good',
+      safety_details:
+        data.safetyEvents.length > 0
+          ? 'Some safety events detected - please review'
+          : 'No safety concerns',
       highlights: ['Active participation in conversations'],
       suggested_conversations: ['Continue encouraging regular communication'],
     };

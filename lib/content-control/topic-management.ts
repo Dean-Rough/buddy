@@ -4,12 +4,12 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { 
-  TopicRule, 
-  TopicAction, 
-  ContentCategory, 
+import {
+  TopicRule,
+  TopicAction,
+  ContentCategory,
   ContentScore,
-  AdvancedFilteringEngine 
+  AdvancedFilteringEngine,
 } from './advanced-filtering-engine';
 
 export interface CreateTopicRuleRequest {
@@ -43,18 +43,21 @@ export interface TopicSuggestion {
 }
 
 export class TopicManagementService {
-  
   /**
    * Create a new topic rule
    */
-  static async createTopicRule(request: CreateTopicRuleRequest): Promise<TopicRule> {
+  static async createTopicRule(
+    request: CreateTopicRuleRequest
+  ): Promise<TopicRule> {
     try {
       // Auto-categorize topic if not provided
-      const category = request.category || await this.categorizeTopicIntelligently(request.topic);
-      
+      const category =
+        request.category ||
+        (await this.categorizeTopicIntelligently(request.topic));
+
       // Determine default score based on action
       const score = this.getDefaultScoreForAction(request.action);
-      
+
       const rule = await prisma.topicRule.create({
         data: {
           parentClerkUserId: request.parentClerkUserId,
@@ -63,10 +66,10 @@ export class TopicManagementService {
           category,
           action: request.action,
           score,
-          reason: request.reason
-        }
+          reason: request.reason,
+        },
       });
-      
+
       return rule as TopicRule;
     } catch (error) {
       console.error('Failed to create topic rule:', error);
@@ -85,21 +88,21 @@ export class TopicManagementService {
     try {
       // Verify ownership
       const existingRule = await prisma.topicRule.findFirst({
-        where: { id: ruleId, parentClerkUserId }
+        where: { id: ruleId, parentClerkUserId },
       });
-      
+
       if (!existingRule) {
         throw new Error('Topic rule not found or access denied');
       }
-      
+
       const rule = await prisma.topicRule.update({
         where: { id: ruleId },
         data: {
           ...updates,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       });
-      
+
       return rule as TopicRule;
     } catch (error) {
       console.error('Failed to update topic rule:', error);
@@ -110,12 +113,15 @@ export class TopicManagementService {
   /**
    * Delete a topic rule
    */
-  static async deleteTopicRule(ruleId: string, parentClerkUserId: string): Promise<void> {
+  static async deleteTopicRule(
+    ruleId: string,
+    parentClerkUserId: string
+  ): Promise<void> {
     try {
       const result = await prisma.topicRule.deleteMany({
-        where: { id: ruleId, parentClerkUserId }
+        where: { id: ruleId, parentClerkUserId },
       });
-      
+
       if (result.count === 0) {
         throw new Error('Topic rule not found or access denied');
       }
@@ -135,33 +141,32 @@ export class TopicManagementService {
     try {
       const whereClause = {
         parentClerkUserId,
-        ...(childAccountId ? { 
-          OR: [
-            { childAccountId },
-            { childAccountId: null }
-          ]
-        } : {})
+        ...(childAccountId
+          ? {
+              OR: [{ childAccountId }, { childAccountId: null }],
+            }
+          : {}),
       };
-      
+
       const rules = await prisma.topicRule.findMany({
         where: whereClause,
         orderBy: [
           { childAccountId: 'desc' }, // Child-specific first
-          { updatedAt: 'desc' }
-        ]
+          { updatedAt: 'desc' },
+        ],
       });
-      
+
       // Add usage statistics
       const rulesWithStats = await Promise.all(
-        rules.map(async (rule) => {
+        rules.map(async rule => {
           const stats = await this.getTopicRuleStats(rule.id);
           return {
             ...rule,
-            ...stats
+            ...stats,
           } as TopicRuleWithStats;
         })
       );
-      
+
       return rulesWithStats;
     } catch (error) {
       console.error('Failed to get topic rules:', error);
@@ -180,60 +185,67 @@ export class TopicManagementService {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-      
+
       // Get conversation topics from recent history
       const conversations = await prisma.conversation.findMany({
         where: {
           childAccountId,
-          createdAt: { gte: startDate }
+          createdAt: { gte: startDate },
         },
         include: {
           messages: {
             where: { sender: 'child' },
-            select: { content: true, createdAt: true }
-          }
-        }
+            select: { content: true, createdAt: true },
+          },
+        },
       });
-      
+
       // Extract and analyze topics
-      const topicFrequency = new Map<string, {
-        count: number;
-        lastMentioned: Date;
-        category: ContentCategory;
-      }>();
-      
+      const topicFrequency = new Map<
+        string,
+        {
+          count: number;
+          lastMentioned: Date;
+          category: ContentCategory;
+        }
+      >();
+
       for (const conversation of conversations) {
         for (const message of conversation.messages) {
           const analysis = await AdvancedFilteringEngine.analyzeContent(
             message.content,
             await this.getChildAge(childAccountId)
           );
-          
+
           for (const topic of analysis.topics) {
             const existing = topicFrequency.get(topic) || {
               count: 0,
               lastMentioned: new Date(0),
-              category: analysis.category
+              category: analysis.category,
             };
-            
+
             topicFrequency.set(topic, {
               count: existing.count + 1,
-              lastMentioned: message.createdAt > existing.lastMentioned 
-                ? message.createdAt 
-                : existing.lastMentioned,
-              category: analysis.category
+              lastMentioned:
+                message.createdAt > existing.lastMentioned
+                  ? message.createdAt
+                  : existing.lastMentioned,
+              category: analysis.category,
             });
           }
         }
       }
-      
+
       // Get existing rules to avoid duplicates
-      const existingRules = await this.getTopicRulesWithStats(parentClerkUserId, childAccountId);
+      const existingRules = await this.getTopicRulesWithStats(
+        parentClerkUserId,
+        childAccountId
+      );
       const existingTopics = new Set(existingRules.map(rule => rule.topic));
-      
+
       // Generate suggestions
       const suggestions: TopicSuggestion[] = [];
-      
+
       for (const [topic, data] of topicFrequency.entries()) {
         if (!existingTopics.has(topic) && data.count >= 2) {
           suggestions.push({
@@ -242,16 +254,17 @@ export class TopicManagementService {
             frequency: data.count,
             lastMentioned: data.lastMentioned,
             suggestedAction: this.suggestActionForTopic(topic, data.category),
-            reason: this.generateSuggestionReason(topic, data.category, data.count)
+            reason: this.generateSuggestionReason(
+              topic,
+              data.category,
+              data.count
+            ),
           });
         }
       }
-      
+
       // Sort by frequency and return top 10
-      return suggestions
-        .sort((a, b) => b.frequency - a.frequency)
-        .slice(0, 10);
-        
+      return suggestions.sort((a, b) => b.frequency - a.frequency).slice(0, 10);
     } catch (error) {
       console.error('Failed to get topic suggestions:', error);
       return [];
@@ -272,17 +285,17 @@ export class TopicManagementService {
   ): Promise<TopicRule[]> {
     try {
       const createdRules = await Promise.all(
-        rules.map(rule => 
+        rules.map(rule =>
           this.createTopicRule({
             parentClerkUserId,
             childAccountId,
             topic: rule.topic,
             action: rule.action,
-            reason: rule.reason
+            reason: rule.reason,
           })
         )
       );
-      
+
       return createdRules;
     } catch (error) {
       console.error('Failed to create bulk topic rules:', error);
@@ -293,36 +306,41 @@ export class TopicManagementService {
   /**
    * Get topic categories with counts
    */
-  static async getTopicCategories(parentClerkUserId: string): Promise<Array<{
-    category: ContentCategory;
-    count: number;
-    allowedCount: number;
-    blockedCount: number;
-    monitoredCount: number;
-  }>> {
+  static async getTopicCategories(parentClerkUserId: string): Promise<
+    Array<{
+      category: ContentCategory;
+      count: number;
+      allowedCount: number;
+      blockedCount: number;
+      monitoredCount: number;
+    }>
+  > {
     try {
       const rules = await prisma.topicRule.findMany({
         where: { parentClerkUserId },
-        select: { category: true, action: true }
+        select: { category: true, action: true },
       });
-      
-      const categoryStats = new Map<ContentCategory, {
-        count: number;
-        allowedCount: number;
-        blockedCount: number;
-        monitoredCount: number;
-      }>();
-      
+
+      const categoryStats = new Map<
+        ContentCategory,
+        {
+          count: number;
+          allowedCount: number;
+          blockedCount: number;
+          monitoredCount: number;
+        }
+      >();
+
       for (const rule of rules) {
         const existing = categoryStats.get(rule.category) || {
           count: 0,
           allowedCount: 0,
           blockedCount: 0,
-          monitoredCount: 0
+          monitoredCount: 0,
         };
-        
+
         existing.count++;
-        
+
         switch (rule.action) {
           case TopicAction.ALLOW:
             existing.allowedCount++;
@@ -334,13 +352,13 @@ export class TopicManagementService {
             existing.monitoredCount++;
             break;
         }
-        
+
         categoryStats.set(rule.category, existing);
       }
-      
+
       return Array.from(categoryStats.entries()).map(([category, stats]) => ({
         category,
-        ...stats
+        ...stats,
       }));
     } catch (error) {
       console.error('Failed to get topic categories:', error);
@@ -350,27 +368,53 @@ export class TopicManagementService {
 
   // Private helper methods
 
-  private static async categorizeTopicIntelligently(topic: string): Promise<ContentCategory> {
+  private static async categorizeTopicIntelligently(
+    topic: string
+  ): Promise<ContentCategory> {
     // This would use AI to categorize topics
     // For now, using simple keyword matching
     const topicLower = topic.toLowerCase();
-    
+
     const categories = {
-      [ContentCategory.EDUCATIONAL]: ['learn', 'study', 'school', 'homework', 'education'],
-      [ContentCategory.SCIENCE]: ['science', 'math', 'physics', 'chemistry', 'biology'],
-      [ContentCategory.ARTS]: ['art', 'music', 'drawing', 'painting', 'creative'],
+      [ContentCategory.EDUCATIONAL]: [
+        'learn',
+        'study',
+        'school',
+        'homework',
+        'education',
+      ],
+      [ContentCategory.SCIENCE]: [
+        'science',
+        'math',
+        'physics',
+        'chemistry',
+        'biology',
+      ],
+      [ContentCategory.ARTS]: [
+        'art',
+        'music',
+        'drawing',
+        'painting',
+        'creative',
+      ],
       [ContentCategory.SPORTS]: ['sport', 'game', 'play', 'team', 'exercise'],
       [ContentCategory.FAMILY]: ['family', 'parent', 'sibling', 'home'],
       [ContentCategory.SOCIAL]: ['friend', 'social', 'talk', 'share'],
-      [ContentCategory.ENTERTAINMENT]: ['fun', 'movie', 'show', 'video', 'entertainment']
+      [ContentCategory.ENTERTAINMENT]: [
+        'fun',
+        'movie',
+        'show',
+        'video',
+        'entertainment',
+      ],
     };
-    
+
     for (const [category, keywords] of Object.entries(categories)) {
       if (keywords.some(keyword => topicLower.includes(keyword))) {
         return category as ContentCategory;
       }
     }
-    
+
     return ContentCategory.UNKNOWN;
   }
 
@@ -397,22 +441,22 @@ export class TopicManagementService {
     try {
       // Get usage statistics from content alerts
       const alerts = await prisma.contentAlert.findMany({
-        where: { 
+        where: {
           // This would need a ruleId field in ContentAlert model
           // For now, return default values
         },
-        select: { timestamp: true }
+        select: { timestamp: true },
       });
-      
+
       return {
         usageCount: alerts.length,
         lastTriggered: alerts.length > 0 ? alerts[0].timestamp : undefined,
-        effectivenessScore: Math.min(alerts.length * 0.1, 1.0) // Simple effectiveness calculation
+        effectivenessScore: Math.min(alerts.length * 0.1, 1.0), // Simple effectiveness calculation
       };
     } catch (error) {
       return {
         usageCount: 0,
-        effectivenessScore: 0
+        effectivenessScore: 0,
       };
     }
   }
@@ -421,27 +465,30 @@ export class TopicManagementService {
     try {
       const child = await prisma.childAccount.findUnique({
         where: { id: childAccountId },
-        select: { age: true }
+        select: { age: true },
       });
-      
+
       return child?.age || 8;
     } catch (error) {
       return 8; // Default age
     }
   }
 
-  private static suggestActionForTopic(topic: string, category: ContentCategory): TopicAction {
+  private static suggestActionForTopic(
+    topic: string,
+    category: ContentCategory
+  ): TopicAction {
     // Intelligent action suggestion based on topic and category
     if (category === ContentCategory.EDUCATIONAL) return TopicAction.ALLOW;
     if (category === ContentCategory.INAPPROPRIATE) return TopicAction.BLOCK;
     if (category === ContentCategory.UNKNOWN) return TopicAction.MONITOR;
-    
+
     return TopicAction.ALLOW;
   }
 
   private static generateSuggestionReason(
-    topic: string, 
-    category: ContentCategory, 
+    topic: string,
+    category: ContentCategory,
     frequency: number
   ): string {
     return `Child mentioned "${topic}" ${frequency} times in recent conversations. Category: ${category}`;

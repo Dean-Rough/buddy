@@ -23,13 +23,13 @@ export async function POST(request: NextRequest) {
     // Get child profile
     const child = await prisma.childAccount.findUnique({
       where: { id: childAccountId },
-      select: { 
-        id: true, 
-        name: true, 
-        age: true, 
-        persona: true, 
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        persona: true,
         parentNotes: true,
-        parentClerkUserId: true 
+        parentClerkUserId: true,
       },
     });
 
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
           enableRealTimeAlerts: true,
           parentNotificationThreshold: 1, // Lower threshold for blocked content
           bypassForEmergency: false,
-          logAllAnalysis: true
+          logAllAnalysis: true,
         }
       );
 
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
         enableRealTimeAlerts: true,
         parentNotificationThreshold: 2, // Standard threshold for safe content
         bypassForEmergency: false,
-        logAllAnalysis: true
+        logAllAnalysis: true,
       }
     ).catch(error => {
       console.error('Content monitoring error:', error);
@@ -267,16 +267,28 @@ export async function POST(request: NextRequest) {
     // Step 6: Detect potential sibling interactions (async, don't block response)
     const allTopics = conversation.messages
       .flatMap(m => (conversation as any).topics || [])
-      .concat(recentMessages.flatMap(msg => {
-        // Extract topics from message content (simplified)
-        const topicPatterns = [
-          'minecraft', 'roblox', 'fortnite', 'pokemon', 'football', 'soccer',
-          'youtube', 'tiktok', 'school', 'homework', 'friends', 'family'
-        ];
-        return topicPatterns.filter(pattern => 
-          msg.toLowerCase().includes(pattern)
-        );
-      }));
+      .concat(
+        recentMessages.flatMap(msg => {
+          // Extract topics from message content (simplified)
+          const topicPatterns = [
+            'minecraft',
+            'roblox',
+            'fortnite',
+            'pokemon',
+            'football',
+            'soccer',
+            'youtube',
+            'tiktok',
+            'school',
+            'homework',
+            'friends',
+            'family',
+          ];
+          return topicPatterns.filter(pattern =>
+            msg.toLowerCase().includes(pattern)
+          );
+        })
+      );
 
     // Detect sibling interaction without blocking the response
     SiblingInteractionManager.detectSiblingInteraction(
@@ -286,8 +298,12 @@ export async function POST(request: NextRequest) {
       {
         messageCount: conversation.messageCount + 2,
         mood: conversationContext?.childMood || 'neutral',
-        timeOfDay: new Date().getHours() < 12 ? 'morning' : 
-                   new Date().getHours() < 18 ? 'afternoon' : 'evening',
+        timeOfDay:
+          new Date().getHours() < 12
+            ? 'morning'
+            : new Date().getHours() < 18
+              ? 'afternoon'
+              : 'evening',
       }
     ).catch(error => {
       console.error('Error detecting sibling interaction:', error);

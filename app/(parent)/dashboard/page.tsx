@@ -284,37 +284,61 @@ export default function ParentDashboardOverview() {
                 {/* Multi-Child Quick Insights (for single column layout) */}
                 {children.length > 1 && (
                   <BrutalCard variant="blue">
-                    <h3 className="font-rokano text-lg mb-4">FAMILY OVERVIEW</h3>
+                    <h3 className="font-rokano text-lg mb-4">
+                      FAMILY OVERVIEW
+                    </h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Active Today:</span>
                         <span className="font-bold">
-                          {children.filter(child => 
-                            getSelectedChildUsage().some(usage => usage.sessionCount > 0)
-                          ).length}/{children.length}
+                          {
+                            children.filter(child =>
+                              getSelectedChildUsage().some(
+                                usage => usage.sessionCount > 0
+                              )
+                            ).length
+                          }
+                          /{children.length}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Family Sessions:</span>
                         <span className="font-bold">
                           {children.reduce((total, child) => {
-                            const childUsage = recentUsage.filter(usage => 
+                            const childUsage = recentUsage.filter(usage =>
                               children.find(c => c.id === child.id)
                             );
-                            return total + childUsage.reduce((sum, usage) => sum + usage.sessionCount, 0);
+                            return (
+                              total +
+                              childUsage.reduce(
+                                (sum, usage) => sum + usage.sessionCount,
+                                0
+                              )
+                            );
                           }, 0)}
                         </span>
                       </div>
                       {children.length <= 5 && (
                         <div className="mt-3 pt-3 border-t">
-                          <div className="text-xs text-gray-600 mb-2">Today&apos;s Activity</div>
+                          <div className="text-xs text-gray-600 mb-2">
+                            Today&apos;s Activity
+                          </div>
                           {children.map(child => (
-                            <div key={child.id} className="flex justify-between text-xs">
+                            <div
+                              key={child.id}
+                              className="flex justify-between text-xs"
+                            >
                               <span>{child.name}:</span>
                               <span>
                                 {recentUsage
-                                  .filter(usage => children.find(c => c.id === child.id))
-                                  .reduce((sum, usage) => sum + usage.totalMinutes, 0)} min
+                                  .filter(usage =>
+                                    children.find(c => c.id === child.id)
+                                  )
+                                  .reduce(
+                                    (sum, usage) => sum + usage.totalMinutes,
+                                    0
+                                  )}{' '}
+                                min
                               </span>
                             </div>
                           ))}

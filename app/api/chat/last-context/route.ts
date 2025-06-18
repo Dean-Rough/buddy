@@ -53,16 +53,17 @@ export async function GET(request: NextRequest) {
     const messages = lastConversation.messages;
     const topics = lastConversation.topics || [];
     const mood = lastConversation.mood || 'neutral';
-    
+
     // Extract key topics from messages
     const messageText = messages.map(m => m.content.toLowerCase()).join(' ');
     const keyTopics = extractKeyTopics(messageText);
-    
+
     // Determine time ago
     const timeAgo = getTimeAgo(lastConversation.startedAt);
-    
+
     // Get primary topic
-    const lastTopic = topics.length > 0 ? topics[0] : detectMainTopic(messageText);
+    const lastTopic =
+      topics.length > 0 ? topics[0] : detectMainTopic(messageText);
 
     return NextResponse.json({
       hasContext: true,
@@ -93,13 +94,21 @@ function extractKeyTopics(text: string): string[] {
     friends: ['friend', 'buddy', 'pal', 'hang out', 'play with'],
     family: ['mom', 'dad', 'parent', 'sibling', 'brother', 'sister', 'family'],
     pets: ['dog', 'cat', 'pet', 'animal', 'puppy', 'kitten'],
-    sports: ['soccer', 'football', 'basketball', 'baseball', 'sport', 'practice', 'game'],
+    sports: [
+      'soccer',
+      'football',
+      'basketball',
+      'baseball',
+      'sport',
+      'practice',
+      'game',
+    ],
     art: ['draw', 'paint', 'art', 'color', 'picture', 'craft'],
     music: ['music', 'song', 'sing', 'instrument', 'piano', 'guitar'],
   };
 
   const foundTopics: string[] = [];
-  
+
   for (const [topic, keywords] of Object.entries(topicKeywords)) {
     if (keywords.some(keyword => text.includes(keyword))) {
       foundTopics.push(topic);
@@ -120,7 +129,7 @@ function detectMainTopic(text: string): string {
   if (text.includes('friend') || text.includes('play')) return 'friends';
   if (text.includes('family') || text.includes('home')) return 'family';
   if (text.includes('game') || text.includes('gaming')) return 'games';
-  
+
   return 'general_chat';
 }
 

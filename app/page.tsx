@@ -13,7 +13,7 @@ export default function BrutalLandingPage() {
 
   // Add debugging
   console.log('🔍 Landing page rendering');
-  
+
   // Add error boundary
   if (typeof window !== 'undefined') {
     console.log('🔍 Landing page on client side');

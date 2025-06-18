@@ -194,7 +194,9 @@ export async function updateConversationContext(
     await prisma.conversationContext.update({
       where: { id: contextId },
       data: {
-        topics: update.newTopic ? [update.newTopic, ...existingContext.topics.slice(0, 4)] : existingContext.topics,
+        topics: update.newTopic
+          ? [update.newTopic, ...existingContext.topics.slice(0, 4)]
+          : existingContext.topics,
         mood: updatedEmotionalState.primaryEmotion,
         lastUpdated: new Date(),
         messageCount: { increment: 1 },

@@ -1,7 +1,7 @@
 /**
  * Advanced Content Control System - Filtering Engine
  * Provides granular content filtering and topic management for child safety
- * 
+ *
  * Features:
  * - Topic allow/block lists with intelligent categorization
  * - Content appropriateness scoring with parental override
@@ -23,7 +23,7 @@ export enum ContentCategory {
   FAMILY = 'family',
   EMOTIONAL = 'emotional',
   INAPPROPRIATE = 'inappropriate',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 // Topic management actions
@@ -31,23 +31,23 @@ export enum TopicAction {
   ALLOW = 'allow',
   BLOCK = 'block',
   MONITOR = 'monitor',
-  REDIRECT = 'redirect'
+  REDIRECT = 'redirect',
 }
 
 // Content scoring levels
 export enum ContentScore {
-  EXCELLENT = 5,    // Highly educational/beneficial
-  GOOD = 4,         // Generally positive
-  NEUTRAL = 3,      // Age-appropriate but not particularly beneficial
-  CONCERNING = 2,   // May require parent attention
-  INAPPROPRIATE = 1 // Should be blocked
+  EXCELLENT = 5, // Highly educational/beneficial
+  GOOD = 4, // Generally positive
+  NEUTRAL = 3, // Age-appropriate but not particularly beneficial
+  CONCERNING = 2, // May require parent attention
+  INAPPROPRIATE = 1, // Should be blocked
 }
 
 // Alert severity levels
 export enum AlertSeverity {
   INFO = 'info',
   WARNING = 'warning',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface TopicRule {
@@ -98,7 +98,6 @@ export interface EducationalSuggestion {
 }
 
 export class AdvancedFilteringEngine {
-  
   /**
    * Analyze content and determine its appropriateness
    */
@@ -110,27 +109,39 @@ export class AdvancedFilteringEngine {
     try {
       // Extract topics from content using AI analysis
       const topics = await this.extractTopics(content);
-      
+
       // Categorize the content
       const category = await this.categorizeContent(content, topics);
-      
+
       // Score content appropriateness
       const score = await this.scoreContent(content, category, childAge);
-      
+
       // Calculate confidence level
-      const confidence = await this.calculateConfidence(content, topics, category);
-      
+      const confidence = await this.calculateConfidence(
+        content,
+        topics,
+        category
+      );
+
       // Identify any concerning flags
       const flags = await this.identifyFlags(content, topics, childAge);
-      
+
       // Assess educational value
-      const educationalValue = await this.assessEducationalValue(content, category, childAge);
-      
+      const educationalValue = await this.assessEducationalValue(
+        content,
+        category,
+        childAge
+      );
+
       // Generate appropriateness reason
       const appropriatenessReason = await this.generateAppropriatenessReason(
-        content, category, score, flags, childAge
+        content,
+        category,
+        score,
+        flags,
+        childAge
       );
-      
+
       return {
         topics,
         category,
@@ -138,7 +149,7 @@ export class AdvancedFilteringEngine {
         confidence,
         flags,
         educationalValue,
-        appropriatenessReason
+        appropriatenessReason,
       };
     } catch (error) {
       console.error('Content analysis error:', error);
@@ -150,7 +161,8 @@ export class AdvancedFilteringEngine {
         confidence: 0.1,
         flags: ['analysis_error'],
         educationalValue: 0,
-        appropriatenessReason: 'Content could not be analyzed - manual review required'
+        appropriatenessReason:
+          'Content could not be analyzed - manual review required',
       };
     }
   }
@@ -169,58 +181,61 @@ export class AdvancedFilteringEngine {
   }> {
     try {
       // Get all applicable rules for this child
-      const rules = await this.getApplicableRules(parentClerkUserId, childAccountId);
-      
+      const rules = await this.getApplicableRules(
+        parentClerkUserId,
+        childAccountId
+      );
+
       // Check for exact topic matches first
       for (const topic of analysis.topics) {
-        const exactMatch = rules.find(rule => 
-          rule.topic.toLowerCase() === topic.toLowerCase()
+        const exactMatch = rules.find(
+          rule => rule.topic.toLowerCase() === topic.toLowerCase()
         );
         if (exactMatch) {
           return {
             action: exactMatch.action,
-            matchedRule: exactMatch
+            matchedRule: exactMatch,
           };
         }
       }
-      
+
       // Check for category-based rules
-      const categoryRule = rules.find(rule => 
-        rule.category === analysis.category
+      const categoryRule = rules.find(
+        rule => rule.category === analysis.category
       );
       if (categoryRule) {
         return {
           action: categoryRule.action,
-          matchedRule: categoryRule
+          matchedRule: categoryRule,
         };
       }
-      
+
       // Default behavior based on content score
       if (analysis.score <= ContentScore.CONCERNING) {
         return {
           action: TopicAction.MONITOR,
-          overrideReason: 'Content score below threshold - requires monitoring'
+          overrideReason: 'Content score below threshold - requires monitoring',
         };
       }
-      
+
       if (analysis.flags.length > 0) {
         return {
           action: TopicAction.MONITOR,
-          overrideReason: 'Content flags detected - requires monitoring'
+          overrideReason: 'Content flags detected - requires monitoring',
         };
       }
-      
+
       return {
         action: TopicAction.ALLOW,
-        overrideReason: 'No matching rules - default allow with standard safety'
+        overrideReason:
+          'No matching rules - default allow with standard safety',
       };
-      
     } catch (error) {
       console.error('Rule application error:', error);
       // Fail safe - monitor unknown content
       return {
         action: TopicAction.MONITOR,
-        overrideReason: 'Rule application failed - defaulting to monitoring'
+        overrideReason: 'Rule application failed - defaulting to monitoring',
       };
     }
   }
@@ -239,7 +254,7 @@ export class AdvancedFilteringEngine {
   ): Promise<ContentAlert> {
     try {
       const severity = this.determineSeverity(analysis, action);
-      
+
       const alert = await prisma.contentAlert.create({
         data: {
           parentClerkUserId,
@@ -252,10 +267,10 @@ export class AdvancedFilteringEngine {
           content: content.substring(0, 500), // Limit content length
           reason: analysis.appropriatenessReason,
           action,
-          acknowledged: false
-        }
+          acknowledged: false,
+        },
       });
-      
+
       return alert as ContentAlert;
     } catch (error) {
       console.error('Alert creation error:', error);
@@ -271,7 +286,7 @@ export class AdvancedFilteringEngine {
     childAge: number
   ): Promise<EducationalSuggestion[]> {
     const suggestions: EducationalSuggestion[] = [];
-    
+
     try {
       // Generate suggestions based on topics and category
       for (const topic of analysis.topics) {
@@ -279,21 +294,27 @@ export class AdvancedFilteringEngine {
           suggestions.push({
             topic,
             category: analysis.category,
-            suggestion: await this.generateEducationalSuggestion(topic, childAge),
+            suggestion: await this.generateEducationalSuggestion(
+              topic,
+              childAge
+            ),
             reason: 'Child showed interest in educational topic',
-            resources: await this.getEducationalResources(topic, childAge)
+            resources: await this.getEducationalResources(topic, childAge),
           });
         } else if (analysis.score >= ContentScore.GOOD) {
           suggestions.push({
             topic,
             category: analysis.category,
-            suggestion: await this.generateRelatedEducationalContent(topic, childAge),
+            suggestion: await this.generateRelatedEducationalContent(
+              topic,
+              childAge
+            ),
             reason: 'Build on positive interest',
-            resources: await this.getRelatedResources(topic, childAge)
+            resources: await this.getRelatedResources(topic, childAge),
           });
         }
       }
-      
+
       return suggestions.slice(0, 3); // Limit to top 3 suggestions
     } catch (error) {
       console.error('Educational suggestion error:', error);
@@ -306,22 +327,33 @@ export class AdvancedFilteringEngine {
   private static async extractTopics(content: string): Promise<string[]> {
     // This would use AI to extract topics from content
     // For now, implementing basic keyword extraction
-    const keywords = content.toLowerCase()
+    const keywords = content
+      .toLowerCase()
       .split(/\W+/)
       .filter(word => word.length > 3)
       .slice(0, 10);
-    
+
     return keywords;
   }
 
-  private static async categorizeContent(content: string, topics: string[]): Promise<ContentCategory> {
+  private static async categorizeContent(
+    content: string,
+    topics: string[]
+  ): Promise<ContentCategory> {
     // Simple categorization logic - would be enhanced with AI
-    const educationalKeywords = ['learn', 'study', 'school', 'homework', 'science', 'math'];
+    const educationalKeywords = [
+      'learn',
+      'study',
+      'school',
+      'homework',
+      'science',
+      'math',
+    ];
     const entertainmentKeywords = ['fun', 'game', 'play', 'movie', 'music'];
     const socialKeywords = ['friend', 'family', 'talk', 'share'];
-    
+
     const contentLower = content.toLowerCase();
-    
+
     if (educationalKeywords.some(keyword => contentLower.includes(keyword))) {
       return ContentCategory.EDUCATIONAL;
     }
@@ -331,7 +363,7 @@ export class AdvancedFilteringEngine {
     if (socialKeywords.some(keyword => contentLower.includes(keyword))) {
       return ContentCategory.SOCIAL;
     }
-    
+
     return ContentCategory.UNKNOWN;
   }
 
@@ -346,7 +378,7 @@ export class AdvancedFilteringEngine {
     if (category === ContentCategory.SOCIAL) return ContentScore.GOOD;
     if (category === ContentCategory.ENTERTAINMENT) return ContentScore.NEUTRAL;
     if (category === ContentCategory.UNKNOWN) return ContentScore.CONCERNING;
-    
+
     return ContentScore.NEUTRAL;
   }
 
@@ -358,11 +390,11 @@ export class AdvancedFilteringEngine {
     // Simple confidence calculation
     const topicCount = topics.length;
     const contentLength = content.length;
-    
+
     if (category === ContentCategory.UNKNOWN) return 0.3;
     if (topicCount > 5 && contentLength > 100) return 0.9;
     if (topicCount > 2 && contentLength > 50) return 0.7;
-    
+
     return 0.5;
   }
 
@@ -373,18 +405,18 @@ export class AdvancedFilteringEngine {
   ): Promise<string[]> {
     const flags: string[] = [];
     const contentLower = content.toLowerCase();
-    
+
     // Check for concerning content
     const concerningWords = ['inappropriate', 'dangerous', 'harmful'];
     if (concerningWords.some(word => contentLower.includes(word))) {
       flags.push('concerning_content');
     }
-    
+
     // Check for age appropriateness
     if (childAge < 8 && contentLower.includes('complex')) {
       flags.push('too_advanced');
     }
-    
+
     return flags;
   }
 
@@ -398,7 +430,7 @@ export class AdvancedFilteringEngine {
     if (category === ContentCategory.SCIENCE) return 0.8;
     if (category === ContentCategory.CREATIVE) return 0.7;
     if (category === ContentCategory.SOCIAL) return 0.5;
-    
+
     return 0.2;
   }
 
@@ -412,11 +444,11 @@ export class AdvancedFilteringEngine {
     if (flags.length > 0) {
       return `Content flagged for: ${flags.join(', ')}`;
     }
-    
+
     if (score >= ContentScore.GOOD) {
       return `${category} content appropriate for age ${childAge}`;
     }
-    
+
     return `Content requires review - ${category} category with score ${score}`;
   }
 
@@ -430,15 +462,15 @@ export class AdvancedFilteringEngine {
           parentClerkUserId,
           OR: [
             { childAccountId },
-            { childAccountId: null } // Family-wide rules
-          ]
+            { childAccountId: null }, // Family-wide rules
+          ],
         },
         orderBy: [
           { childAccountId: 'desc' }, // Child-specific rules first
-          { updatedAt: 'desc' }
-        ]
+          { updatedAt: 'desc' },
+        ],
       });
-      
+
       return rules as TopicRule[];
     } catch (error) {
       console.error('Failed to get topic rules:', error);
@@ -446,36 +478,51 @@ export class AdvancedFilteringEngine {
     }
   }
 
-  private static determineSeverity(analysis: ContentAnalysis, action: TopicAction): AlertSeverity {
+  private static determineSeverity(
+    analysis: ContentAnalysis,
+    action: TopicAction
+  ): AlertSeverity {
     if (action === TopicAction.BLOCK) return AlertSeverity.CRITICAL;
     if (analysis.score <= ContentScore.CONCERNING) return AlertSeverity.WARNING;
     if (analysis.flags.length > 0) return AlertSeverity.WARNING;
-    
+
     return AlertSeverity.INFO;
   }
 
-  private static async generateEducationalSuggestion(topic: string, childAge: number): Promise<string> {
+  private static async generateEducationalSuggestion(
+    topic: string,
+    childAge: number
+  ): Promise<string> {
     // This would use AI to generate personalized suggestions
     return `Explore more about ${topic} with age-appropriate activities for ${childAge} year olds`;
   }
 
-  private static async getEducationalResources(topic: string, childAge: number): Promise<string[]> {
+  private static async getEducationalResources(
+    topic: string,
+    childAge: number
+  ): Promise<string[]> {
     // This would fetch curated educational resources
     return [
       `Educational games about ${topic}`,
       `Age-appropriate books on ${topic}`,
-      `Interactive activities for ${topic}`
+      `Interactive activities for ${topic}`,
     ];
   }
 
-  private static async generateRelatedEducationalContent(topic: string, childAge: number): Promise<string> {
+  private static async generateRelatedEducationalContent(
+    topic: string,
+    childAge: number
+  ): Promise<string> {
     return `Build on interest in ${topic} with educational activities`;
   }
 
-  private static async getRelatedResources(topic: string, childAge: number): Promise<string[]> {
+  private static async getRelatedResources(
+    topic: string,
+    childAge: number
+  ): Promise<string[]> {
     return [
       `Related educational content for ${topic}`,
-      `Hands-on activities about ${topic}`
+      `Hands-on activities about ${topic}`,
     ];
   }
 }

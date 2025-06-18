@@ -90,16 +90,21 @@ export default function BrutalChatInterface({
   const generateContextualWelcome = async () => {
     try {
       // Get the last conversation to reference
-      const response = await fetch(`/api/chat/last-context?childAccountId=${childProfile.id}`);
+      const response = await fetch(
+        `/api/chat/last-context?childAccountId=${childProfile.id}`
+      );
       let welcomeContent = `yo ${childProfile.name}! 🤘 what's good today?`;
-      
+
       if (response.ok) {
         const lastContext = await response.json();
         if (lastContext.hasContext) {
-          welcomeContent = generateOrganicGreeting(childProfile.name, lastContext);
+          welcomeContent = generateOrganicGreeting(
+            childProfile.name,
+            lastContext
+          );
         }
       }
-      
+
       const welcomeMessage: Message = {
         id: 'welcome',
         content: welcomeContent,
@@ -122,7 +127,7 @@ export default function BrutalChatInterface({
 
   const generateOrganicGreeting = (name: string, context: any): string => {
     const { lastTopic, lastMood, timeAgo, keyTopics } = context;
-    
+
     // Time-based greetings
     const timeBasedGreetings = [
       `hey ${name}! how was your day?`,
@@ -133,43 +138,43 @@ export default function BrutalChatInterface({
 
     // Topic-specific follow-ups
     const topicGreetings: Record<string, string[]> = {
-      'school': [
+      school: [
         `hey ${name}! how was school today?`,
         `yo ${name}! did you have that test you mentioned?`,
         `what's up ${name}? how'd school go?`,
         `hey ${name}! learn anything cool at school today?`,
       ],
-      'family': [
+      family: [
         `hey ${name}! how's the family doing?`,
         `yo ${name}! how was dinner with everyone?`,
         `what's up ${name}? how are things at home?`,
       ],
-      'friends': [
+      friends: [
         `hey ${name}! did you hang out with your friends?`,
         `yo ${name}! how was hanging with the crew?`,
         `what's up ${name}? catch up with your buddies lately?`,
       ],
-      'games': [
+      games: [
         `hey ${name}! play any cool games lately?`,
         `yo ${name}! beat that level you were stuck on?`,
         `what's up ${name}? any new gaming adventures?`,
       ],
-      'sports': [
+      sports: [
         `hey ${name}! how was practice?`,
         `yo ${name}! how'd your game go?`,
         `what's up ${name}? been staying active?`,
       ],
-      'animals': [
+      animals: [
         `hey ${name}! how's your pet doing?`,
         `yo ${name}! any fun animal stories today?`,
         `what's up ${name}? see any cool animals lately?`,
       ],
-      'art': [
+      art: [
         `hey ${name}! been creating anything cool?`,
         `yo ${name}! finish that drawing you were working on?`,
         `what's up ${name}? any new art projects?`,
       ],
-      'music': [
+      music: [
         `hey ${name}! been jamming to any good music?`,
         `yo ${name}! learn any new songs?`,
         `what's up ${name}? what's on your playlist today?`,
@@ -225,7 +230,9 @@ export default function BrutalChatInterface({
     }
 
     // Default friendly greeting
-    return timeBasedGreetings[Math.floor(Math.random() * timeBasedGreetings.length)];
+    return timeBasedGreetings[
+      Math.floor(Math.random() * timeBasedGreetings.length)
+    ];
   };
 
   const enableAudio = () => {
@@ -412,7 +419,10 @@ export default function BrutalChatInterface({
   return (
     <div className="h-screen paper-bg flex flex-col">
       {/* Brutal Header */}
-      <div className="brutal-header flex justify-between items-center" style={{ backgroundColor: '#2563eb' }}>
+      <div
+        className="brutal-header flex justify-between items-center"
+        style={{ backgroundColor: '#2563eb' }}
+      >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-yellow-400 border-3 border-black flex items-center justify-center brutal-shadow-small">
             <span className="font-rokano text-xl font-bold">

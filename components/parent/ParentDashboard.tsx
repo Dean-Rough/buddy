@@ -99,7 +99,10 @@ export default function ParentDashboard() {
     }
   };
 
-  const updateChildInfo = async (field: 'name' | 'parentNotes', value: string) => {
+  const updateChildInfo = async (
+    field: 'name' | 'parentNotes',
+    value: string
+  ) => {
     if (!child) return;
 
     try {
@@ -167,9 +170,9 @@ export default function ParentDashboard() {
             <div className="text-sm text-gray-600">
               Welcome back, {user?.emailAddresses[0]?.emailAddress}
             </div>
-            <BrutalButton 
-              variant="blue" 
-              onClick={() => window.location.href = '/chat'}
+            <BrutalButton
+              variant="blue"
+              onClick={() => (window.location.href = '/chat')}
             >
               BACK TO CHAT
             </BrutalButton>
@@ -214,15 +217,15 @@ export default function ParentDashboard() {
                         className="flex-1"
                         placeholder="Child's name"
                       />
-                      <BrutalButton 
-                        variant="green" 
+                      <BrutalButton
+                        variant="green"
                         size="small"
                         onClick={() => updateChildInfo('name', tempChildName)}
                       >
                         SAVE
                       </BrutalButton>
-                      <BrutalButton 
-                        variant="white" 
+                      <BrutalButton
+                        variant="white"
                         size="small"
                         onClick={() => cancelEditing('name')}
                       >
@@ -232,8 +235,8 @@ export default function ParentDashboard() {
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className="font-avotica text-lg">{child.name}</span>
-                      <BrutalButton 
-                        variant="white" 
+                      <BrutalButton
+                        variant="white"
                         size="small"
                         onClick={startEditingName}
                       >
@@ -244,10 +247,12 @@ export default function ParentDashboard() {
                 </div>
 
                 <div>
-                  <span className="font-avotica font-bold">Username:</span> @{child.username}
+                  <span className="font-avotica font-bold">Username:</span> @
+                  {child.username}
                 </div>
                 <div>
-                  <span className="font-avotica font-bold">Age:</span> {child.age}
+                  <span className="font-avotica font-bold">Age:</span>{' '}
+                  {child.age}
                 </div>
               </div>
             </BrutalCard>
@@ -256,11 +261,12 @@ export default function ParentDashboard() {
             <BrutalCard variant="pink">
               <h2 className="font-rokano text-2xl mb-4">SENSITIVITIES</h2>
               <p className="text-sm text-gray-700 mb-4">
-                Share important information about your child that Onda should be aware of - 
-                allergies, disabilities, physical limitations, emotional sensitivities, or 
-                anything that helps provide appropriate responses.
+                Share important information about your child that Onda should be
+                aware of - allergies, disabilities, physical limitations,
+                emotional sensitivities, or anything that helps provide
+                appropriate responses.
               </p>
-              
+
               {editingChildNotes ? (
                 <div className="space-y-3">
                   <textarea
@@ -271,13 +277,15 @@ export default function ParentDashboard() {
                     placeholder="e.g., Has a nut allergy, uses a wheelchair, gets anxious about loud noises, loves art but struggles with reading..."
                   />
                   <div className="flex gap-2">
-                    <BrutalButton 
+                    <BrutalButton
                       variant="green"
-                      onClick={() => updateChildInfo('parentNotes', tempChildNotes)}
+                      onClick={() =>
+                        updateChildInfo('parentNotes', tempChildNotes)
+                      }
                     >
                       SAVE NOTES
                     </BrutalButton>
-                    <BrutalButton 
+                    <BrutalButton
                       variant="white"
                       onClick={() => cancelEditing('notes')}
                     >
@@ -289,17 +297,18 @@ export default function ParentDashboard() {
                 <div>
                   {child.parentNotes ? (
                     <div className="bg-white/50 p-4 brutal-shadow-small mb-3">
-                      <p className="text-gray-800 whitespace-pre-wrap">{child.parentNotes}</p>
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {child.parentNotes}
+                      </p>
                     </div>
                   ) : (
                     <div className="bg-gray-100 p-4 brutal-shadow-small mb-3 text-center">
-                      <p className="text-gray-600">No sensitivities noted yet</p>
+                      <p className="text-gray-600">
+                        No sensitivities noted yet
+                      </p>
                     </div>
                   )}
-                  <BrutalButton 
-                    variant="blue"
-                    onClick={startEditingNotes}
-                  >
+                  <BrutalButton variant="blue" onClick={startEditingNotes}>
                     {child.parentNotes ? 'EDIT NOTES' : 'ADD NOTES'}
                   </BrutalButton>
                 </div>

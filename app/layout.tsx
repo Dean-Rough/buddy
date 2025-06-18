@@ -27,10 +27,10 @@ export default function RootLayout({
   // Add debugging for production
   if (typeof window !== 'undefined') {
     console.log('🔍 Root Layout rendering on client');
-    window.addEventListener('error', (e) => {
+    window.addEventListener('error', e => {
       console.error('🚨 Global error:', e.error);
     });
-    window.addEventListener('unhandledrejection', (e) => {
+    window.addEventListener('unhandledrejection', e => {
       console.error('🚨 Unhandled promise rejection:', e.reason);
     });
   }
@@ -39,7 +39,19 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className="font-avotica">
-          <div id="debug-info" style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '4px', fontSize: '12px', zIndex: 9999 }}>
+          <div
+            id="debug-info"
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              background: 'red',
+              color: 'white',
+              padding: '4px',
+              fontSize: '12px',
+              zIndex: 9999,
+            }}
+          >
             Layout Loaded
           </div>
           <ErrorBoundary>

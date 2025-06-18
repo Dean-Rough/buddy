@@ -30,9 +30,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       stats,
-      period: `${days} days`
+      period: `${days} days`,
     });
-    
   } catch (error) {
     console.error('Monitoring stats GET error:', error);
     return NextResponse.json(
@@ -56,12 +55,14 @@ export async function PUT(request: NextRequest) {
       notificationThreshold,
       alertMethods,
       quietHours,
-      categoryFilters
+      categoryFilters,
     } = body;
 
     // Validate notification threshold
-    if (notificationThreshold !== undefined && 
-        (notificationThreshold < 1 || notificationThreshold > 5)) {
+    if (
+      notificationThreshold !== undefined &&
+      (notificationThreshold < 1 || notificationThreshold > 5)
+    ) {
       return NextResponse.json(
         { error: 'notificationThreshold must be between 1 and 5' },
         { status: 400 }
@@ -81,14 +82,13 @@ export async function PUT(request: NextRequest) {
       notificationThreshold,
       alertMethods,
       quietHours,
-      categoryFilters
+      categoryFilters,
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Monitoring settings updated successfully'
+      message: 'Monitoring settings updated successfully',
     });
-    
   } catch (error) {
     console.error('Monitoring settings update error:', error);
     return NextResponse.json(

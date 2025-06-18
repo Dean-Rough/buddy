@@ -6,7 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs';
 import { TopicManagementService } from '@/lib/content-control/topic-management';
-import { TopicAction, ContentCategory } from '@/lib/content-control/advanced-filtering-engine';
+import {
+  TopicAction,
+  ContentCategory,
+} from '@/lib/content-control/advanced-filtering-engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,9 +32,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       rules,
-      count: rules.length
+      count: rules.length,
     });
-    
   } catch (error) {
     console.error('Topic rules GET error:', error);
     return NextResponse.json(
@@ -50,13 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      childAccountId,
-      topic,
-      action,
-      reason,
-      category
-    } = body;
+    const { childAccountId, topic, action, reason, category } = body;
 
     // Validate required fields
     if (!topic || !action || !reason) {
@@ -76,10 +72,7 @@ export async function POST(request: NextRequest) {
 
     // Validate category if provided
     if (category && !Object.values(ContentCategory).includes(category)) {
-      return NextResponse.json(
-        { error: 'Invalid category' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
     const rule = await TopicManagementService.createTopicRule({
@@ -88,14 +81,16 @@ export async function POST(request: NextRequest) {
       topic,
       action,
       reason,
-      category
+      category,
     });
 
-    return NextResponse.json({
-      success: true,
-      rule
-    }, { status: 201 });
-    
+    return NextResponse.json(
+      {
+        success: true,
+        rule,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Topic rule creation error:', error);
     return NextResponse.json(
@@ -117,19 +112,13 @@ export async function PUT(request: NextRequest) {
     const { ruleId, action, reason, category } = body;
 
     if (!ruleId) {
-      return NextResponse.json(
-        { error: 'Missing ruleId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing ruleId' }, { status: 400 });
     }
 
     const updates: any = {};
     if (action !== undefined) {
       if (!Object.values(TopicAction).includes(action)) {
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
       }
       updates.action = action;
     }
@@ -152,9 +141,8 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      rule
+      rule,
     });
-    
   } catch (error) {
     console.error('Topic rule update error:', error);
     return NextResponse.json(
@@ -186,9 +174,8 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Topic rule deleted successfully'
+      message: 'Topic rule deleted successfully',
     });
-    
   } catch (error) {
     console.error('Topic rule deletion error:', error);
     return NextResponse.json(

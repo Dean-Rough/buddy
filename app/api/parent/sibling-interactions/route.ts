@@ -23,10 +23,11 @@ export async function GET(request: NextRequest) {
     switch (action) {
       case 'insights':
         // Get family interaction insights
-        const insights = await SiblingInteractionManager.getFamilyInteractionInsights(
-          userId,
-          days
-        );
+        const insights =
+          await SiblingInteractionManager.getFamilyInteractionInsights(
+            userId,
+            days
+          );
 
         return NextResponse.json({
           success: true,
@@ -36,7 +37,8 @@ export async function GET(request: NextRequest) {
 
       case 'dynamics':
         // Get family dynamics
-        const dynamics = await SiblingInteractionManager.updateFamilyDynamics(userId);
+        const dynamics =
+          await SiblingInteractionManager.updateFamilyDynamics(userId);
 
         return NextResponse.json({
           success: true,
@@ -45,13 +47,15 @@ export async function GET(request: NextRequest) {
 
       case 'privacy':
         // Get family data with privacy isolation
-        const familyData = await PrivacyIsolationService.getFamilyDataWithIsolation(
-          userId,
-          {
-            dataCategories: ['conversations', 'safety_events', 'usage_analytics'],
+        const familyData =
+          await PrivacyIsolationService.getFamilyDataWithIsolation(userId, {
+            dataCategories: [
+              'conversations',
+              'safety_events',
+              'usage_analytics',
+            ],
             respectChildPrivacy: true,
-          }
-        );
+          });
 
         return NextResponse.json({
           success: true,
@@ -89,7 +93,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action, childId, targetSiblingId, conversationContent, topics, contextMetadata } = body;
+    const {
+      action,
+      childId,
+      targetSiblingId,
+      conversationContent,
+      topics,
+      contextMetadata,
+    } = body;
 
     switch (action) {
       case 'detect_interaction':
@@ -101,16 +112,21 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-          childId,
-          conversationContent,
-          topics || [],
-          contextMetadata || {
-            messageCount: 1,
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : 
-                       new Date().getHours() < 18 ? 'afternoon' : 'evening',
-          }
-        );
+        const interaction =
+          await SiblingInteractionManager.detectSiblingInteraction(
+            childId,
+            conversationContent,
+            topics || [],
+            contextMetadata || {
+              messageCount: 1,
+              timeOfDay:
+                new Date().getHours() < 12
+                  ? 'morning'
+                  : new Date().getHours() < 18
+                    ? 'afternoon'
+                    : 'evening',
+            }
+          );
 
         return NextResponse.json({
           success: true,
@@ -127,14 +143,18 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const isAllowed = await SiblingInteractionManager.isSiblingInteractionAllowed(
-          childId,
-          targetSiblingId
-        );
+        const isAllowed =
+          await SiblingInteractionManager.isSiblingInteractionAllowed(
+            childId,
+            targetSiblingId
+          );
 
-        const siblingInfo = isAllowed ? 
-          await SiblingInteractionManager.getSanitizedSiblingInfo(childId, targetSiblingId) : 
-          null;
+        const siblingInfo = isAllowed
+          ? await SiblingInteractionManager.getSanitizedSiblingInfo(
+              childId,
+              targetSiblingId
+            )
+          : null;
 
         return NextResponse.json({
           success: true,
@@ -145,7 +165,7 @@ export async function POST(request: NextRequest) {
       case 'update_privacy_settings':
         // Update child privacy settings (simplified - would be more comprehensive in production)
         const { privacySettings } = body;
-        
+
         if (!childId || !privacySettings) {
           return NextResponse.json(
             { error: 'childId and privacySettings are required' },

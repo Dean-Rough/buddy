@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { FamilyAnalyticsEngine, AnalyticsTimeframe, FamilyMetricType } from '@/lib/multi-child/family-analytics';
+import {
+  FamilyAnalyticsEngine,
+  AnalyticsTimeframe,
+  FamilyMetricType,
+} from '@/lib/multi-child/family-analytics';
 import { SiblingInteractionManager } from '@/lib/multi-child/sibling-interaction';
 
 export const dynamic = 'force-dynamic';
@@ -17,12 +21,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const timeframe = (searchParams.get('timeframe') || 'weekly') as AnalyticsTimeframe;
-    const includeChildren = searchParams.get('children')?.split(',').filter(Boolean);
+    const timeframe = (searchParams.get('timeframe') ||
+      'weekly') as AnalyticsTimeframe;
+    const includeChildren = searchParams
+      .get('children')
+      ?.split(',')
+      .filter(Boolean);
     const metricTypesParam = searchParams.get('metrics');
     const respectPrivacy = searchParams.get('respectPrivacy') !== 'false';
-    
-    const metricTypes = metricTypesParam?.split(',') as FamilyMetricType[] || undefined;
+
+    const metricTypes =
+      (metricTypesParam?.split(',') as FamilyMetricType[]) || undefined;
 
     // Parse date range if provided
     const startDateParam = searchParams.get('startDate');
@@ -42,10 +51,17 @@ export async function GET(request: NextRequest) {
     });
 
     // Get sibling interaction insights
-    const interactionInsights = await SiblingInteractionManager.getFamilyInteractionInsights(
-      userId,
-      timeframe === 'daily' ? 1 : timeframe === 'weekly' ? 7 : timeframe === 'monthly' ? 30 : 365
-    );
+    const interactionInsights =
+      await SiblingInteractionManager.getFamilyInteractionInsights(
+        userId,
+        timeframe === 'daily'
+          ? 1
+          : timeframe === 'weekly'
+            ? 7
+            : timeframe === 'monthly'
+              ? 30
+              : 365
+      );
 
     return NextResponse.json({
       success: true,
@@ -108,10 +124,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { error: 'Invalid action' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Family analytics POST error:', error);
     return NextResponse.json(

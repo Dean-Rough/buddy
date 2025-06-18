@@ -25,9 +25,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       alerts,
-      count: alerts.length
+      count: alerts.length,
     });
-    
   } catch (error) {
     console.error('Content alerts GET error:', error);
     return NextResponse.json(
@@ -63,9 +62,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       acknowledgedCount,
-      message: `${acknowledgedCount} alerts acknowledged`
+      message: `${acknowledgedCount} alerts acknowledged`,
     });
-    
   } catch (error) {
     console.error('Alert acknowledgment error:', error);
     return NextResponse.json(

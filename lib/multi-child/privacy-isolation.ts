@@ -6,7 +6,12 @@
 import { prisma } from '@/lib/prisma';
 
 export type PrivacyLevel = 'strict' | 'family_shared' | 'parent_only';
-export type DataCategory = 'conversations' | 'safety_events' | 'usage_analytics' | 'memories' | 'preferences';
+export type DataCategory =
+  | 'conversations'
+  | 'safety_events'
+  | 'usage_analytics'
+  | 'memories'
+  | 'preferences';
 
 interface ChildPrivacySettings {
   childAccountId: string;
@@ -35,7 +40,9 @@ export class PrivacyIsolationService {
   /**
    * Get privacy settings for a specific child
    */
-  static async getChildPrivacySettings(childAccountId: string): Promise<ChildPrivacySettings> {
+  static async getChildPrivacySettings(
+    childAccountId: string
+  ): Promise<ChildPrivacySettings> {
     const child = await prisma.childAccount.findUnique({
       where: { id: childAccountId },
       select: {
@@ -59,7 +66,10 @@ export class PrivacyIsolationService {
       memoryPrivacy: 'strict',
       preferencesPrivacy: 'strict',
       allowSiblingInteraction: false,
-      parentVisibilityLevel: child.visibilityLevel as 'full' | 'summaries_only' | 'safety_only',
+      parentVisibilityLevel: child.visibilityLevel as
+        | 'full'
+        | 'summaries_only'
+        | 'safety_only',
     };
   }
 
@@ -86,7 +96,9 @@ export class PrivacyIsolationService {
       };
     }
 
-    const privacySettings = await this.getChildPrivacySettings(request.targetChildId);
+    const privacySettings = await this.getChildPrivacySettings(
+      request.targetChildId
+    );
 
     // Parent access logic
     if (!request.requestingChildId) {
@@ -104,7 +116,10 @@ export class PrivacyIsolationService {
     request: DataAccessRequest,
     privacySettings: ChildPrivacySettings
   ): { allowed: boolean; reason?: string; filteredAccess?: boolean } {
-    const categoryPrivacy = this.getCategoryPrivacy(request.dataCategory, privacySettings);
+    const categoryPrivacy = this.getCategoryPrivacy(
+      request.dataCategory,
+      privacySettings
+    );
 
     // Parents always have some level of access, but it may be filtered
     switch (categoryPrivacy) {
@@ -142,7 +157,10 @@ export class PrivacyIsolationService {
       };
     }
 
-    const categoryPrivacy = this.getCategoryPrivacy(request.dataCategory, privacySettings);
+    const categoryPrivacy = this.getCategoryPrivacy(
+      request.dataCategory,
+      privacySettings
+    );
 
     switch (categoryPrivacy) {
       case 'family_shared':
@@ -292,7 +310,10 @@ export class PrivacyIsolationService {
 
           childData[category] = categoryData;
         } catch (error) {
-          console.error(`Error getting ${category} data for child ${child.id}:`, error);
+          console.error(
+            `Error getting ${category} data for child ${child.id}:`,
+            error
+          );
           childData[category] = null;
         }
       }
@@ -335,7 +356,10 @@ export class PrivacyIsolationService {
   /**
    * Get raw data for a category without privacy filtering
    */
-  private static async getRawCategoryData(childId: string, category: DataCategory) {
+  private static async getRawCategoryData(
+    childId: string,
+    category: DataCategory
+  ) {
     switch (category) {
       case 'conversations':
         return await prisma.conversation.findMany({
@@ -413,9 +437,13 @@ export class PrivacyIsolationService {
         return data.map((conv: any) => ({
           id: conv.id,
           date: conv.startedAt,
-          duration: conv.endedAt ? 
-            Math.floor((new Date(conv.endedAt).getTime() - new Date(conv.startedAt).getTime()) / 60000) : 
-            null,
+          duration: conv.endedAt
+            ? Math.floor(
+                (new Date(conv.endedAt).getTime() -
+                  new Date(conv.startedAt).getTime()) /
+                  60000
+              )
+            : null,
           messageCount: conv.messageCount,
           mood: conv.mood,
           topicCount: conv.topics?.length || 0,

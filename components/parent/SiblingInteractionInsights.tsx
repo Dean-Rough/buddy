@@ -33,14 +33,16 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/parent/sibling-interactions?action=insights&days=${days}`);
-      
+      const response = await fetch(
+        `/api/parent/sibling-interactions?action=insights&days=${days}`
+      );
+
       if (!response.ok) {
         throw new Error('Failed to load sibling interaction insights');
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.insights) {
         setInsights(data.insights);
       } else {
@@ -108,11 +110,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
           <h3 className="font-rokano text-xl mb-4">SIBLING INTERACTIONS</h3>
           <div className="text-center">
             <p className="text-red-600 mb-4">Error: {error}</p>
-            <BrutalButton
-              variant="white"
-              size="small"
-              onClick={loadInsights}
-            >
+            <BrutalButton variant="white" size="small" onClick={loadInsights}>
               RETRY
             </BrutalButton>
           </div>
@@ -141,7 +139,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-rokano text-xl">SIBLING INTERACTIONS</h3>
           <div className="flex gap-2">
-            {[7, 14, 30].map((period) => (
+            {[7, 14, 30].map(period => (
               <BrutalButton
                 key={period}
                 variant={days === period ? 'black' : 'white'}
@@ -157,11 +155,15 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
         {/* Overview Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-2xl font-bold">{insights.totalInteractions}</div>
+            <div className="text-2xl font-bold">
+              {insights.totalInteractions}
+            </div>
             <div className="text-sm text-gray-600">Total Interactions</div>
           </div>
           <div className="text-center">
-            <div className={`text-2xl font-bold ${getScoreColor(insights.familyBenefitScore)}`}>
+            <div
+              className={`text-2xl font-bold ${getScoreColor(insights.familyBenefitScore)}`}
+            >
               {Math.round(insights.familyBenefitScore * 100)}%
             </div>
             <div className="text-sm text-gray-600">Family Benefit</div>
@@ -178,7 +180,9 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
                 .slice(0, 5)
                 .map(([type, count]) => (
                   <div key={type} className="flex justify-between items-center">
-                    <span className="text-sm">{getInteractionTypeLabel(type)}</span>
+                    <span className="text-sm">
+                      {getInteractionTypeLabel(type)}
+                    </span>
                     <span className="font-bold">{count}</span>
                   </div>
                 ))}
@@ -192,17 +196,25 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
             <h4 className="font-bold text-sm mb-3">Sibling Compatibility</h4>
             <div className="space-y-3">
               {insights.siblingPairs.slice(0, 3).map((pair, index) => (
-                <div key={index} className="p-3 bg-gray-50 border-2 border-black">
+                <div
+                  key={index}
+                  className="p-3 bg-gray-50 border-2 border-black"
+                >
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-bold text-sm">
                       {pair.child1} & {pair.child2}
                     </span>
-                    <span className={`text-sm font-bold ${getScoreColor(pair.compatibilityScore)}`}>
+                    <span
+                      className={`text-sm font-bold ${getScoreColor(pair.compatibilityScore)}`}
+                    >
                       {getCompatibilityLabel(pair.compatibilityScore)}
                     </span>
                   </div>
                   <div className="flex justify-between text-xs text-gray-600">
-                    <span>Compatibility: {Math.round(pair.compatibilityScore * 100)}%</span>
+                    <span>
+                      Compatibility: {Math.round(pair.compatibilityScore * 100)}
+                      %
+                    </span>
                     <span>Recent interactions: {pair.recentInteractions}</span>
                   </div>
                 </div>
@@ -216,12 +228,14 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
           <div className="mb-4">
             <h4 className="font-bold text-sm mb-3">Recommendations</h4>
             <div className="space-y-2">
-              {insights.recommendations.slice(0, 3).map((recommendation, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-1">•</span>
-                  <span className="text-sm">{recommendation}</span>
-                </div>
-              ))}
+              {insights.recommendations
+                .slice(0, 3)
+                .map((recommendation, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-1">•</span>
+                    <span className="text-sm">{recommendation}</span>
+                  </div>
+                ))}
             </div>
           </div>
         )}
@@ -231,8 +245,14 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
           <div className="flex justify-between items-center">
             <span className="text-sm">Privacy Risk</span>
             <div className="flex items-center gap-2">
-              <span className={`font-bold ${insights.privacyRiskScore < 0.3 ? 'text-green-600' : insights.privacyRiskScore < 0.6 ? 'text-yellow-600' : 'text-red-600'}`}>
-                {insights.privacyRiskScore < 0.3 ? 'Low' : insights.privacyRiskScore < 0.6 ? 'Medium' : 'High'}
+              <span
+                className={`font-bold ${insights.privacyRiskScore < 0.3 ? 'text-green-600' : insights.privacyRiskScore < 0.6 ? 'text-yellow-600' : 'text-red-600'}`}
+              >
+                {insights.privacyRiskScore < 0.3
+                  ? 'Low'
+                  : insights.privacyRiskScore < 0.6
+                    ? 'Medium'
+                    : 'High'}
               </span>
               <span className="text-xs text-gray-600">
                 {Math.round(insights.privacyRiskScore * 100)}%
@@ -243,11 +263,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
 
         {/* Refresh Button */}
         <div className="text-center">
-          <BrutalButton
-            variant="white"
-            size="small"
-            onClick={loadInsights}
-          >
+          <BrutalButton variant="white" size="small" onClick={loadInsights}>
             REFRESH
           </BrutalButton>
         </div>

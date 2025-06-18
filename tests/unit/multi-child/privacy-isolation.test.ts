@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PrivacyIsolationService, DataAccessRequest } from '@/lib/multi-child/privacy-isolation';
+import {
+  PrivacyIsolationService,
+  DataAccessRequest,
+} from '@/lib/multi-child/privacy-isolation';
 
 // Mock prisma
 vi.mock('@/lib/prisma', () => ({
@@ -44,7 +47,8 @@ describe('PrivacyIsolationService', () => {
         visibilityLevel: 'full',
       });
 
-      const settings = await PrivacyIsolationService.getChildPrivacySettings('child1');
+      const settings =
+        await PrivacyIsolationService.getChildPrivacySettings('child1');
 
       expect(settings).toEqual({
         childAccountId: 'child1',
@@ -126,7 +130,10 @@ describe('PrivacyIsolationService', () => {
 
     it('should allow family_shared data for siblings with interaction enabled', async () => {
       // Mock privacy settings with sibling interaction enabled
-      vi.spyOn(PrivacyIsolationService, 'getChildPrivacySettings').mockResolvedValue({
+      vi.spyOn(
+        PrivacyIsolationService,
+        'getChildPrivacySettings'
+      ).mockResolvedValue({
         childAccountId: 'child1',
         conversationPrivacy: 'family_shared',
         safetyEventPrivacy: 'parent_only',
@@ -157,7 +164,12 @@ describe('PrivacyIsolationService', () => {
       // Mock children
       (prisma.childAccount.findMany as any).mockResolvedValue([
         { id: 'child1', name: 'Alice', age: 8, visibilityLevel: 'full' },
-        { id: 'child2', name: 'Bob', age: 10, visibilityLevel: 'summaries_only' },
+        {
+          id: 'child2',
+          name: 'Bob',
+          age: 10,
+          visibilityLevel: 'summaries_only',
+        },
       ]);
 
       // Mock conversation data
@@ -199,13 +211,11 @@ describe('PrivacyIsolationService', () => {
     });
 
     it('should return family data with privacy isolation applied', async () => {
-      const familyData = await PrivacyIsolationService.getFamilyDataWithIsolation(
-        'parent1',
-        {
+      const familyData =
+        await PrivacyIsolationService.getFamilyDataWithIsolation('parent1', {
           dataCategories: ['conversations', 'safety_events', 'usage_analytics'],
           respectChildPrivacy: true,
-        }
-      );
+        });
 
       expect(familyData).toHaveProperty('child1');
       expect(familyData).toHaveProperty('child2');
@@ -216,25 +226,21 @@ describe('PrivacyIsolationService', () => {
     });
 
     it('should filter children when includeChildren is specified', async () => {
-      const familyData = await PrivacyIsolationService.getFamilyDataWithIsolation(
-        'parent1',
-        {
+      const familyData =
+        await PrivacyIsolationService.getFamilyDataWithIsolation('parent1', {
           includeChildren: ['child1'],
           respectChildPrivacy: true,
-        }
-      );
+        });
 
       expect(familyData).toHaveProperty('child1');
       expect(familyData).not.toHaveProperty('child2');
     });
 
     it('should return raw data when privacy is not respected', async () => {
-      const familyData = await PrivacyIsolationService.getFamilyDataWithIsolation(
-        'parent1',
-        {
+      const familyData =
+        await PrivacyIsolationService.getFamilyDataWithIsolation('parent1', {
           respectChildPrivacy: false,
-        }
-      );
+        });
 
       expect(familyData).toHaveProperty('child1');
       expect(familyData).toHaveProperty('child2');
@@ -256,7 +262,10 @@ describe('PrivacyIsolationService', () => {
       };
 
       // Mock access allowed
-      vi.spyOn(PrivacyIsolationService, 'isDataAccessAllowed').mockResolvedValue({
+      vi.spyOn(
+        PrivacyIsolationService,
+        'isDataAccessAllowed'
+      ).mockResolvedValue({
         allowed: true,
         filteredAccess: true,
       });
@@ -290,7 +299,10 @@ describe('PrivacyIsolationService', () => {
       };
 
       // Mock access denied
-      vi.spyOn(PrivacyIsolationService, 'isDataAccessAllowed').mockResolvedValue({
+      vi.spyOn(
+        PrivacyIsolationService,
+        'isDataAccessAllowed'
+      ).mockResolvedValue({
         allowed: false,
         reason: 'Access denied',
       });

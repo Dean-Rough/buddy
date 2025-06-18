@@ -4,12 +4,12 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { 
-  AdvancedFilteringEngine, 
-  ContentAnalysis, 
-  TopicAction, 
+import {
+  AdvancedFilteringEngine,
+  ContentAnalysis,
+  TopicAction,
   AlertSeverity,
-  ContentAlert
+  ContentAlert,
 } from './advanced-filtering-engine';
 import { TopicManagementService } from './topic-management';
 
@@ -31,7 +31,6 @@ export interface MonitoringOptions {
 }
 
 export class RealTimeContentMonitor {
-  
   /**
    * Monitor message content in real-time during conversation
    */
@@ -45,29 +44,29 @@ export class RealTimeContentMonitor {
       enableRealTimeAlerts: true,
       parentNotificationThreshold: 2,
       bypassForEmergency: false,
-      logAllAnalysis: true
+      logAllAnalysis: true,
     }
   ): Promise<MonitoringResult> {
     const startTime = Date.now();
-    
+
     try {
       // Get child age for context-appropriate analysis
       const childAge = await this.getChildAge(childAccountId);
-      
+
       // Analyze content
       const analysis = await AdvancedFilteringEngine.analyzeContent(
         content,
         childAge,
         await this.getConversationContext(conversationId)
       );
-      
+
       // Apply topic rules
       const ruleResult = await AdvancedFilteringEngine.applyTopicRules(
         parentClerkUserId,
         childAccountId,
         analysis
       );
-      
+
       // Store content analysis if logging enabled
       if (options.logAllAnalysis) {
         await this.storeContentAnalysis(
@@ -78,12 +77,17 @@ export class RealTimeContentMonitor {
           Date.now() - startTime
         );
       }
-      
+
       // Check if parent notification is needed
       let alertCreated = false;
-      if (options.enableRealTimeAlerts && 
-          this.shouldCreateAlert(analysis, ruleResult.action, options.parentNotificationThreshold)) {
-        
+      if (
+        options.enableRealTimeAlerts &&
+        this.shouldCreateAlert(
+          analysis,
+          ruleResult.action,
+          options.parentNotificationThreshold
+        )
+      ) {
         await AdvancedFilteringEngine.createContentAlert(
           parentClerkUserId,
           childAccountId,
@@ -93,29 +97,30 @@ export class RealTimeContentMonitor {
           ruleResult.action,
           content
         );
-        
+
         alertCreated = true;
-        
+
         // Send real-time notification to parent (if they're online)
         await this.sendRealTimeNotification(parentClerkUserId, {
           type: 'content_alert',
           severity: this.determineSeverity(analysis, ruleResult.action),
           childName: await this.getChildName(childAccountId),
           topic: analysis.topics[0] || 'unknown',
-          action: ruleResult.action
+          action: ruleResult.action,
         });
       }
-      
+
       // Generate warnings for the chat system
       const warnings = this.generateWarnings(analysis, ruleResult);
-      
+
       // Generate suggested response if content needs redirection
-      const suggestedResponse = ruleResult.action === TopicAction.REDIRECT 
-        ? await this.generateRedirectionResponse(analysis, childAge)
-        : undefined;
-      
+      const suggestedResponse =
+        ruleResult.action === TopicAction.REDIRECT
+          ? await this.generateRedirectionResponse(analysis, childAge)
+          : undefined;
+
       const processingTimeMs = Date.now() - startTime;
-      
+
       return {
         allowed: ruleResult.action !== TopicAction.BLOCK,
         action: ruleResult.action,
@@ -123,12 +128,11 @@ export class RealTimeContentMonitor {
         warnings,
         suggestedResponse,
         alertCreated,
-        processingTimeMs
+        processingTimeMs,
       };
-      
     } catch (error) {
       console.error('Real-time monitoring error:', error);
-      
+
       // Fail safe - always allow but log error
       return {
         allowed: true,
@@ -136,7 +140,7 @@ export class RealTimeContentMonitor {
         score: 2, // Concerning due to error
         warnings: ['Content analysis failed - manual review recommended'],
         alertCreated: false,
-        processingTimeMs: Date.now() - startTime
+        processingTimeMs: Date.now() - startTime,
       };
     }
   }
@@ -159,56 +163,56 @@ export class RealTimeContentMonitor {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-      
+
       const whereClause = {
         parentClerkUserId,
         timestamp: { gte: startDate },
-        ...(childAccountId ? { childAccountId } : {})
+        ...(childAccountId ? { childAccountId } : {}),
       };
-      
+
       // Get alerts
       const alerts = await prisma.contentAlert.findMany({
         where: whereClause,
-        orderBy: { timestamp: 'desc' }
+        orderBy: { timestamp: 'desc' },
       });
-      
+
       // Get content scores
       const scores = await prisma.contentScore.findMany({
         where: {
           childAccountId: childAccountId || undefined,
-          analyzedAt: { gte: startDate }
-        }
+          analyzedAt: { gte: startDate },
+        },
       });
-      
+
       // Calculate category distribution
       const categoryCount = new Map<string, number>();
       scores.forEach(score => {
         const count = categoryCount.get(score.category) || 0;
         categoryCount.set(score.category, count + 1);
       });
-      
+
       const topCategories = Array.from(categoryCount.entries())
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
-      
+
       // Calculate average score
-      const averageScore = scores.length > 0 
-        ? scores.reduce((sum, score) => sum + score.score, 0) / scores.length
-        : 0;
-      
+      const averageScore =
+        scores.length > 0
+          ? scores.reduce((sum, score) => sum + score.score, 0) / scores.length
+          : 0;
+
       // Generate trends over time
       const trendsOverTime = await this.generateTrends(scores, alerts, days);
-      
+
       return {
         totalMessages: scores.length,
         analyzedMessages: scores.length,
         alertsCreated: alerts.length,
         topCategories,
         averageScore,
-        trendsOverTime
+        trendsOverTime,
       };
-      
     } catch (error) {
       console.error('Failed to get monitoring stats:', error);
       return {
@@ -217,7 +221,7 @@ export class RealTimeContentMonitor {
         alertsCreated: 0,
         topCategories: [],
         averageScore: 0,
-        trendsOverTime: []
+        trendsOverTime: [],
       };
     }
   }
@@ -240,7 +244,11 @@ export class RealTimeContentMonitor {
       // For now, we'll use the existing ParentSettings
       // Store content monitoring settings in parent settings
       // Note: Add contentMonitoringEnabled and alertThreshold fields to ParentSettings model later
-      console.log('Content monitoring settings updated for parent:', parentClerkUserId, settings);
+      console.log(
+        'Content monitoring settings updated for parent:',
+        parentClerkUserId,
+        settings
+      );
     } catch (error) {
       console.error('Failed to update monitoring settings:', error);
       throw new Error('Failed to update monitoring settings');
@@ -258,20 +266,17 @@ export class RealTimeContentMonitor {
       const alerts = await prisma.contentAlert.findMany({
         where: {
           parentClerkUserId,
-          acknowledged: false
+          acknowledged: false,
         },
-        orderBy: [
-          { severity: 'desc' },
-          { timestamp: 'desc' }
-        ],
+        orderBy: [{ severity: 'desc' }, { timestamp: 'desc' }],
         take: limit,
         include: {
           childAccount: {
-            select: { name: true, username: true }
-          }
-        }
+            select: { name: true, username: true },
+          },
+        },
       });
-      
+
       return alerts as ContentAlert[];
     } catch (error) {
       console.error('Failed to get active alerts:', error);
@@ -291,14 +296,14 @@ export class RealTimeContentMonitor {
         where: {
           id: { in: alertIds },
           parentClerkUserId, // Ensure ownership
-          acknowledged: false
+          acknowledged: false,
         },
         data: {
           acknowledged: true,
-          acknowledgedAt: new Date()
-        }
+          acknowledgedAt: new Date(),
+        },
       });
-      
+
       return result.count;
     } catch (error) {
       console.error('Failed to acknowledge alerts:', error);
@@ -312,22 +317,24 @@ export class RealTimeContentMonitor {
     try {
       const child = await prisma.childAccount.findUnique({
         where: { id: childAccountId },
-        select: { age: true }
+        select: { age: true },
       });
-      
+
       return child?.age || 8;
     } catch (error) {
       return 8;
     }
   }
 
-  private static async getConversationContext(conversationId: string): Promise<string> {
+  private static async getConversationContext(
+    conversationId: string
+  ): Promise<string> {
     try {
       const conversation = await prisma.conversation.findUnique({
         where: { id: conversationId },
-        select: { topics: true, mood: true }
+        select: { topics: true, mood: true },
       });
-      
+
       return `Topics: ${conversation?.topics?.join(', ') || 'none'}, Mood: ${conversation?.mood || 'neutral'}`;
     } catch (error) {
       return '';
@@ -354,8 +361,8 @@ export class RealTimeContentMonitor {
           flags: analysis.flags,
           educationalValue: analysis.educationalValue,
           analysisMethod: 'hybrid',
-          processingTime: processingTimeMs
-        }
+          processingTime: processingTimeMs,
+        },
       });
     } catch (error) {
       console.error('Failed to store content analysis:', error);
@@ -371,40 +378,47 @@ export class RealTimeContentMonitor {
     if (action === TopicAction.BLOCK) return true;
     if (analysis.score <= threshold) return true;
     if (analysis.flags.length > 0) return true;
-    
+
     return false;
   }
 
-  private static determineSeverity(analysis: ContentAnalysis, action: TopicAction): AlertSeverity {
+  private static determineSeverity(
+    analysis: ContentAnalysis,
+    action: TopicAction
+  ): AlertSeverity {
     if (action === TopicAction.BLOCK) return AlertSeverity.CRITICAL;
     if (analysis.score <= 2) return AlertSeverity.WARNING;
     if (analysis.flags.length > 0) return AlertSeverity.WARNING;
-    
+
     return AlertSeverity.INFO;
   }
 
   private static generateWarnings(
     analysis: ContentAnalysis,
-    ruleResult: { action: TopicAction; matchedRule?: any; overrideReason?: string }
+    ruleResult: {
+      action: TopicAction;
+      matchedRule?: any;
+      overrideReason?: string;
+    }
   ): string[] {
     const warnings: string[] = [];
-    
+
     if (ruleResult.action === TopicAction.BLOCK) {
       warnings.push('Content blocked by topic rule');
     }
-    
+
     if (ruleResult.action === TopicAction.MONITOR) {
       warnings.push('Content flagged for monitoring');
     }
-    
+
     if (analysis.flags.length > 0) {
       warnings.push(`Flags detected: ${analysis.flags.join(', ')}`);
     }
-    
+
     if (analysis.score <= 2) {
       warnings.push('Content score below recommended threshold');
     }
-    
+
     return warnings;
   }
 
@@ -414,7 +428,7 @@ export class RealTimeContentMonitor {
   ): Promise<string> {
     // This would use AI to generate natural redirections
     const topic = analysis.topics[0] || 'that topic';
-    
+
     if (childAge <= 8) {
       return `That's an interesting topic! Let's talk about something fun instead. What's your favorite game?`;
     } else {
@@ -434,8 +448,11 @@ export class RealTimeContentMonitor {
   ): Promise<void> {
     try {
       // This would integrate with push notification service
-      console.log(`Real-time notification for parent ${parentClerkUserId}:`, notification);
-      
+      console.log(
+        `Real-time notification for parent ${parentClerkUserId}:`,
+        notification
+      );
+
       // Store notification for parent dashboard
       await prisma.parentNotification.create({
         data: {
@@ -444,8 +461,8 @@ export class RealTimeContentMonitor {
           title: `Content Alert - ${notification.childName}`,
           message: `${notification.severity} alert for topic: ${notification.topic}`,
           severity: notification.severity,
-          read: false
-        }
+          read: false,
+        },
       });
     } catch (error) {
       console.error('Failed to send real-time notification:', error);
@@ -456,9 +473,9 @@ export class RealTimeContentMonitor {
     try {
       const child = await prisma.childAccount.findUnique({
         where: { id: childAccountId },
-        select: { name: true }
+        select: { name: true },
       });
-      
+
       return child?.name || 'Child';
     } catch (error) {
       return 'Child';
@@ -471,31 +488,32 @@ export class RealTimeContentMonitor {
     days: number
   ): Promise<Array<{ date: string; score: number; alerts: number }>> {
     const trends: Array<{ date: string; score: number; alerts: number }> = [];
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      
-      const dayScores = scores.filter(s => 
-        s.analyzedAt.toISOString().split('T')[0] === dateStr
+
+      const dayScores = scores.filter(
+        s => s.analyzedAt.toISOString().split('T')[0] === dateStr
       );
-      
-      const dayAlerts = alerts.filter(a => 
-        a.timestamp.toISOString().split('T')[0] === dateStr
+
+      const dayAlerts = alerts.filter(
+        a => a.timestamp.toISOString().split('T')[0] === dateStr
       );
-      
-      const averageScore = dayScores.length > 0 
-        ? dayScores.reduce((sum, s) => sum + s.score, 0) / dayScores.length
-        : 0;
-      
+
+      const averageScore =
+        dayScores.length > 0
+          ? dayScores.reduce((sum, s) => sum + s.score, 0) / dayScores.length
+          : 0;
+
       trends.push({
         date: dateStr,
         score: averageScore,
-        alerts: dayAlerts.length
+        alerts: dayAlerts.length,
       });
     }
-    
+
     return trends;
   }
 }

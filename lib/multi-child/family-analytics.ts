@@ -8,12 +8,12 @@ import { PrivacyIsolationService, DataCategory } from './privacy-isolation';
 import { SiblingInteractionManager } from './sibling-interaction';
 
 export type AnalyticsTimeframe = 'daily' | 'weekly' | 'monthly' | 'yearly';
-export type FamilyMetricType = 
-  | 'engagement' 
-  | 'safety' 
-  | 'learning' 
-  | 'emotional_wellbeing' 
-  | 'screen_time' 
+export type FamilyMetricType =
+  | 'engagement'
+  | 'safety'
+  | 'learning'
+  | 'emotional_wellbeing'
+  | 'screen_time'
   | 'family_interaction';
 
 interface FamilyAnalyticsQuery {
@@ -119,7 +119,14 @@ export class FamilyAnalyticsEngine {
         startDate,
         endDate,
         includeChildren,
-        metricTypes = ['engagement', 'safety', 'learning', 'emotional_wellbeing', 'screen_time', 'family_interaction'],
+        metricTypes = [
+          'engagement',
+          'safety',
+          'learning',
+          'emotional_wellbeing',
+          'screen_time',
+          'family_interaction',
+        ],
         respectPrivacy = true,
       } = query;
 
@@ -139,7 +146,7 @@ export class FamilyAnalyticsEngine {
       });
 
       // Filter to requested children
-      const targetChildren = includeChildren 
+      const targetChildren = includeChildren
         ? allChildren.filter(child => includeChildren.includes(child.id))
         : allChildren.filter(child => child.accountStatus === 'active');
 
@@ -147,7 +154,12 @@ export class FamilyAnalyticsEngine {
       const childSummaries: ChildAnalyticsSummary[] = [];
       let familyPrivacyCompliance = {
         childrenWithRestrictedData: [] as string[],
-        dataCategories: ['conversations', 'safety_events', 'usage_analytics', 'memories'] as DataCategory[],
+        dataCategories: [
+          'conversations',
+          'safety_events',
+          'usage_analytics',
+          'memories',
+        ] as DataCategory[],
         complianceScore: 1.0,
       };
 
@@ -169,7 +181,10 @@ export class FamilyAnalyticsEngine {
             familyPrivacyCompliance.complianceScore *= 0.9; // Slight reduction for each restricted child
           }
         } catch (error) {
-          console.error(`Error generating analytics for child ${child.id}:`, error);
+          console.error(
+            `Error generating analytics for child ${child.id}:`,
+            error
+          );
           // Continue with other children
         }
       }
@@ -209,7 +224,10 @@ export class FamilyAnalyticsEngine {
     metricTypes: FamilyMetricType[],
     respectPrivacy: boolean
   ): Promise<ChildAnalyticsSummary> {
-    const privacyLevel = child.visibilityLevel as 'full' | 'summaries_only' | 'safety_only';
+    const privacyLevel = child.visibilityLevel as
+      | 'full'
+      | 'summaries_only'
+      | 'safety_only';
 
     // Initialize child summary
     const childSummary: ChildAnalyticsSummary = {
@@ -268,13 +286,17 @@ export class FamilyAnalyticsEngine {
           childSummary
         );
       } catch (error) {
-        console.error(`Error calculating ${metricType} for child ${child.id}:`, error);
+        console.error(
+          `Error calculating ${metricType} for child ${child.id}:`,
+          error
+        );
       }
     }
 
     // Generate insights and recommendations
     childSummary.insights = this.generateChildInsights(childSummary);
-    childSummary.recommendations = this.generateChildRecommendations(childSummary);
+    childSummary.recommendations =
+      this.generateChildRecommendations(childSummary);
 
     return childSummary;
   }
@@ -292,7 +314,11 @@ export class FamilyAnalyticsEngine {
     childSummary: ChildAnalyticsSummary
   ): Promise<void> {
     // Check data access permissions
-    if (respectPrivacy && privacyLevel === 'safety_only' && metricType !== 'safety') {
+    if (
+      respectPrivacy &&
+      privacyLevel === 'safety_only' &&
+      metricType !== 'safety'
+    ) {
       return; // Skip non-safety metrics for privacy-restricted children
     }
 
@@ -307,7 +333,11 @@ export class FamilyAnalyticsEngine {
         await this.calculateLearningMetrics(childId, dateRange, childSummary);
         break;
       case 'emotional_wellbeing':
-        await this.calculateEmotionalWellbeingMetrics(childId, dateRange, childSummary);
+        await this.calculateEmotionalWellbeingMetrics(
+          childId,
+          dateRange,
+          childSummary
+        );
         break;
       case 'screen_time':
         await this.calculateScreenTimeMetrics(childId, dateRange, childSummary);
@@ -355,30 +385,47 @@ export class FamilyAnalyticsEngine {
       });
 
       // Calculate metrics
-      const totalSessions = dailyUsage.reduce((sum, day) => sum + day.sessionCount, 0);
-      const totalMinutes = dailyUsage.reduce((sum, day) => sum + day.totalMinutes, 0);
-      const messagesSent = dailyUsage.reduce((sum, day) => sum + day.messagesSent, 0);
-      
+      const totalSessions = dailyUsage.reduce(
+        (sum, day) => sum + day.sessionCount,
+        0
+      );
+      const totalMinutes = dailyUsage.reduce(
+        (sum, day) => sum + day.totalMinutes,
+        0
+      );
+      const messagesSent = dailyUsage.reduce(
+        (sum, day) => sum + day.messagesSent,
+        0
+      );
+
       const allTopics = conversations.flatMap(conv => conv.topics || []);
       const uniqueTopics = [...new Set(allTopics)];
 
       // Calculate trends (simplified - would be more sophisticated in production)
       const firstHalf = dailyUsage.slice(0, Math.floor(dailyUsage.length / 2));
       const secondHalf = dailyUsage.slice(Math.floor(dailyUsage.length / 2));
-      
-      const firstHalfAvg = firstHalf.length > 0 ? 
-        firstHalf.reduce((sum, day) => sum + day.totalMinutes, 0) / firstHalf.length : 0;
-      const secondHalfAvg = secondHalf.length > 0 ? 
-        secondHalf.reduce((sum, day) => sum + day.totalMinutes, 0) / secondHalf.length : 0;
+
+      const firstHalfAvg =
+        firstHalf.length > 0
+          ? firstHalf.reduce((sum, day) => sum + day.totalMinutes, 0) /
+            firstHalf.length
+          : 0;
+      const secondHalfAvg =
+        secondHalf.length > 0
+          ? secondHalf.reduce((sum, day) => sum + day.totalMinutes, 0) /
+            secondHalf.length
+          : 0;
 
       let engagementTrend: 'increasing' | 'stable' | 'decreasing' = 'stable';
       if (secondHalfAvg > firstHalfAvg * 1.2) engagementTrend = 'increasing';
-      else if (secondHalfAvg < firstHalfAvg * 0.8) engagementTrend = 'decreasing';
+      else if (secondHalfAvg < firstHalfAvg * 0.8)
+        engagementTrend = 'decreasing';
 
       childSummary.metrics.engagement = {
         totalSessions,
         totalMinutes,
-        averageSessionLength: totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0,
+        averageSessionLength:
+          totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0,
         messagesSent,
         topicsExplored: uniqueTopics.length,
         engagementTrend,
@@ -413,20 +460,28 @@ export class FamilyAnalyticsEngine {
       });
 
       const totalEvents = safetyEvents.length;
-      const criticalEvents = safetyEvents.filter(event => event.severityLevel >= 3).length;
-      const resolvedEvents = safetyEvents.filter(event => event.status === 'resolved').length;
+      const criticalEvents = safetyEvents.filter(
+        event => event.severityLevel >= 3
+      ).length;
+      const resolvedEvents = safetyEvents.filter(
+        event => event.status === 'resolved'
+      ).length;
 
       // Calculate safety trend
       const recentEvents = safetyEvents.filter(
-        event => event.detectedAt >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        event =>
+          event.detectedAt >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       );
       const olderEvents = safetyEvents.filter(
-        event => event.detectedAt < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        event =>
+          event.detectedAt < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       );
 
       let safetyTrend: 'improving' | 'stable' | 'concerning' = 'stable';
-      if (recentEvents.length > olderEvents.length * 1.5) safetyTrend = 'concerning';
-      else if (recentEvents.length < olderEvents.length * 0.5) safetyTrend = 'improving';
+      if (recentEvents.length > olderEvents.length * 1.5)
+        safetyTrend = 'concerning';
+      else if (recentEvents.length < olderEvents.length * 0.5)
+        safetyTrend = 'improving';
 
       childSummary.metrics.safety = {
         totalEvents,
@@ -469,20 +524,27 @@ export class FamilyAnalyticsEngine {
       });
 
       const knowledgeQueriesCount = knowledgeUsage.length;
-      const uniqueCategories = [...new Set(knowledgeUsage.map(usage => 
-        usage.knowledgeEntry.category
-      ))];
+      const uniqueCategories = [
+        ...new Set(knowledgeUsage.map(usage => usage.knowledgeEntry.category)),
+      ];
       const newTopicsExplored = uniqueCategories.length;
 
       // Calculate curiosity score based on query diversity and confidence
-      const avgConfidence = knowledgeUsage.length > 0 ? 
-        knowledgeUsage.reduce((sum, usage) => sum + Number(usage.confidence), 0) / knowledgeUsage.length : 0;
+      const avgConfidence =
+        knowledgeUsage.length > 0
+          ? knowledgeUsage.reduce(
+              (sum, usage) => sum + Number(usage.confidence),
+              0
+            ) / knowledgeUsage.length
+          : 0;
       const diversityScore = Math.min(newTopicsExplored / 10, 1); // Max 10 different topics
-      const curiosityScore = (avgConfidence * 0.4) + (diversityScore * 0.6);
+      const curiosityScore = avgConfidence * 0.4 + diversityScore * 0.6;
 
       let learningMomentum: 'high' | 'medium' | 'low' = 'medium';
-      if (knowledgeQueriesCount > 20 && curiosityScore > 0.7) learningMomentum = 'high';
-      else if (knowledgeQueriesCount < 5 || curiosityScore < 0.3) learningMomentum = 'low';
+      if (knowledgeQueriesCount > 20 && curiosityScore > 0.7)
+        learningMomentum = 'high';
+      else if (knowledgeQueriesCount < 5 || curiosityScore < 0.3)
+        learningMomentum = 'low';
 
       childSummary.metrics.learning = {
         knowledgeQueriesCount,
@@ -520,13 +582,17 @@ export class FamilyAnalyticsEngine {
       });
 
       const moods = conversations.map(conv => conv.mood).filter(Boolean);
-      const moodCounts = moods.reduce((counts: Record<string, number>, mood) => {
-        counts[mood!] = (counts[mood!] || 0) + 1;
-        return counts;
-      }, {});
+      const moodCounts = moods.reduce(
+        (counts: Record<string, number>, mood) => {
+          counts[mood!] = (counts[mood!] || 0) + 1;
+          return counts;
+        },
+        {}
+      );
 
-      const dominantMood = Object.entries(moodCounts)
-        .sort(([, a], [, b]) => b - a)[0]?.[0] || 'neutral';
+      const dominantMood =
+        Object.entries(moodCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+        'neutral';
 
       // Calculate mood variability
       const uniqueMoods = Object.keys(moodCounts).length;
@@ -536,11 +602,11 @@ export class FamilyAnalyticsEngine {
       const positiveMoods = ['happy', 'excited', 'curious', 'content'];
       const concerningMoods = ['sad', 'angry', 'frustrated', 'anxious'];
 
-      const positiveInteractions = moods.filter(mood => 
+      const positiveInteractions = moods.filter(mood =>
         positiveMoods.includes(mood?.toLowerCase() || '')
       ).length;
 
-      const concerningPatterns = moods.filter(mood => 
+      const concerningPatterns = moods.filter(mood =>
         concerningMoods.includes(mood?.toLowerCase() || '')
       ).length;
 
@@ -574,21 +640,37 @@ export class FamilyAnalyticsEngine {
         },
       });
 
-      const totalMinutes = dailyUsage.reduce((sum, day) => sum + day.totalMinutes, 0);
-      const daysWithUsage = dailyUsage.filter(day => day.totalMinutes > 0).length;
-      const dailyAverage = daysWithUsage > 0 ? Math.round(totalMinutes / daysWithUsage) : 0;
+      const totalMinutes = dailyUsage.reduce(
+        (sum, day) => sum + day.totalMinutes,
+        0
+      );
+      const daysWithUsage = dailyUsage.filter(
+        day => day.totalMinutes > 0
+      ).length;
+      const dailyAverage =
+        daysWithUsage > 0 ? Math.round(totalMinutes / daysWithUsage) : 0;
 
       // Check against typical limits (this would be configurable in production)
       const ageLimits = {
-        6: 30, 7: 35, 8: 40, 9: 45, 10: 50, 11: 55, 12: 60
+        6: 30,
+        7: 35,
+        8: 40,
+        9: 45,
+        10: 50,
+        11: 55,
+        12: 60,
       };
-      const recommendedLimit = ageLimits[childSummary.age as keyof typeof ageLimits] || 60;
+      const recommendedLimit =
+        ageLimits[childSummary.age as keyof typeof ageLimits] || 60;
       const withinLimits = dailyAverage <= recommendedLimit;
 
       // Calculate time management score
       const consistencyScore = daysWithUsage / dailyUsage.length; // How consistently they use the platform
-      const moderationScore = withinLimits ? 1 : Math.max(0, 1 - ((dailyAverage - recommendedLimit) / recommendedLimit));
-      const timeManagementScore = (consistencyScore * 0.3) + (moderationScore * 0.7);
+      const moderationScore = withinLimits
+        ? 1
+        : Math.max(0, 1 - (dailyAverage - recommendedLimit) / recommendedLimit);
+      const timeManagementScore =
+        consistencyScore * 0.3 + moderationScore * 0.7;
 
       childSummary.metrics.screenTime = {
         totalMinutes,
@@ -604,38 +686,59 @@ export class FamilyAnalyticsEngine {
   /**
    * Calculate family-wide metrics from individual child summaries
    */
-  private static calculateFamilyMetrics(childSummaries: ChildAnalyticsSummary[]) {
+  private static calculateFamilyMetrics(
+    childSummaries: ChildAnalyticsSummary[]
+  ) {
     const totalChildren = childSummaries.length;
-    const activeChildren = childSummaries.filter(child => 
-      child.metrics.engagement.totalSessions > 0
+    const activeChildren = childSummaries.filter(
+      child => child.metrics.engagement.totalSessions > 0
     ).length;
 
     // Calculate averages for family scores
-    const engagementScores = childSummaries.map(child => 
-      Math.min(child.metrics.engagement.totalMinutes / 420, 1) // Max 7 hours per week
+    const engagementScores = childSummaries.map(
+      child => Math.min(child.metrics.engagement.totalMinutes / 420, 1) // Max 7 hours per week
     );
-    const familyEngagementScore = engagementScores.length > 0 ? 
-      engagementScores.reduce((sum, score) => sum + score, 0) / engagementScores.length : 0;
+    const familyEngagementScore =
+      engagementScores.length > 0
+        ? engagementScores.reduce((sum, score) => sum + score, 0) /
+          engagementScores.length
+        : 0;
 
-    const safetyScores = childSummaries.map(child => 
-      Math.max(0, 1 - (child.metrics.safety.criticalEvents / 10)) // Penalize critical events
+    const safetyScores = childSummaries.map(
+      child => Math.max(0, 1 - child.metrics.safety.criticalEvents / 10) // Penalize critical events
     );
-    const familySafetyScore = safetyScores.length > 0 ? 
-      safetyScores.reduce((sum, score) => sum + score, 0) / safetyScores.length : 1;
+    const familySafetyScore =
+      safetyScores.length > 0
+        ? safetyScores.reduce((sum, score) => sum + score, 0) /
+          safetyScores.length
+        : 1;
 
-    const learningScores = childSummaries.map(child => child.metrics.learning.curiosityScore);
-    const familyLearningScore = learningScores.length > 0 ? 
-      learningScores.reduce((sum, score) => sum + score, 0) / learningScores.length : 0;
-
-    const wellbeingScores = childSummaries.map(child => 
-      Math.max(0, 1 - (child.metrics.emotionalWellbeing.concerningPatterns / 10))
+    const learningScores = childSummaries.map(
+      child => child.metrics.learning.curiosityScore
     );
-    const familyWellbeingScore = wellbeingScores.length > 0 ? 
-      wellbeingScores.reduce((sum, score) => sum + score, 0) / wellbeingScores.length : 1;
+    const familyLearningScore =
+      learningScores.length > 0
+        ? learningScores.reduce((sum, score) => sum + score, 0) /
+          learningScores.length
+        : 0;
 
-    const screenTimeScores = childSummaries.map(child => child.metrics.screenTime.timeManagementScore);
-    const familyScreenTimeBalance = screenTimeScores.length > 0 ? 
-      screenTimeScores.reduce((sum, score) => sum + score, 0) / screenTimeScores.length : 0;
+    const wellbeingScores = childSummaries.map(child =>
+      Math.max(0, 1 - child.metrics.emotionalWellbeing.concerningPatterns / 10)
+    );
+    const familyWellbeingScore =
+      wellbeingScores.length > 0
+        ? wellbeingScores.reduce((sum, score) => sum + score, 0) /
+          wellbeingScores.length
+        : 1;
+
+    const screenTimeScores = childSummaries.map(
+      child => child.metrics.screenTime.timeManagementScore
+    );
+    const familyScreenTimeBalance =
+      screenTimeScores.length > 0
+        ? screenTimeScores.reduce((sum, score) => sum + score, 0) /
+          screenTimeScores.length
+        : 0;
 
     // Sibling interaction health (simplified - would use actual interaction data in production)
     const siblingInteractionHealth = totalChildren > 1 ? 0.8 : 1.0; // Default good score
@@ -648,7 +751,8 @@ export class FamilyAnalyticsEngine {
       familyLearningScore: Math.round(familyLearningScore * 100) / 100,
       familyWellbeingScore: Math.round(familyWellbeingScore * 100) / 100,
       familyScreenTimeBalance: Math.round(familyScreenTimeBalance * 100) / 100,
-      siblingInteractionHealth: Math.round(siblingInteractionHealth * 100) / 100,
+      siblingInteractionHealth:
+        Math.round(siblingInteractionHealth * 100) / 100,
     };
   }
 
@@ -662,17 +766,24 @@ export class FamilyAnalyticsEngine {
   ) {
     try {
       // Get family interaction insights
-      const interactionInsights = await SiblingInteractionManager.getFamilyInteractionInsights(
-        parentClerkUserId,
-        Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
-      );
+      const interactionInsights =
+        await SiblingInteractionManager.getFamilyInteractionInsights(
+          parentClerkUserId,
+          Math.ceil(
+            (dateRange.end.getTime() - dateRange.start.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        );
 
       // Analyze common patterns across children
       const allTopics = childSummaries.flatMap(child => child.insights);
-      const topicCounts = allTopics.reduce((counts: Record<string, number>, topic) => {
-        counts[topic] = (counts[topic] || 0) + 1;
-        return counts;
-      }, {});
+      const topicCounts = allTopics.reduce(
+        (counts: Record<string, number>, topic) => {
+          counts[topic] = (counts[topic] || 0) + 1;
+          return counts;
+        },
+        {}
+      );
 
       const topSharedInterests = Object.entries(topicCounts)
         .filter(([, count]) => count > 1)
@@ -682,37 +793,50 @@ export class FamilyAnalyticsEngine {
 
       // Identify family strengths
       const familyStrengths: string[] = [];
-      const avgSafetyScore = childSummaries.reduce((sum, child) => 
-        sum + (child.metrics.safety.totalEvents === 0 ? 1 : 0.8), 0
-      ) / childSummaries.length;
+      const avgSafetyScore =
+        childSummaries.reduce(
+          (sum, child) =>
+            sum + (child.metrics.safety.totalEvents === 0 ? 1 : 0.8),
+          0
+        ) / childSummaries.length;
 
-      if (avgSafetyScore > 0.9) familyStrengths.push('Excellent safety record across all children');
-      
-      const avgLearningScore = childSummaries.reduce((sum, child) => 
-        sum + child.metrics.learning.curiosityScore, 0
-      ) / childSummaries.length;
+      if (avgSafetyScore > 0.9)
+        familyStrengths.push('Excellent safety record across all children');
 
-      if (avgLearningScore > 0.7) familyStrengths.push('High curiosity and learning engagement');
+      const avgLearningScore =
+        childSummaries.reduce(
+          (sum, child) => sum + child.metrics.learning.curiosityScore,
+          0
+        ) / childSummaries.length;
+
+      if (avgLearningScore > 0.7)
+        familyStrengths.push('High curiosity and learning engagement');
 
       // Identify areas for improvement
       const areasForImprovement: string[] = [];
-      const screenTimeIssues = childSummaries.filter(child => 
-        !child.metrics.screenTime.withinLimits
+      const screenTimeIssues = childSummaries.filter(
+        child => !child.metrics.screenTime.withinLimits
       );
-      
+
       if (screenTimeIssues.length > 0) {
-        areasForImprovement.push(`Screen time management for ${screenTimeIssues.length} child(ren)`);
+        areasForImprovement.push(
+          `Screen time management for ${screenTimeIssues.length} child(ren)`
+        );
       }
 
       // Generate recommendations
       const recommendedActivities: string[] = [];
       if (topSharedInterests.length > 0) {
-        recommendedActivities.push(`Plan family activities around shared interests: ${topSharedInterests.slice(0, 2).join(', ')}`);
+        recommendedActivities.push(
+          `Plan family activities around shared interests: ${topSharedInterests.slice(0, 2).join(', ')}`
+        );
       }
 
       const parentActionItems: string[] = [];
       if (interactionInsights.totalInteractions < 5) {
-        parentActionItems.push('Consider encouraging more family discussion time');
+        parentActionItems.push(
+          'Consider encouraging more family discussion time'
+        );
       }
 
       return {
@@ -737,7 +861,9 @@ export class FamilyAnalyticsEngine {
   /**
    * Generate insights for an individual child
    */
-  private static generateChildInsights(childSummary: ChildAnalyticsSummary): string[] {
+  private static generateChildInsights(
+    childSummary: ChildAnalyticsSummary
+  ): string[] {
     const insights: string[] = [];
 
     // Engagement insights
@@ -754,7 +880,10 @@ export class FamilyAnalyticsEngine {
     }
 
     // Emotional insights
-    if (childSummary.metrics.emotionalWellbeing.positiveInteractions > childSummary.metrics.emotionalWellbeing.concerningPatterns * 3) {
+    if (
+      childSummary.metrics.emotionalWellbeing.positiveInteractions >
+      childSummary.metrics.emotionalWellbeing.concerningPatterns * 3
+    ) {
       insights.push('Maintains positive emotional engagement');
     }
 
@@ -764,22 +893,30 @@ export class FamilyAnalyticsEngine {
   /**
    * Generate recommendations for an individual child
    */
-  private static generateChildRecommendations(childSummary: ChildAnalyticsSummary): string[] {
+  private static generateChildRecommendations(
+    childSummary: ChildAnalyticsSummary
+  ): string[] {
     const recommendations: string[] = [];
 
     // Screen time recommendations
     if (!childSummary.metrics.screenTime.withinLimits) {
-      recommendations.push('Consider setting daily time limits to promote healthy screen time habits');
+      recommendations.push(
+        'Consider setting daily time limits to promote healthy screen time habits'
+      );
     }
 
     // Safety recommendations
     if (childSummary.metrics.safety.criticalEvents > 0) {
-      recommendations.push('Review conversation topics and consider additional safety discussions');
+      recommendations.push(
+        'Review conversation topics and consider additional safety discussions'
+      );
     }
 
     // Learning recommendations
     if (childSummary.metrics.learning.learningMomentum === 'low') {
-      recommendations.push('Encourage exploration of new topics to boost curiosity');
+      recommendations.push(
+        'Encourage exploration of new topics to boost curiosity'
+      );
     }
 
     return recommendations;
@@ -856,7 +993,7 @@ export class FamilyAnalyticsEngine {
 
     // Format data based on requested format
     let formattedData: any;
-    
+
     switch (format) {
       case 'json':
         formattedData = analytics;

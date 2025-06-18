@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FamilyAnalyticsEngine, AnalyticsTimeframe } from '@/lib/multi-child/family-analytics';
+import {
+  FamilyAnalyticsEngine,
+  AnalyticsTimeframe,
+} from '@/lib/multi-child/family-analytics';
 
 // Mock dependencies
 vi.mock('@/lib/prisma', () => ({
@@ -29,7 +32,9 @@ vi.mock('@/lib/multi-child/sibling-interaction', () => ({
 }));
 
 const { prisma } = await import('@/lib/prisma');
-const { SiblingInteractionManager } = await import('@/lib/multi-child/sibling-interaction');
+const { SiblingInteractionManager } = await import(
+  '@/lib/multi-child/sibling-interaction'
+);
 
 describe('FamilyAnalyticsEngine', () => {
   beforeEach(() => {
@@ -144,15 +149,21 @@ describe('FamilyAnalyticsEngine', () => {
       (prisma.childAccount.findMany as any).mockResolvedValue(mockChildren);
       (prisma.dailyUsage.findMany as any).mockResolvedValue(mockDailyUsage);
       (prisma.safetyEvent.findMany as any).mockResolvedValue(mockSafetyEvents);
-      (prisma.knowledgeUsage.findMany as any).mockResolvedValue(mockKnowledgeUsage);
-      (prisma.conversation.findMany as any).mockResolvedValue(mockConversations);
+      (prisma.knowledgeUsage.findMany as any).mockResolvedValue(
+        mockKnowledgeUsage
+      );
+      (prisma.conversation.findMany as any).mockResolvedValue(
+        mockConversations
+      );
 
-      (SiblingInteractionManager.getFamilyInteractionInsights as any).mockResolvedValue({
+      (
+        SiblingInteractionManager.getFamilyInteractionInsights as any
+      ).mockResolvedValue({
         totalInteractions: 5,
         interactionTypes: {
-          'shared_topic_discussion': 2,
-          'family_activity_mention': 1,
-          'sibling_mention': 2,
+          shared_topic_discussion: 2,
+          family_activity_mention: 1,
+          sibling_mention: 2,
         },
         familyBenefitScore: 0.7,
         privacyRiskScore: 0.3,
@@ -184,8 +195,12 @@ describe('FamilyAnalyticsEngine', () => {
         respectPrivacy: true,
       });
 
-      const aliceData = analytics.childSummaries.find(child => child.childName === 'Alice');
-      const bobData = analytics.childSummaries.find(child => child.childName === 'Bob');
+      const aliceData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
+      const bobData = analytics.childSummaries.find(
+        child => child.childName === 'Bob'
+      );
 
       expect(aliceData?.privacyLevel).toBe('full');
       expect(bobData?.privacyLevel).toBe('summaries_only');
@@ -198,11 +213,21 @@ describe('FamilyAnalyticsEngine', () => {
         metricTypes: ['engagement'],
       });
 
-      const aliceData = analytics.childSummaries.find(child => child.childName === 'Alice');
-      expect(aliceData?.metrics.engagement.totalSessions).toBeGreaterThanOrEqual(2);
-      expect(aliceData?.metrics.engagement.totalMinutes).toBeGreaterThanOrEqual(30);
-      expect(aliceData?.metrics.engagement.messagesSent).toBeGreaterThanOrEqual(15);
-      expect(aliceData?.metrics.engagement.topicsExplored).toBeGreaterThanOrEqual(2);
+      const aliceData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
+      expect(
+        aliceData?.metrics.engagement.totalSessions
+      ).toBeGreaterThanOrEqual(2);
+      expect(aliceData?.metrics.engagement.totalMinutes).toBeGreaterThanOrEqual(
+        30
+      );
+      expect(aliceData?.metrics.engagement.messagesSent).toBeGreaterThanOrEqual(
+        15
+      );
+      expect(
+        aliceData?.metrics.engagement.topicsExplored
+      ).toBeGreaterThanOrEqual(2);
     });
 
     it('should calculate safety metrics correctly', async () => {
@@ -212,9 +237,13 @@ describe('FamilyAnalyticsEngine', () => {
         metricTypes: ['safety'],
       });
 
-      const childData = analytics.childSummaries.find(child => child.childName === 'Alice');
+      const childData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
       expect(childData?.metrics.safety.totalEvents).toBeGreaterThanOrEqual(0);
-      expect(childData?.metrics.safety.safetyTrend).toMatch(/improving|stable|concerning/);
+      expect(childData?.metrics.safety.safetyTrend).toMatch(
+        /improving|stable|concerning/
+      );
     });
 
     it('should calculate learning metrics correctly', async () => {
@@ -224,11 +253,15 @@ describe('FamilyAnalyticsEngine', () => {
         metricTypes: ['learning'],
       });
 
-      const aliceData = analytics.childSummaries.find(child => child.childName === 'Alice');
+      const aliceData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
       expect(aliceData?.metrics.learning.knowledgeQueriesCount).toBe(2);
       expect(aliceData?.metrics.learning.newTopicsExplored).toBe(2);
       expect(aliceData?.metrics.learning.curiosityScore).toBeGreaterThan(0);
-      expect(aliceData?.metrics.learning.learningMomentum).toMatch(/high|medium|low/);
+      expect(aliceData?.metrics.learning.learningMomentum).toMatch(
+        /high|medium|low/
+      );
     });
 
     it('should calculate emotional wellbeing metrics correctly', async () => {
@@ -238,10 +271,16 @@ describe('FamilyAnalyticsEngine', () => {
         metricTypes: ['emotional_wellbeing'],
       });
 
-      const childData = analytics.childSummaries.find(child => child.childName === 'Alice');
+      const childData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
       expect(childData?.metrics.emotionalWellbeing.dominantMood).toBeDefined();
-      expect(childData?.metrics.emotionalWellbeing.moodVariability).toBeGreaterThanOrEqual(0);
-      expect(childData?.metrics.emotionalWellbeing.moodVariability).toBeLessThanOrEqual(1);
+      expect(
+        childData?.metrics.emotionalWellbeing.moodVariability
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        childData?.metrics.emotionalWellbeing.moodVariability
+      ).toBeLessThanOrEqual(1);
     });
 
     it('should calculate screen time metrics correctly', async () => {
@@ -251,11 +290,19 @@ describe('FamilyAnalyticsEngine', () => {
         metricTypes: ['screen_time'],
       });
 
-      const aliceData = analytics.childSummaries.find(child => child.childName === 'Alice');
-      expect(aliceData?.metrics.screenTime.totalMinutes).toBeGreaterThanOrEqual(30);
+      const aliceData = analytics.childSummaries.find(
+        child => child.childName === 'Alice'
+      );
+      expect(aliceData?.metrics.screenTime.totalMinutes).toBeGreaterThanOrEqual(
+        30
+      );
       expect(aliceData?.metrics.screenTime.withinLimits).toBeDefined();
-      expect(aliceData?.metrics.screenTime.timeManagementScore).toBeGreaterThanOrEqual(0);
-      expect(aliceData?.metrics.screenTime.timeManagementScore).toBeLessThanOrEqual(1);
+      expect(
+        aliceData?.metrics.screenTime.timeManagementScore
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        aliceData?.metrics.screenTime.timeManagementScore
+      ).toBeLessThanOrEqual(1);
     });
 
     it('should filter children when includeChildren is specified', async () => {
@@ -275,12 +322,22 @@ describe('FamilyAnalyticsEngine', () => {
         timeframe: 'weekly',
       });
 
-      expect(analytics.familyMetrics.familyEngagementScore).toBeGreaterThanOrEqual(0);
-      expect(analytics.familyMetrics.familyEngagementScore).toBeLessThanOrEqual(1);
-      expect(analytics.familyMetrics.familySafetyScore).toBeGreaterThanOrEqual(0);
+      expect(
+        analytics.familyMetrics.familyEngagementScore
+      ).toBeGreaterThanOrEqual(0);
+      expect(analytics.familyMetrics.familyEngagementScore).toBeLessThanOrEqual(
+        1
+      );
+      expect(analytics.familyMetrics.familySafetyScore).toBeGreaterThanOrEqual(
+        0
+      );
       expect(analytics.familyMetrics.familySafetyScore).toBeLessThanOrEqual(1);
-      expect(analytics.familyMetrics.familyLearningScore).toBeGreaterThanOrEqual(0);
-      expect(analytics.familyMetrics.familyLearningScore).toBeLessThanOrEqual(1);
+      expect(
+        analytics.familyMetrics.familyLearningScore
+      ).toBeGreaterThanOrEqual(0);
+      expect(analytics.familyMetrics.familyLearningScore).toBeLessThanOrEqual(
+        1
+      );
     });
 
     it('should generate family insights and recommendations', async () => {
@@ -291,8 +348,12 @@ describe('FamilyAnalyticsEngine', () => {
 
       expect(analytics.familyInsights.topSharedInterests).toBeInstanceOf(Array);
       expect(analytics.familyInsights.familyStrengths).toBeInstanceOf(Array);
-      expect(analytics.familyInsights.areasForImprovement).toBeInstanceOf(Array);
-      expect(analytics.familyInsights.recommendedActivities).toBeInstanceOf(Array);
+      expect(analytics.familyInsights.areasForImprovement).toBeInstanceOf(
+        Array
+      );
+      expect(analytics.familyInsights.recommendedActivities).toBeInstanceOf(
+        Array
+      );
       expect(analytics.familyInsights.parentActionItems).toBeInstanceOf(Array);
     });
 
@@ -303,8 +364,12 @@ describe('FamilyAnalyticsEngine', () => {
         respectPrivacy: true,
       });
 
-      expect(analytics.privacyCompliance.complianceScore).toBeGreaterThanOrEqual(0);
-      expect(analytics.privacyCompliance.complianceScore).toBeLessThanOrEqual(1);
+      expect(
+        analytics.privacyCompliance.complianceScore
+      ).toBeGreaterThanOrEqual(0);
+      expect(analytics.privacyCompliance.complianceScore).toBeLessThanOrEqual(
+        1
+      );
       expect(analytics.privacyCompliance.dataCategories).toBeInstanceOf(Array);
     });
   });
@@ -327,7 +392,9 @@ describe('FamilyAnalyticsEngine', () => {
       (prisma.knowledgeUsage.findMany as any).mockResolvedValue([]);
       (prisma.conversation.findMany as any).mockResolvedValue([]);
 
-      (SiblingInteractionManager.getFamilyInteractionInsights as any).mockResolvedValue({
+      (
+        SiblingInteractionManager.getFamilyInteractionInsights as any
+      ).mockResolvedValue({
         totalInteractions: 0,
         interactionTypes: {},
         familyBenefitScore: 0.5,
@@ -379,7 +446,7 @@ describe('FamilyAnalyticsEngine', () => {
       const exportResult = await FamilyAnalyticsEngine.exportFamilyAnalytics(
         'parent1',
         'json',
-        { 
+        {
           timeframe: 'weekly',
           includePersonalData: true,
         }
@@ -392,7 +459,7 @@ describe('FamilyAnalyticsEngine', () => {
       const exportResult = await FamilyAnalyticsEngine.exportFamilyAnalytics(
         'parent1',
         'json',
-        { 
+        {
           timeframe: 'weekly',
           childrenFilter: ['child1'],
         }
@@ -416,7 +483,9 @@ describe('FamilyAnalyticsEngine', () => {
 
       // Mock minimal data to test date ranges
       (prisma.childAccount.findMany as any).mockResolvedValue([]);
-      (SiblingInteractionManager.getFamilyInteractionInsights as any).mockResolvedValue({
+      (
+        SiblingInteractionManager.getFamilyInteractionInsights as any
+      ).mockResolvedValue({
         totalInteractions: 0,
         interactionTypes: {},
         familyBenefitScore: 0.5,
@@ -425,11 +494,17 @@ describe('FamilyAnalyticsEngine', () => {
         siblingPairs: [],
       });
 
-      const weeklyAnalytics = await FamilyAnalyticsEngine.generateFamilyAnalytics(weeklyQuery);
-      const monthlyAnalytics = await FamilyAnalyticsEngine.generateFamilyAnalytics(monthlyQuery);
+      const weeklyAnalytics =
+        await FamilyAnalyticsEngine.generateFamilyAnalytics(weeklyQuery);
+      const monthlyAnalytics =
+        await FamilyAnalyticsEngine.generateFamilyAnalytics(monthlyQuery);
 
-      const weeklyDuration = weeklyAnalytics.dateRange.end.getTime() - weeklyAnalytics.dateRange.start.getTime();
-      const monthlyDuration = monthlyAnalytics.dateRange.end.getTime() - monthlyAnalytics.dateRange.start.getTime();
+      const weeklyDuration =
+        weeklyAnalytics.dateRange.end.getTime() -
+        weeklyAnalytics.dateRange.start.getTime();
+      const monthlyDuration =
+        monthlyAnalytics.dateRange.end.getTime() -
+        monthlyAnalytics.dateRange.start.getTime();
 
       expect(weeklyDuration).toBeCloseTo(7 * 24 * 60 * 60 * 1000, -1); // 7 days
       expect(monthlyDuration).toBeCloseTo(30 * 24 * 60 * 60 * 1000, -1); // 30 days
@@ -447,7 +522,9 @@ describe('FamilyAnalyticsEngine', () => {
       };
 
       (prisma.childAccount.findMany as any).mockResolvedValue([]);
-      (SiblingInteractionManager.getFamilyInteractionInsights as any).mockResolvedValue({
+      (
+        SiblingInteractionManager.getFamilyInteractionInsights as any
+      ).mockResolvedValue({
         totalInteractions: 0,
         interactionTypes: {},
         familyBenefitScore: 0.5,
@@ -456,7 +533,8 @@ describe('FamilyAnalyticsEngine', () => {
         siblingPairs: [],
       });
 
-      const analytics = await FamilyAnalyticsEngine.generateFamilyAnalytics(query);
+      const analytics =
+        await FamilyAnalyticsEngine.generateFamilyAnalytics(query);
 
       expect(analytics.dateRange.start).toEqual(startDate);
       expect(analytics.dateRange.end).toEqual(endDate);

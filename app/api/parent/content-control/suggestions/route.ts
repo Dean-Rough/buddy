@@ -38,9 +38,8 @@ export async function GET(request: NextRequest) {
       success: true,
       suggestions,
       count: suggestions.length,
-      period: `${days} days`
+      period: `${days} days`,
     });
-    
   } catch (error) {
     console.error('Topic suggestions GET error:', error);
     return NextResponse.json(
@@ -84,13 +83,15 @@ export async function POST(request: NextRequest) {
       rules
     );
 
-    return NextResponse.json({
-      success: true,
-      createdRules,
-      count: createdRules.length,
-      message: `${createdRules.length} topic rules created successfully`
-    }, { status: 201 });
-    
+    return NextResponse.json(
+      {
+        success: true,
+        createdRules,
+        count: createdRules.length,
+        message: `${createdRules.length} topic rules created successfully`,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Bulk rule creation error:', error);
     return NextResponse.json(

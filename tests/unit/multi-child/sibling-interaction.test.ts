@@ -21,7 +21,9 @@ vi.mock('@/lib/multi-child/privacy-isolation', () => ({
 }));
 
 const { prisma } = await import('@/lib/prisma');
-const { PrivacyIsolationService } = await import('@/lib/multi-child/privacy-isolation');
+const { PrivacyIsolationService } = await import(
+  '@/lib/multi-child/privacy-isolation'
+);
 
 describe('SiblingInteractionManager', () => {
   beforeEach(() => {
@@ -48,9 +50,12 @@ describe('SiblingInteractionManager', () => {
     beforeEach(() => {
       (prisma.childAccount.findUnique as any).mockResolvedValue(mockChild);
       (prisma.childAccount.findMany as any).mockResolvedValue(mockSiblings);
-      
+
       // Mock the updateFamilyDynamics method to avoid database calls
-      vi.spyOn(SiblingInteractionManager, 'updateFamilyDynamics').mockResolvedValue({
+      vi.spyOn(
+        SiblingInteractionManager,
+        'updateFamilyDynamics'
+      ).mockResolvedValue({
         parentClerkUserId: 'parent1',
         totalChildren: 2,
         activeChildren: 2,
@@ -63,7 +68,7 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should detect direct sibling mention', async () => {
-      const conversationContent = "Bob is really good at minecraft";
+      const conversationContent = 'Bob is really good at minecraft';
       const topics = ['gaming', 'minecraft'];
       const contextMetadata = {
         messageCount: 5,
@@ -71,12 +76,13 @@ describe('SiblingInteractionManager', () => {
         timeOfDay: 'afternoon',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeTruthy();
       expect(interaction?.interactionType).toBe('sibling_mention');
@@ -86,7 +92,7 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should detect family activity mentions', async () => {
-      const conversationContent = "We had a family movie night yesterday";
+      const conversationContent = 'We had a family movie night yesterday';
       const topics = ['family', 'entertainment'];
       const contextMetadata = {
         messageCount: 3,
@@ -94,12 +100,13 @@ describe('SiblingInteractionManager', () => {
         timeOfDay: 'evening',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeTruthy();
       expect(interaction?.interactionType).toBe('family_activity_mention');
@@ -108,7 +115,7 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should detect shared topic discussions', async () => {
-      const conversationContent = "I love playing minecraft";
+      const conversationContent = 'I love playing minecraft';
       const topics = ['minecraft', 'gaming'];
       const contextMetadata = {
         messageCount: 2,
@@ -116,12 +123,13 @@ describe('SiblingInteractionManager', () => {
         timeOfDay: 'afternoon',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeTruthy();
       expect(interaction?.interactionType).toBe('shared_topic_discussion');
@@ -129,7 +137,7 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should detect comparative behavior patterns', async () => {
-      const conversationContent = "Bob is better than me at football";
+      const conversationContent = 'Bob is better than me at football';
       const topics = ['sports', 'football'];
       const contextMetadata = {
         messageCount: 4,
@@ -137,12 +145,13 @@ describe('SiblingInteractionManager', () => {
         timeOfDay: 'afternoon',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeTruthy();
       expect(interaction?.interactionType).toBe('comparative_behavior');
@@ -151,7 +160,7 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should flag negative comparisons for monitoring', async () => {
-      const conversationContent = "My sister is so annoying and stupid";
+      const conversationContent = 'My sister is so annoying and stupid';
       const topics = ['family'];
       const contextMetadata = {
         messageCount: 1,
@@ -159,12 +168,13 @@ describe('SiblingInteractionManager', () => {
         timeOfDay: 'morning',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeTruthy();
       expect(interaction?.safetyLevel).toBe('monitored');
@@ -175,30 +185,32 @@ describe('SiblingInteractionManager', () => {
     it('should return null when no siblings exist', async () => {
       (prisma.childAccount.findMany as any).mockResolvedValue([]);
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        'I love minecraft',
-        ['gaming'],
-        { messageCount: 1, timeOfDay: 'afternoon' }
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          'I love minecraft',
+          ['gaming'],
+          { messageCount: 1, timeOfDay: 'afternoon' }
+        );
 
       expect(interaction).toBeNull();
     });
 
     it('should return null when no interaction patterns detected', async () => {
-      const conversationContent = "The weather is nice today";
+      const conversationContent = 'The weather is nice today';
       const topics = ['weather'];
       const contextMetadata = {
         messageCount: 1,
         timeOfDay: 'morning',
       };
 
-      const interaction = await SiblingInteractionManager.detectSiblingInteraction(
-        'child1',
-        conversationContent,
-        topics,
-        contextMetadata
-      );
+      const interaction =
+        await SiblingInteractionManager.detectSiblingInteraction(
+          'child1',
+          conversationContent,
+          topics,
+          contextMetadata
+        );
 
       expect(interaction).toBeNull();
     });
@@ -233,7 +245,8 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should update family dynamics with correct metrics', async () => {
-      const dynamics = await SiblingInteractionManager.updateFamilyDynamics('parent1');
+      const dynamics =
+        await SiblingInteractionManager.updateFamilyDynamics('parent1');
 
       expect(dynamics.parentClerkUserId).toBe('parent1');
       expect(dynamics.totalChildren).toBe(2);
@@ -246,10 +259,13 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should calculate sibling compatibility scores', async () => {
-      const dynamics = await SiblingInteractionManager.updateFamilyDynamics('parent1');
+      const dynamics =
+        await SiblingInteractionManager.updateFamilyDynamics('parent1');
 
-      const child1ToChild2Compatibility = dynamics.siblingCompatibilityMatrix['child1']['child2'];
-      const child2ToChild1Compatibility = dynamics.siblingCompatibilityMatrix['child2']['child1'];
+      const child1ToChild2Compatibility =
+        dynamics.siblingCompatibilityMatrix['child1']['child2'];
+      const child2ToChild1Compatibility =
+        dynamics.siblingCompatibilityMatrix['child2']['child1'];
 
       expect(child1ToChild2Compatibility).toBeGreaterThan(0);
       expect(child2ToChild1Compatibility).toBeGreaterThan(0);
@@ -261,7 +277,10 @@ describe('SiblingInteractionManager', () => {
   describe('getFamilyInteractionInsights', () => {
     beforeEach(() => {
       // Mock successful dynamics update
-      vi.spyOn(SiblingInteractionManager, 'updateFamilyDynamics').mockResolvedValue({
+      vi.spyOn(
+        SiblingInteractionManager,
+        'updateFamilyDynamics'
+      ).mockResolvedValue({
         parentClerkUserId: 'parent1',
         totalChildren: 2,
         activeChildren: 2,
@@ -269,8 +288,8 @@ describe('SiblingInteractionManager', () => {
         sharedActivities: [],
         familyEngagementScore: 0.8,
         siblingCompatibilityMatrix: {
-          'child1': { 'child2': 0.7 },
-          'child2': { 'child1': 0.7 },
+          child1: { child2: 0.7 },
+          child2: { child1: 0.7 },
         },
         lastUpdated: new Date(),
       });
@@ -283,11 +302,19 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should generate family interaction insights', async () => {
-      const insights = await SiblingInteractionManager.getFamilyInteractionInsights('parent1', 7);
+      const insights =
+        await SiblingInteractionManager.getFamilyInteractionInsights(
+          'parent1',
+          7
+        );
 
       expect(insights.totalInteractions).toBeGreaterThanOrEqual(0);
-      expect(insights.interactionTypes).toHaveProperty('shared_topic_discussion');
-      expect(insights.interactionTypes).toHaveProperty('family_activity_mention');
+      expect(insights.interactionTypes).toHaveProperty(
+        'shared_topic_discussion'
+      );
+      expect(insights.interactionTypes).toHaveProperty(
+        'family_activity_mention'
+      );
       expect(insights.familyBenefitScore).toBeGreaterThan(0);
       expect(insights.privacyRiskScore).toBeLessThan(1);
       expect(insights.recommendations).toBeInstanceOf(Array);
@@ -296,7 +323,10 @@ describe('SiblingInteractionManager', () => {
 
     it('should include recommendations for low engagement families', async () => {
       // Mock low engagement
-      vi.spyOn(SiblingInteractionManager, 'updateFamilyDynamics').mockResolvedValue({
+      vi.spyOn(
+        SiblingInteractionManager,
+        'updateFamilyDynamics'
+      ).mockResolvedValue({
         parentClerkUserId: 'parent1',
         totalChildren: 2,
         activeChildren: 1,
@@ -307,7 +337,11 @@ describe('SiblingInteractionManager', () => {
         lastUpdated: new Date(),
       });
 
-      const insights = await SiblingInteractionManager.getFamilyInteractionInsights('parent1', 7);
+      const insights =
+        await SiblingInteractionManager.getFamilyInteractionInsights(
+          'parent1',
+          7
+        );
 
       expect(insights.recommendations).toContain(
         'Consider encouraging more shared family activities'
@@ -315,26 +349,33 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should highlight shared interests', async () => {
-      const insights = await SiblingInteractionManager.getFamilyInteractionInsights('parent1', 7);
+      const insights =
+        await SiblingInteractionManager.getFamilyInteractionInsights(
+          'parent1',
+          7
+        );
 
-      expect(insights.recommendations.some(rec => 
-        rec.includes('share interests in')
-      )).toBe(true);
+      expect(
+        insights.recommendations.some(rec => rec.includes('share interests in'))
+      ).toBe(true);
     });
   });
 
   describe('isSiblingInteractionAllowed', () => {
     beforeEach(() => {
-      (PrivacyIsolationService.getChildPrivacySettings as any).mockResolvedValue({
+      (
+        PrivacyIsolationService.getChildPrivacySettings as any
+      ).mockResolvedValue({
         allowSiblingInteraction: true,
       });
     });
 
     it('should return true when both children allow sibling interaction', async () => {
-      const allowed = await SiblingInteractionManager.isSiblingInteractionAllowed(
-        'child1',
-        'child2'
-      );
+      const allowed =
+        await SiblingInteractionManager.isSiblingInteractionAllowed(
+          'child1',
+          'child2'
+        );
 
       expect(allowed).toBe(true);
     });
@@ -344,10 +385,11 @@ describe('SiblingInteractionManager', () => {
         .mockResolvedValueOnce({ allowSiblingInteraction: true })
         .mockResolvedValueOnce({ allowSiblingInteraction: false });
 
-      const allowed = await SiblingInteractionManager.isSiblingInteractionAllowed(
-        'child1',
-        'child2'
-      );
+      const allowed =
+        await SiblingInteractionManager.isSiblingInteractionAllowed(
+          'child1',
+          'child2'
+        );
 
       expect(allowed).toBe(false);
     });
@@ -365,11 +407,16 @@ describe('SiblingInteractionManager', () => {
         });
 
       // Mock sibling interaction allowed
-      vi.spyOn(SiblingInteractionManager, 'isSiblingInteractionAllowed')
-        .mockResolvedValue(true);
+      vi.spyOn(
+        SiblingInteractionManager,
+        'isSiblingInteractionAllowed'
+      ).mockResolvedValue(true);
 
       // Mock family dynamics
-      vi.spyOn(SiblingInteractionManager, 'updateFamilyDynamics').mockResolvedValue({
+      vi.spyOn(
+        SiblingInteractionManager,
+        'updateFamilyDynamics'
+      ).mockResolvedValue({
         parentClerkUserId: 'parent1',
         totalChildren: 2,
         activeChildren: 2,
@@ -382,10 +429,11 @@ describe('SiblingInteractionManager', () => {
     });
 
     it('should return sanitized sibling information when interaction is allowed', async () => {
-      const siblingInfo = await SiblingInteractionManager.getSanitizedSiblingInfo(
-        'child1',
-        'child2'
-      );
+      const siblingInfo =
+        await SiblingInteractionManager.getSanitizedSiblingInfo(
+          'child1',
+          'child2'
+        );
 
       expect(siblingInfo).toBeTruthy();
       expect(siblingInfo?.name).toBe('Bob');
@@ -400,28 +448,32 @@ describe('SiblingInteractionManager', () => {
       vi.clearAllMocks();
       (prisma.childAccount.findUnique as any)
         .mockResolvedValueOnce({ parentClerkUserId: 'parent1' })
-        .mockResolvedValueOnce({ 
+        .mockResolvedValueOnce({
           parentClerkUserId: 'parent2', // Different parent
           name: 'Bob',
-          age: 10 
+          age: 10,
         });
 
-      const siblingInfo = await SiblingInteractionManager.getSanitizedSiblingInfo(
-        'child1',
-        'child2'
-      );
+      const siblingInfo =
+        await SiblingInteractionManager.getSanitizedSiblingInfo(
+          'child1',
+          'child2'
+        );
 
       expect(siblingInfo).toBeNull();
     });
 
     it('should return null when sibling interaction is not allowed', async () => {
-      vi.spyOn(SiblingInteractionManager, 'isSiblingInteractionAllowed')
-        .mockResolvedValue(false);
+      vi.spyOn(
+        SiblingInteractionManager,
+        'isSiblingInteractionAllowed'
+      ).mockResolvedValue(false);
 
-      const siblingInfo = await SiblingInteractionManager.getSanitizedSiblingInfo(
-        'child1',
-        'child2'
-      );
+      const siblingInfo =
+        await SiblingInteractionManager.getSanitizedSiblingInfo(
+          'child1',
+          'child2'
+        );
 
       expect(siblingInfo).toBeNull();
     });

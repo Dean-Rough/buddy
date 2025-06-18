@@ -333,9 +333,13 @@ ${modeInstructions}
 
 ${memoryContext ? `Previous conversation context: ${memoryContext}` : ''}
 
-${parentNotes ? `IMPORTANT - Parent notes about this child: ${parentNotes}
+${
+  parentNotes
+    ? `IMPORTANT - Parent notes about this child: ${parentNotes}
 
-Please be mindful of these sensitivities when chatting and adjust your responses accordingly. For example, avoid suggesting physical activities if they have mobility limitations, don't mention foods they're allergic to, be gentle if they have anxiety triggers, etc.` : ''}
+Please be mindful of these sensitivities when chatting and adjust your responses accordingly. For example, avoid suggesting physical activities if they have mobility limitations, don't mention foods they're allergic to, be gentle if they have anxiety triggers, etc.`
+    : ''
+}
 
 Current mood: ${detectedMood || 'neutral'}
 Time: ${timeContext}
