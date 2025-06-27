@@ -35,6 +35,8 @@ export default function OnboardingPage() {
 
         <div className="flex justify-center">
           <SignUp
+            redirectUrl="/onboarding/setup"
+            afterSignUpUrl="/onboarding/setup"
             appearance={{
               elements: {
                 formButtonPrimary: 'brutal-btn brutal-btn-green',
