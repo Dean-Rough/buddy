@@ -12,13 +12,15 @@ import path from 'path';
 
 export interface SafetyResult {
   isSafe: boolean;
-  severity: number; // 0-3
+  severity: number; // 0-4 (expanded for testing)
   reason: string;
-  action: 'allow' | 'warn' | 'block' | 'escalate';
+  action: 'allow' | 'guide' | 'support' | 'warn' | 'block' | 'escalate';
   flaggedTerms: string[];
   processingTime?: number;
   cacheHit?: boolean;
   fallbackUsed?: boolean;
+  testingOverride?: boolean;
+  confidence?: number; // 0-100 confidence in detection
 }
 
 export interface SafetyContext {
@@ -118,9 +120,12 @@ export async function validateMessageSafety(
       await logSafetyEvent(message, finalResult, context);
     }
 
-    // Escalate to parents if severity 3
-    if (finalResult.severity >= 3) {
+    // Escalate to parents if severity 4 (emergency) or repeated severity 3
+    if (finalResult.severity >= 4) {
       await escalateToParent(message, finalResult, context);
+    } else if (finalResult.severity === 3) {
+      // For level 3, provide support but continue conversation with monitoring
+      await logSafetyEvent(message, finalResult, context, 'support_provided');
     }
 
     return finalResult;
@@ -265,15 +270,45 @@ function runRuleBasedSafety(message: string, _childAge: number): SafetyResult {
   try {
     const patterns = getCompiledSafetyPatterns();
 
-    // Check critical patterns (immediate escalation)
+    // Check critical patterns (emergency only - level 4)
     for (const pattern of patterns.critical) {
       if (pattern.regex.test(message)) {
+        // Context check for false positives
+        const hasGamingContext = /\b(game|gaming|fortnite|minecraft|roblox|boss|level)\b/i.test(message);
+        const isLaughingContext = /\b(lol|haha|funny|joke|kidding)\b/i.test(message);
+        
+        if (hasGamingContext || isLaughingContext) {
+          return {
+            isSafe: true,
+            severity: 1,
+            reason: `${pattern.reason} - but in gaming/humor context`,
+            action: 'allow',
+            flaggedTerms: [pattern.category + '_contextual'],
+            confidence: 60,
+          };
+        }
+
         return {
           isSafe: false,
-          severity: 3,
+          severity: 4, // Emergency level for genuine critical patterns
           reason: pattern.reason,
           action: 'escalate',
           flaggedTerms: [pattern.category],
+          confidence: 90,
+        };
+      }
+    }
+
+    // Check high concern patterns (level 3 - immediate support)
+    for (const pattern of patterns.highConcern) {
+      if (pattern.regex.test(message)) {
+        return {
+          isSafe: false,
+          severity: 3, // Active intervention with support
+          reason: pattern.reason,
+          action: 'support',
+          flaggedTerms: [pattern.category],
+          confidence: 80,
         };
       }
     }
@@ -291,19 +326,6 @@ function runRuleBasedSafety(message: string, _childAge: number): SafetyResult {
       }
     }
 
-    // Check high concern patterns (Level 2)
-    for (const pattern of patterns.highConcern) {
-      if (pattern.regex.test(message)) {
-        return {
-          isSafe: false,
-          severity: 2,
-          reason: pattern.reason,
-          action: 'warn',
-          flaggedTerms: [pattern.category],
-        };
-      }
-    }
-
     // Check contextual guidance patterns (gentle guidance)
     for (const pattern of patterns.contextualGuidance) {
       if (pattern.regex.test(message)) {
@@ -311,8 +333,9 @@ function runRuleBasedSafety(message: string, _childAge: number): SafetyResult {
           isSafe: false,
           severity: 2,
           reason: pattern.reason,
-          action: 'warn',
+          action: 'guide', // Changed from 'warn' to 'guide'
           flaggedTerms: [pattern.category],
+          confidence: 70,
         };
       }
     }
@@ -406,12 +429,13 @@ function combineResults(
 async function logSafetyEvent(
   message: string,
   result: SafetyResult,
-  context: SafetyContext
+  context: SafetyContext,
+  eventType: string = 'message_flagged'
 ): Promise<void> {
   try {
     await prisma.safetyEvent.create({
       data: {
-        eventType: 'message_flagged',
+        eventType,
         severityLevel: result.severity,
         childAccountId: context.childAccountId,
         conversationId: context.conversationId,
@@ -534,6 +558,12 @@ export function getSafetyResponse(
 
     // Default action-based responses
     switch (result.action) {
+      case 'guide':
+        return getSafetyResponseFromConfig('gentle_redirect', childAge);
+
+      case 'support':
+        return getSafetyResponseFromConfig('supportive_response', childAge);
+
       case 'warn':
         return getSafetyResponseFromConfig('gentle_redirect', childAge);
 

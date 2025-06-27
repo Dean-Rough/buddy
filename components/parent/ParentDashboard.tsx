@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
 import BrutalInput from '@/components/ui/BrutalInput';
+import { CalendarIntegrationCard } from './CalendarIntegrationCard';
+import { NudgeManagementCard } from './NudgeManagementCard';
 
 interface ChildAccount {
   id: string;
@@ -40,7 +42,7 @@ export default function ParentDashboard() {
   });
   const [usage, setUsage] = useState<DailyUsage[]>([]);
   const [activeTab, setActiveTab] = useState<
-    'info' | 'time' | 'summaries' | 'privacy'
+    'info' | 'time' | 'summaries' | 'privacy' | 'calendar' | 'nudges'
   >('info');
   const [loading, setLoading] = useState(true);
   const [editingChildName, setEditingChildName] = useState(false);
@@ -162,7 +164,7 @@ export default function ParentDashboard() {
             <h1 className="font-rokano text-4xl">PARENT DASHBOARD</h1>
             {child && (
               <h2 className="font-avotica text-xl text-gray-600 mt-2">
-                Managing {child.name}'s Account
+                Managing {child.name}&apos;s Account
               </h2>
             )}
           </div>
@@ -180,12 +182,14 @@ export default function ParentDashboard() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 mb-8">
+        <div className="flex gap-2 mb-8 flex-wrap">
           {[
             { id: 'info', label: 'CHILD INFO' },
             { id: 'time', label: 'TIME LIMITS' },
             { id: 'summaries', label: 'EMAIL SUMMARIES' },
             { id: 'privacy', label: 'PRIVACY' },
+            { id: 'calendar', label: 'CALENDAR' },
+            { id: 'nudges', label: 'NUDGES' },
           ].map(tab => (
             <BrutalButton
               key={tab.id}
@@ -207,7 +211,7 @@ export default function ParentDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block font-avotica font-bold mb-2">
-                    Child's Name
+                    Child&apos;s Name
                   </label>
                   {editingChildName ? (
                     <div className="flex items-center gap-2">
@@ -496,6 +500,18 @@ export default function ParentDashboard() {
                 </div>
               </div>
             </BrutalCard>
+          </div>
+        )}
+
+        {activeTab === 'calendar' && (
+          <div className="grid gap-6">
+            <CalendarIntegrationCard />
+          </div>
+        )}
+
+        {activeTab === 'nudges' && (
+          <div className="grid gap-6">
+            <NudgeManagementCard childAccountId={child?.id} />
           </div>
         )}
       </div>

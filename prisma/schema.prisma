@@ -696,7 +696,7 @@ model CalendarCredentials {
   events                CalendarEvent[]
   webhooks              CalendarWebhook[]
   
-  @@index([parentClerkUserId, provider])
+  @@unique([parentClerkUserId, provider])
   @@index([provider, isActive])
   @@index([lastSyncAt])
   @@map("calendar_credentials")

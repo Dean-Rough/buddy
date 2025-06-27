@@ -1,0 +1,178 @@
+{
+  "version": "1.0.0-testing",
+  "lastUpdated": "2025-01-27",
+  "description": "Safety configuration calibrated for live testing deployment",
+  
+  "testingMode": {
+    "enabled": true,
+    "graduatedLevels": true,
+    "manualOverrides": true,
+    "testingTeamDashboard": true,
+    "realTimeMonitoring": true
+  },
+
+  "safetyLevels": {
+    "0": {
+      "name": "Safe",
+      "description": "Normal conversation - no restrictions",
+      "action": "allow",
+      "logging": "minimal"
+    },
+    "1": {
+      "name": "Monitor", 
+      "description": "Log for pattern analysis but allow conversation",
+      "action": "allow",
+      "logging": "full",
+      "parentNotification": "weekly_summary"
+    },
+    "2": {
+      "name": "Gentle Guidance",
+      "description": "Provide age-appropriate redirect but continue conversation", 
+      "action": "guide",
+      "logging": "full",
+      "parentNotification": "daily_summary"
+    },
+    "3": {
+      "name": "Active Intervention",
+      "description": "Immediate parent notification but continue with support",
+      "action": "support",
+      "logging": "complete",
+      "parentNotification": "immediate"
+    },
+    "4": {
+      "name": "Emergency Block",
+      "description": "Only for genuine immediate danger - rare use",
+      "action": "escalate", 
+      "logging": "emergency",
+      "parentNotification": "urgent_call"
+    }
+  },
+
+  "testingThresholds": {
+    "description": "Realistic expectations for live testing phase",
+    "selfHarmDetection": {
+      "target": "85%",
+      "rationale": "Allows for context-dependent variations while catching direct threats"
+    },
+    "contextAwareness": {
+      "target": "75%", 
+      "rationale": "Complex patterns need human nuance - AI assists rather than replaces judgment"
+    },
+    "falsePositiveRate": {
+      "acceptable": "15%",
+      "rationale": "Better to occasionally over-caution than miss genuine concerns"
+    }
+  },
+
+  "manualOverrides": {
+    "testingTeamAccess": true,
+    "overrideReasons": [
+      "contextual_misinterpretation", 
+      "cultural_reference_missed",
+      "gaming_terminology_confusion",
+      "uk_slang_not_recognized",
+      "family_specific_language"
+    ],
+    "overrideNotification": "testing_team_dashboard"
+  },
+
+  "enhancedPatterns": {
+    "description": "Patterns specifically calibrated for UK children 6-12",
+    
+    "directSelfHarm": {
+      "severity": 4,
+      "patterns": [
+        "i want to kill myself",
+        "going to hurt myself", 
+        "planning to end it all",
+        "don't want to be alive"
+      ],
+      "contextExemptions": [
+        "kill it in the game",
+        "hurt myself laughing"
+      ]
+    },
+
+    "emotionalDistress": {
+      "severity": 2,
+      "patterns": [
+        "nobody likes me",
+        "i'm so sad all the time",
+        "everything is horrible", 
+        "i hate my life"
+      ],
+      "escalationTrigger": "3_instances_in_10_messages"
+    },
+
+    "bullying": {
+      "severity": 2,
+      "patterns": [
+        "kids at school are mean",
+        "they won't let me play",
+        "everyone picks on me",
+        "no one wants to be my friend"
+      ],
+      "supportResponse": "bullying_support_uk"
+    },
+
+    "familyStress": {
+      "severity": 1,
+      "patterns": [
+        "mum and dad are fighting",
+        "parents getting divorced",
+        "moving house again",
+        "grandma is sick"
+      ],
+      "supportResponse": "family_support_uk"
+    }
+  },
+
+  "contextualUnderstanding": {
+    "ukCulture": {
+      "schoolTerms": ["year 6", "sats", "secondary school", "gcses"],
+      "familyTerms": ["mum", "dad", "nan", "grandad", "auntie"],
+      "friendshipTerms": ["mate", "bestie", "squad", "crew"]
+    },
+    
+    "gaming": {
+      "positiveTerms": ["clutch", "op", "noob", "respawn", "glitch"],
+      "neutralTerms": ["kill", "die", "destroy", "murder", "dead"] 
+    },
+
+    "youthSlang": {
+      "positive": ["slay", "fire", "based", "bussin", "rizz"],
+      "neutral": ["mid", "cringe", "sus", "npc", "cap"]
+    }
+  },
+
+  "testingDashboard": {
+    "realTimeMetrics": [
+      "messages_per_hour",
+      "safety_flags_triggered", 
+      "manual_overrides_used",
+      "parent_notifications_sent",
+      "false_positive_reports"
+    ],
+    
+    "alerts": [
+      "unusual_pattern_detected",
+      "high_false_positive_rate",
+      "system_performance_degraded",
+      "manual_override_threshold_exceeded"
+    ]
+  },
+
+  "graduatedResponse": {
+    "firstOffense": "gentle_guidance",
+    "repeatedPattern": "increased_monitoring", 
+    "escalatingConcern": "parent_notification",
+    "immediateDanger": "emergency_protocol"
+  },
+
+  "parentCommunication": {
+    "weeklyDigest": "patterns_and_growth",
+    "dailySummary": "concerns_requiring_attention",
+    "immediateAlert": "urgent_safety_concerns",
+    "emergencyContact": "serious_harm_indicators"
+  }
+}

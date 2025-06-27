@@ -40,6 +40,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
+    "google-auth-library": "^10.1.0",
+    "googleapis": "^150.0.1",
     "lucide-react": "^0.294.0",
     "next": "14.2.29",
     "nodemailer": "^7.0.3",
