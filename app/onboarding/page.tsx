@@ -9,19 +9,7 @@ export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      // User is already signed in, redirect to setup
-      const userType = user.unsafeMetadata?.userType;
-      if (!userType) {
-        router.push('/onboarding/setup');
-      } else if (userType === 'parent') {
-        router.push('/parent');
-      } else if (userType === 'child') {
-        router.push('/chat');
-      }
-    }
-  }, [isLoaded, user, router]);
+  // Trust middleware to handle auth routing - no conflicting redirects
 
   return (
     <div className="min-h-screen bg-[#FFF8E1] flex items-center justify-center p-8">

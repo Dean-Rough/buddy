@@ -7,6 +7,9 @@ export default authMiddleware({
     '/', // Landing page
     '/test', // Test page for debugging
     '/debug-auth', // Auth debug page
+    '/debug-deploy', // Deployment debug page
+    '/simple-landing', // Simple landing page
+    '/auth-test', // Auth flow test page
     '/sign-in', // Clerk sign-in page
     '/onboarding', // Clerk sign-up page
     '/onboarding/setup', // User type selection page

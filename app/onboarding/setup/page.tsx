@@ -37,9 +37,15 @@ export default function UserTypeSetupPage() {
     }
   };
 
+  // Trust middleware to handle auth routing - no need to redirect here
   if (!user) {
-    router.push('/');
-    return null;
+    return (
+      <div className="min-h-screen bg-[#FFF8E1] flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -56,7 +62,7 @@ export default function UserTypeSetupPage() {
           <BrutalCard variant="blue">
             <div className="p-6 text-center">
               <div className="text-6xl mb-4">🧒</div>
-              <h3 className="font-rokano text-2xl mb-4">I&apos;M A KID</h3>
+              <h3 className="font-rokano text-2xl mb-4">I'M A KID</h3>
               <p className="font-avotica text-gray-600 mb-6">
                 Set up my account so I can start chatting with Onda right away!
               </p>
@@ -75,9 +81,9 @@ export default function UserTypeSetupPage() {
           <BrutalCard variant="blue">
             <div className="p-6 text-center">
               <div className="text-6xl mb-4">👨‍👩‍👧‍👦</div>
-              <h3 className="font-rokano text-2xl mb-4">I&apos;M A PARENT</h3>
+              <h3 className="font-rokano text-2xl mb-4">I'M A PARENT</h3>
               <p className="font-avotica text-gray-600 mb-6">
-                Set up parental controls and manage my family&apos;s accounts.
+                Set up parental controls and manage my family's accounts.
               </p>
               <BrutalButton
                 onClick={() => handleUserTypeSelection('parent')}
@@ -94,7 +100,7 @@ export default function UserTypeSetupPage() {
 
         <div className="mt-8 text-center">
           <p className="font-avotica text-sm text-gray-500">
-            Don&apos;t worry - you can always change this later in your account
+            Don't worry - you can always change this later in your account
             settings.
           </p>
         </div>
