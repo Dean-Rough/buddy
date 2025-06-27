@@ -2,7 +2,7 @@
 
 ## Stack Overview
 
-**Confirmed Implementation**: Next.js 14.2.29 with production-grade safety architecture
+**Current Status**: Production deployed at www.onda.click with Buddy 2.0 features live
 
 ### Core Technology Stack
 
@@ -14,6 +14,7 @@
 - **AI Services**: OpenAI (4.20.1) + Anthropic SDK (0.9.1)
 - **Voice**: Cartesia TTS integration
 - **Email**: Resend for transactional emails
+- **Calendar**: Google Calendar API integration (OAuth 2.0)
 - **Testing**: Vitest (unit) + Playwright (E2E)
 
 ### Database Architecture
@@ -40,21 +41,24 @@ Parent 1:N WeeklySummary (automated email summaries)
 
 ### AI Safety Architecture
 
-#### Dual-Layer Validation System
+#### Dual-Layer Validation System (Calibrated for Live Testing)
 
 ```typescript
-// lib/ai/safety.ts - Production implementation
+// lib/ai/safety.ts - Production implementation with graduated safety levels
 1. Input Processing → Rule-based patterns → AI validation
 2. Response Generation → Output safety check → User delivery
 3. Real-time monitoring → Safety event logging → Parent alerts
 ```
 
-**Safety Levels**:
+**Safety Levels (Expanded for Testing)**:
 
 - **Level 0**: Safe content (allow normally)
 - **Level 1**: Monitor (log for patterns)
-- **Level 2**: Warn (gentle redirection + parent notification)
-- **Level 3**: Escalate (block + immediate parent alert)
+- **Level 2**: Guide (supportive redirection)
+- **Level 3**: Support (warm redirection + optional notification)
+- **Level 4**: Escalate (immediate parent alert + conversation pause)
+
+**Testing Dashboard**: Manual override capability for safety testing and calibration
 
 #### Context-Aware Safety
 
@@ -229,6 +233,53 @@ CARTESIA_API_KEY=
 WEBHOOK_SECRET=                  # Clerk webhooks
 ```
 
+### Buddy 2.0 Features (Implemented)
+
+#### Calendar Integration Architecture
+
+```typescript
+// lib/calendar/ - Full Google Calendar integration
+- OAuth 2.0 authentication flow
+- COPPA-compliant privacy filtering
+- Child-relevant event detection
+- Secure token storage with encryption
+- Webhook support for real-time updates
+```
+
+**Supported Providers**:
+- ✅ Google Calendar (fully implemented)
+- 🚧 Outlook Calendar (infrastructure ready)
+- 🚧 Apple Calendar (infrastructure ready)
+
+#### Organic Nudging System
+
+```typescript
+// lib/conversation/context-weaver.ts - Natural conversation bridging
+- Topic mapping and bridge detection
+- Conversation flow intelligence
+- Natural transition templates
+- Success tracking and optimization
+- Parent nudge queue management
+```
+
+**Context Weaving Features**:
+- Natural topic transitions (story, callback, interest pivot)
+- Emotional tone matching for authentic flow
+- Timing intelligence (optimal moments for nudges)
+- Multi-attempt strategies with decreasing invasiveness
+- Analytics on nudge effectiveness
+
+#### Testing Infrastructure
+
+```typescript
+// components/parent/TestingSafetyDashboard.tsx
+- Manual safety level override for testing
+- Real-time safety score visualization
+- Conversation flow monitoring
+- Nudge effectiveness tracking
+- Debug mode for development
+```
+
 ### Monitoring & Analytics
 
 #### Real-Time Monitoring
@@ -238,6 +289,8 @@ WEBHOOK_SECRET=                  # Clerk webhooks
 - Parent engagement analytics
 - Cost tracking for AI services
 - Error monitoring and alerting
+- Calendar sync status and usage
+- Nudge success rates and patterns
 
 #### Parent Analytics
 
@@ -245,5 +298,7 @@ WEBHOOK_SECRET=                  # Clerk webhooks
 - Mood and topic trend analysis
 - Safety event tracking and resolution
 - Usage patterns and engagement metrics
+- Calendar integration insights
+- Nudge effectiveness reports
 
 This architecture provides a robust, scalable foundation for the Buddy 2.0 → Onda 3.0 evolution while maintaining child safety as the primary concern.

@@ -1,4 +1,7 @@
-# AI System Prompt & UX Guide - Onda Platform
+# AI System Prompt & UX Guide - Onda Platform (Live Production)
+
+**Status**: ✅ LIVE at [www.onda.click](https://www.onda.click) | Updated January 2025  
+**System**: GPT-4o primary with Anthropic Claude fallback in production
 
 ## Primary Chat Agent System Prompt
 
