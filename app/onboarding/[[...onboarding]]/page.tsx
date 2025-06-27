@@ -1,45 +1,25 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
-import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { SignUp } from '@clerk/nextjs';
 
-export default function SignInPage() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isLoaded && user) {
-      // User is already signed in, redirect based on userType
-      const userType = user.unsafeMetadata?.userType;
-      if (!userType) {
-        router.push('/onboarding/setup');
-      } else if (userType === 'parent') {
-        router.push('/parent');
-      } else if (userType === 'child') {
-        router.push('/chat');
-      }
-    }
-  }, [isLoaded, user, router]);
-
+export default function OnboardingCatchAllPage() {
   return (
     <div className="min-h-screen bg-[#FFF8E1] flex items-center justify-center p-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="font-rokano text-4xl mb-4">SIGN IN</h1>
+          <h1 className="font-rokano text-4xl mb-4">CREATE ACCOUNT</h1>
           <p className="font-avotica text-gray-600">
-            Welcome back! Sign in to continue your Onda experience
+            Join thousands of families using Onda for safe AI conversations
           </p>
         </div>
 
         <div className="flex justify-center">
-          <SignIn
+          <SignUp
             redirectUrl="/onboarding/setup"
-            afterSignInUrl="/onboarding/setup"
+            afterSignUpUrl="/onboarding/setup"
             appearance={{
               elements: {
-                formButtonPrimary: 'brutal-btn brutal-btn-blue',
+                formButtonPrimary: 'brutal-btn brutal-btn-green',
                 card: 'brutal-card border-3 border-black shadow-lg',
                 headerTitle: 'font-avotica font-bold text-xl',
                 headerSubtitle: 'font-avotica',
