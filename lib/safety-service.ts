@@ -37,7 +37,7 @@ export function analyzeTextSafety(text: string): SafetyResult {
   for (const pattern of allPatterns) {
     const regex = new RegExp(pattern.regex, pattern.flags || 'i');
     if (regex.test(text)) {
-      let severity = pattern.severity || 1;
+      let severity = 1; // Default severity
 
       // Determine severity based on which pattern set this belongs to
       if (safetyConfig.criticalPatterns.patterns.includes(pattern)) {

@@ -55,7 +55,7 @@ interface ConversationBridge {
 interface ConversationContext {
   currentTopic: ConversationTopic;
   recentTopics: ConversationTopic[];
-  childMood: 'happy' | 'sad' | 'excited' | 'calm' | 'frustrated' | 'curious';
+  childMood: 'happy' | 'sad' | 'excited' | 'calm' | 'frustrated' | 'curious' | 'tired';
   engagementLevel: 'high' | 'medium' | 'low';
   conversationLength: number; // Number of messages
   lastBridgeAttempt?: Date;

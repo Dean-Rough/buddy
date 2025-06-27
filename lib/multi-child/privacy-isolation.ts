@@ -24,7 +24,7 @@ interface ChildPrivacySettings {
   parentVisibilityLevel: 'full' | 'summaries_only' | 'safety_only';
 }
 
-interface DataAccessRequest {
+export interface DataAccessRequest {
   requestingChildId?: string; // Child requesting data about sibling
   requestingParentId: string;
   targetChildId: string;

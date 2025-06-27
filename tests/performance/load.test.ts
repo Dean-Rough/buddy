@@ -32,6 +32,10 @@ interface PerformanceMetrics {
 class LoadTester {
   private baseUrl: string;
   private results: LoadTestResult[] = [];
+  
+  getResults(): LoadTestResult[] {
+    return this.results;
+  }
 
   constructor(baseUrl = 'http://localhost:4288') {
     this.baseUrl = baseUrl;
@@ -378,7 +382,7 @@ describe('Load Testing Suite', () => {
         }
       }
 
-      const allResults = loadTester.results;
+      const allResults = loadTester.getResults();
       const metrics = loadTester.calculateMetrics(allResults);
 
       console.log('♻️ Sustained Load Performance Metrics:', {

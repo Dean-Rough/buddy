@@ -28,7 +28,6 @@ export default function SignInPage() {
                   'font-avotica text-blue-600 hover:text-blue-800',
               },
             }}
-            redirectUrl="/chat"
           />
         </div>
       </div>

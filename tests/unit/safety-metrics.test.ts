@@ -465,7 +465,7 @@ describe('Safety Metrics System', () => {
       );
 
       expect(performanceAlert).toBeDefined();
-      expect(performanceAlert[0]).toEqual(
+      expect(performanceAlert?.[0]).toEqual(
         expect.objectContaining({
           data: expect.objectContaining({
             alertType: SafetyAlertType.PERFORMANCE_DEGRADATION,

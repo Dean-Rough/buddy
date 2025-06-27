@@ -370,7 +370,7 @@ describe('ContextWeavingEngine', () => {
         sessionId: 'session_123',
         fromTopic: 'school',
         targetTopic: 'weekend',
-        bridgeType: 'forced',
+        bridgeType: 'natural',
         attemptedAt: new Date(),
         message: 'Now we need to talk about cleaning your room',
         success: false,
@@ -1091,7 +1091,7 @@ describe('BridgeAnalytics', () => {
         sessionId: 'session_123',
         fromTopic: 'school',
         targetTopic: 'weekend',
-        bridgeType: 'forced',
+        bridgeType: 'natural',
         attemptedAt: new Date(),
         message: 'Now lets talk about cleaning your room',
         success: false,
@@ -1263,7 +1263,14 @@ describe('Context Weaving Integration', () => {
     });
 
     // Queue nudge in context weaver as well
-    await contextWeaver.queueParentNudge(nudgeRequest);
+    const fullNudgeRequest = {
+      ...nudgeRequest,
+      id: 'nudge_integration_test',
+      createdAt: new Date(),
+      currentAttempts: 0,
+      status: 'pending' as const,
+    };
+    await contextWeaver.queueParentNudge(fullNudgeRequest);
 
     const opportunity =
       await contextWeaver.analyzeConversationForNudgeOpportunity(

@@ -483,7 +483,9 @@ class SafetyMetricsManager {
           message: alert.message,
           timestamp: alert.timestamp,
           resolved: alert.resolved,
-          metricIds: alert.metrics.map(m => m.id),
+          metrics: {
+            connect: alert.metrics.map(m => ({ id: m.id }))
+          },
         },
       });
     } catch (error) {

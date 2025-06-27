@@ -44,6 +44,15 @@ export interface ConversationContext {
   recentMessageLength: number;
   isAskingQuestions: boolean;
   topicDepth: 'surface' | 'deep' | 'personal';
+  childMood?:
+    | 'happy'
+    | 'sad'
+    | 'excited'
+    | 'calm'
+    | 'frustrated'
+    | 'curious'
+    | 'tired'
+    | 'neutral';
 }
 
 /**

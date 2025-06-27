@@ -31,6 +31,7 @@ export class ContextAwareWarnings {
       recentMessageLength: lastMessage?.content.length || 0,
       isAskingQuestions: this.detectQuestionAsking(last3Messages),
       topicDepth: this.analyzeTopicDepth(last5Messages),
+      childMood: this.detectChildMood(last3Messages),
     };
   }
 
@@ -611,5 +612,128 @@ export class ContextAwareWarnings {
     };
 
     return NaturalExitGenerator.generateNaturalExit(exitContext, 'final');
+  }
+
+  /**
+   * Detect child's current mood based on recent messages
+   */
+  private static detectChildMood(
+    messages: Array<{ content: string; role: string }>
+  ):
+    | 'happy'
+    | 'sad'
+    | 'excited'
+    | 'calm'
+    | 'frustrated'
+    | 'curious'
+    | 'tired'
+    | 'neutral' {
+    const childMessages = messages
+      .filter(m => m.role === 'child')
+      .map(m => m.content.toLowerCase());
+
+    if (childMessages.length === 0) return 'neutral';
+
+    const allContent = childMessages.join(' ');
+
+    // Check for specific mood indicators
+    const moodIndicators = {
+      happy: [
+        'happy',
+        'great',
+        'awesome',
+        'love',
+        'fun',
+        'yay',
+        'cool',
+        '😊',
+        '😄',
+      ],
+      sad: ['sad', 'cry', 'miss', 'lonely', 'hurt', 'sorry', '😢', '😭'],
+      excited: [
+        'excited',
+        "can't wait",
+        'amazing',
+        'wow',
+        'omg',
+        'yay',
+        '!',
+        '😃',
+        '🎉',
+      ],
+      frustrated: [
+        'annoying',
+        'hate',
+        'stupid',
+        'unfair',
+        'mad',
+        'angry',
+        'ugh',
+        '😤',
+        '😠',
+      ],
+      curious: [
+        'why',
+        'how',
+        'what if',
+        'wonder',
+        'know',
+        'tell me',
+        'explain',
+        '?',
+        '🤔',
+      ],
+      tired: [
+        'tired',
+        'sleepy',
+        'yawn',
+        'bed',
+        'rest',
+        'exhausted',
+        '😴',
+        '🥱',
+      ],
+      calm: ['okay', 'fine', 'sure', 'alright', 'yeah', 'mhm'],
+    };
+
+    // Count mood indicators
+    const moodScores: Record<string, number> = {
+      happy: 0,
+      sad: 0,
+      excited: 0,
+      frustrated: 0,
+      curious: 0,
+      tired: 0,
+      calm: 0,
+    };
+
+    for (const [mood, indicators] of Object.entries(moodIndicators)) {
+      for (const indicator of indicators) {
+        if (allContent.includes(indicator)) {
+          moodScores[mood]++;
+        }
+      }
+    }
+
+    // Find dominant mood
+    let dominantMood: string = 'neutral';
+    let highestScore = 0;
+
+    for (const [mood, score] of Object.entries(moodScores)) {
+      if (score > highestScore) {
+        highestScore = score;
+        dominantMood = mood;
+      }
+    }
+
+    return dominantMood as
+      | 'happy'
+      | 'sad'
+      | 'excited'
+      | 'calm'
+      | 'frustrated'
+      | 'curious'
+      | 'tired'
+      | 'neutral';
   }
 }

@@ -190,11 +190,11 @@ export class TopicManagementService {
       const conversations = await prisma.conversation.findMany({
         where: {
           childAccountId,
-          createdAt: { gte: startDate },
+          startedAt: { gte: startDate },
         },
         include: {
           messages: {
-            where: { sender: 'child' },
+            where: { role: 'child' },
             select: { content: true, createdAt: true },
           },
         },
@@ -332,7 +332,9 @@ export class TopicManagementService {
       >();
 
       for (const rule of rules) {
-        const existing = categoryStats.get(rule.category) || {
+        const existing = categoryStats.get(
+          rule.category as ContentCategory
+        ) || {
           count: 0,
           allowedCount: 0,
           blockedCount: 0,
@@ -353,7 +355,7 @@ export class TopicManagementService {
             break;
         }
 
-        categoryStats.set(rule.category, existing);
+        categoryStats.set(rule.category as ContentCategory, existing);
       }
 
       return Array.from(categoryStats.entries()).map(([category, stats]) => ({
@@ -433,7 +435,7 @@ export class TopicManagementService {
     }
   }
 
-  private static async getTopicRuleStats(ruleId: string): Promise<{
+  private static async getTopicRuleStats(_ruleId: string): Promise<{
     usageCount: number;
     lastTriggered?: Date;
     effectivenessScore: number;
@@ -453,7 +455,7 @@ export class TopicManagementService {
         lastTriggered: alerts.length > 0 ? alerts[0].timestamp : undefined,
         effectivenessScore: Math.min(alerts.length * 0.1, 1.0), // Simple effectiveness calculation
       };
-    } catch (error) {
+    } catch {
       return {
         usageCount: 0,
         effectivenessScore: 0,
@@ -469,7 +471,7 @@ export class TopicManagementService {
       });
 
       return child?.age || 8;
-    } catch (error) {
+    } catch {
       return 8; // Default age
     }
   }

@@ -10,6 +10,15 @@ export interface ConversationContext {
   conversationFlow: TopicFlow[];
   lastActivityAt: Date;
   metadata: Record<string, any>;
+  childMood?:
+    | 'happy'
+    | 'sad'
+    | 'excited'
+    | 'calm'
+    | 'frustrated'
+    | 'curious'
+    | 'tired'
+    | 'neutral';
 }
 
 export interface EmotionalState {
@@ -60,10 +69,6 @@ export async function getConversationContext(
 
     if (!context) {
       // Create new context
-      const newSessionId =
-        sessionId ||
-        `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-
       context = await prisma.conversationContext.create({
         data: {
           childAccountId,
@@ -141,7 +146,6 @@ export async function updateConversationContext(
       timestamp: existingContext.lastUpdated,
     } as EmotionalState;
     const currentFlow = [] as TopicFlow[];
-    const currentMetadata = {};
 
     // Update emotional state
     const updatedEmotionalState = update.emotionalState
@@ -185,11 +189,6 @@ export async function updateConversationContext(
         );
       }
     }
-
-    // Update metadata
-    const updatedMetadata = update.metadata
-      ? { ...currentMetadata, ...update.metadata }
-      : currentMetadata;
 
     await prisma.conversationContext.update({
       where: { id: contextId },

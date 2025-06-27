@@ -315,7 +315,7 @@ describe('TopicManagementService', () => {
         },
       ];
 
-      const mockExistingRules = [];
+      const mockExistingRules: any[] = [];
 
       (prisma.conversation.findMany as any).mockResolvedValue(
         mockConversations

@@ -23,10 +23,23 @@ export function useAuthFlow() {
         isLoaded,
       });
 
-      // If user is already signed in, redirect to chat
+      // If user is already signed in, redirect based on user type
       if (user && isLoaded) {
-        console.log('✅ User already signed in, redirecting to chat');
-        router.push('/chat');
+        const userType = user.unsafeMetadata?.userType;
+
+        if (!userType) {
+          console.log('⚙️ User needs to set up user type');
+          router.push('/onboarding/setup');
+        } else if (userType === 'parent') {
+          console.log('✅ Parent user, redirecting to parent dashboard');
+          router.push('/parent');
+        } else if (userType === 'child') {
+          console.log('✅ Child user, redirecting to chat');
+          router.push('/chat');
+        } else {
+          console.log('❓ Invalid user type, redirecting to setup');
+          router.push('/onboarding/setup');
+        }
         return;
       }
 

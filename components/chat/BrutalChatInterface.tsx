@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import WritingAnimation from './WritingAnimation';
 import BrutalButton from '../ui/BrutalButton';
@@ -83,11 +83,7 @@ export default function BrutalChatInterface({
     }
   }, [writingMessage]);
 
-  useEffect(() => {
-    generateContextualWelcome();
-  }, [childProfile.name]);
-
-  const generateContextualWelcome = async () => {
+  const generateContextualWelcome = useCallback(async () => {
     try {
       // Get the last conversation to reference
       const response = await fetch(
@@ -123,7 +119,11 @@ export default function BrutalChatInterface({
       };
       setMessages([welcomeMessage]);
     }
-  };
+  }, [childProfile.id, childProfile.name]);
+
+  useEffect(() => {
+    generateContextualWelcome();
+  }, [generateContextualWelcome]);
 
   const generateOrganicGreeting = (name: string, context: any): string => {
     const { lastTopic, lastMood, timeAgo, keyTopics } = context;

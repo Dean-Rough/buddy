@@ -1,8 +1,27 @@
-# CLAUDE.md - Onda AI Child Safety Platform
+# CLAUDE.md - Onda AI Child Safety Platform (Web-First PWA)
 
 see /Users/deannewton/Documents/Onda/.claude/settings.json
 
 _Safe AI chat companion for children aged 6-12. CRITICAL: All development must prioritize child safety and legal compliance._
+
+## 🌐 Web-First Development Strategy
+
+**Platform Decision**: Progressive Web App (PWA) approach due to Apple App Store restrictions on AI in kids' apps. This is our competitive advantage, not a limitation.
+
+### Web-First Development Guidelines
+
+1. **Mobile-First Always**: Design for mobile browsers first, desktop second
+2. **Touch-Optimized**: All tap targets minimum 44x44px
+3. **Offline-First**: Core features must work without internet
+4. **Performance Budget**: <3s time to interactive on 3G
+5. **PWA Best Practices**: Service workers, manifest.json, HTTPS required
+
+### Why This Matters
+
+- **Instant Updates**: Safety improvements deployed immediately
+- **Universal Access**: Works on all devices
+- **Better Safety**: No app store delays for critical fixes
+- **100% Revenue**: No 30% commission
 
 ## Project Context & Mission
 
@@ -29,11 +48,18 @@ npm run lint         # ESLint (must pass before commits)
 npm run type-check   # TypeScript validation (must pass)
 npm run format       # Prettier formatting
 
+# PWA Development (NEW)
+npm run pwa:dev      # Dev server with PWA features enabled
+npm run pwa:audit    # Lighthouse PWA audit
+npm run pwa:icons    # Generate all icon sizes
+npm run pwa:test     # Test offline functionality
+
 # Testing (MANDATORY)
 npm run test         # Vitest unit tests
 npm run test:ui      # Vitest UI interface
 npm run test:safety  # Safety validation tests (CRITICAL)
 npm run test:e2e     # Playwright E2E tests
+npm run test:mobile  # Mobile web experience tests
 
 # Database (Handle with Care)
 npm run db:generate  # Generate Prisma client

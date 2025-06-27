@@ -1,4 +1,44 @@
----
+# Onda Platform - Product Requirements Document
+
+## 🌐 Distribution Strategy - Web-First Approach
+
+### Platform Decision: Progressive Web App (PWA)
+
+**Strategic Context**: Apple's App Store guidelines prohibit AI-generated content in kids' apps, making traditional app distribution impossible for AI chat companions. This constraint drives our web-first strategy.
+
+### Why Web-First is Our Competitive Advantage
+
+1. **Safety First**: Instant deployment of safety updates without 2-4 week review cycles
+2. **Revenue Optimization**: Keep 100% of subscription revenue (no 30% App Store tax)
+3. **Universal Access**: Works on all devices - iOS, Android, tablets, computers
+4. **Better Parent Experience**: No app downloads, instant access, always updated
+5. **Faster Innovation**: A/B test features, rapid iteration, immediate bug fixes
+
+### Distribution Approach
+
+**Phase 1: Premium Web Experience (Immediate)**
+
+- Progressive Web App with native-like features
+- Install to home screen functionality
+- Offline capability for active conversations
+- Push notifications (with parental consent)
+
+**Phase 2: Parent Companion App (3-4 months)**
+
+- Native iOS/Android app for parents only
+- Listed as "Family Communication Tool" (not Kids Category)
+- Enhanced monitoring and real-time alerts
+- Child access remains web-based
+
+### Marketing Positioning
+
+**Key Messages**:
+
+- "Safer than apps - instantly updated when new threats emerge"
+- "Works on every device your family already owns"
+- "No storage space or downloads required"
+- "Start chatting in seconds, not minutes"
+
 ---
 
 ### 🎯 Goals & Success Criteria
@@ -24,9 +64,19 @@ Create a safe, emotionally intelligent chat tool for children aged 6–12 that o
 
 ---
 
-### 🧒 Kids' UI (To Be Defined Later)
+### 🧒 Kids' UI - Web-First Design
 
-The children's interface will prioritize extreme simplicity and emotional safety. While a final design is TBD, the following constraints are agreed:
+The children's interface prioritizes extreme simplicity and emotional safety, optimized for web browsers and PWA installation:
+
+#### PWA-Specific Features
+
+- **One-Tap Install**: Parents can add Onda to home screen during onboarding
+- **App-Like Experience**: Full-screen mode hides browser chrome
+- **Offline Support**: Continue conversations even without internet
+- **Touch-Optimized**: Designed for small fingers on mobile devices
+- **Fast Loading**: Service worker ensures instant launch
+
+#### Core Interface Elements
 
 - No login or account creation required.
 - Interface limited to:

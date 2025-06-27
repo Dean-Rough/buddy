@@ -232,9 +232,7 @@ export class WeeklySummaryGenerator {
           lt: maxRetries,
         },
         generationErrors: {
-          not: {
-            equals: [],
-          },
+          isEmpty: false,
         },
       },
       include: {
@@ -330,9 +328,7 @@ export class WeeklySummaryGenerator {
       where: {
         emailSent: false,
         generationErrors: {
-          not: {
-            equals: [],
-          },
+          isEmpty: false,
         },
       },
     });

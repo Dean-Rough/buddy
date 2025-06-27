@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
 
@@ -44,7 +44,7 @@ export default function FamilyAnalyticsCard({ className = '' }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
 
-  const loadFamilyAnalytics = async () => {
+  const loadFamilyAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -70,11 +70,11 @@ export default function FamilyAnalyticsCard({ className = '' }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeframe]);
 
   useEffect(() => {
     loadFamilyAnalytics();
-  }, [timeframe]);
+  }, [loadFamilyAnalytics]);
 
   const getScoreColor = (score: number): string => {
     if (score >= 0.8) return 'text-green-600';
@@ -104,7 +104,7 @@ export default function FamilyAnalyticsCard({ className = '' }: Props) {
 
   if (error) {
     return (
-      <BrutalCard variant="red" className={className}>
+      <BrutalCard variant="pink" className={className}>
         <div className="p-6">
           <h3 className="font-rokano text-xl mb-4">FAMILY ANALYTICS</h3>
           <div className="text-center">
@@ -145,7 +145,7 @@ export default function FamilyAnalyticsCard({ className = '' }: Props) {
             {(['daily', 'weekly', 'monthly'] as const).map(period => (
               <BrutalButton
                 key={period}
-                variant={timeframe === period ? 'black' : 'white'}
+                variant={timeframe === period ? 'blue' : 'white'}
                 size="small"
                 onClick={() => setTimeframe(period)}
               >

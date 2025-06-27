@@ -1,11 +1,8 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import { useUser, useClerk } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import BrutalChatInterface from '@/components/chat/BrutalChatInterface';
-import BrutalButton from '@/components/ui/BrutalButton';
 import AuthGuard from '@/components/auth/AuthGuard';
 
 interface ChildProfile {
@@ -24,8 +21,6 @@ export default function ChatPage() {
 
 function ChatPageContent() {
   const { user } = useUser();
-  const { signOut } = useClerk();
-  const router = useRouter();
   const [childProfile, setChildProfile] = React.useState<ChildProfile | null>(
     null
   );
@@ -106,15 +101,6 @@ function ChatPageContent() {
       </div>
     );
   }
-
-  const handleSignOut = () => {
-    signOut();
-    router.push('/');
-  };
-
-  const handleParentDashboard = () => {
-    router.push('/parent');
-  };
 
   return <BrutalChatInterface childProfile={childProfile} />;
 }

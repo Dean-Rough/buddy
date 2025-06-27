@@ -11,7 +11,6 @@ import {
   AlertSeverity,
   ContentAlert,
 } from './advanced-filtering-engine';
-import { TopicManagementService } from './topic-management';
 
 export interface MonitoringResult {
   allowed: boolean;
@@ -101,7 +100,7 @@ export class RealTimeContentMonitor {
         alertCreated = true;
 
         // Send real-time notification to parent (if they're online)
-        await this.sendRealTimeNotification(parentClerkUserId, {
+        await this.sendRealTimeNotification(parentClerkUserId, childAccountId, {
           type: 'content_alert',
           severity: this.determineSeverity(analysis, ruleResult.action),
           childName: await this.getChildName(childAccountId),
@@ -321,7 +320,7 @@ export class RealTimeContentMonitor {
       });
 
       return child?.age || 8;
-    } catch (error) {
+    } catch {
       return 8;
     }
   }
@@ -336,7 +335,7 @@ export class RealTimeContentMonitor {
       });
 
       return `Topics: ${conversation?.topics?.join(', ') || 'none'}, Mood: ${conversation?.mood || 'neutral'}`;
-    } catch (error) {
+    } catch {
       return '';
     }
   }
@@ -438,6 +437,7 @@ export class RealTimeContentMonitor {
 
   private static async sendRealTimeNotification(
     parentClerkUserId: string,
+    childAccountId: string,
     notification: {
       type: string;
       severity: AlertSeverity;
@@ -457,11 +457,12 @@ export class RealTimeContentMonitor {
       await prisma.parentNotification.create({
         data: {
           parentClerkUserId,
-          type: 'content_alert',
-          title: `Content Alert - ${notification.childName}`,
-          message: `${notification.severity} alert for topic: ${notification.topic}`,
-          severity: notification.severity,
-          read: false,
+          childAccountId,
+          notificationType: 'content_alert',
+          subject: `Content Alert - ${notification.childName}`,
+          content: `${notification.severity} alert for topic: ${notification.topic}. Action taken: ${notification.action}`,
+          deliveryMethod: 'push',
+          status: 'sent',
         },
       });
     } catch (error) {
@@ -477,7 +478,7 @@ export class RealTimeContentMonitor {
       });
 
       return child?.name || 'Child';
-    } catch (error) {
+    } catch {
       return 'Child';
     }
   }

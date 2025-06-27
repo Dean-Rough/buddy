@@ -262,21 +262,18 @@ describe('AISummaryGenerator', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          summary: expect.any(String),
+          overall_mood: expect.any(String),
+          mood_details: expect.any(String),
+          main_interests: expect.any(Array),
+          learning_moments: expect.any(String),
+          social_emotional: expect.any(String),
+          safety_status: expect.any(String),
+          safety_details: expect.any(String),
           highlights: expect.any(Array),
-          concerns: expect.any(Array),
-          recommendations: expect.any(Array),
-          mood_analysis: expect.any(String),
-          growth_opportunities: expect.any(Array),
-          next_week_focus: expect.any(String),
-          metadata: expect.objectContaining({
-            engagement_level: expect.any(String),
-            conversation_quality: expect.any(String),
-            safety_status: expect.any(String),
-            tokenUsage: expect.any(Number),
-            estimatedCost: expect.any(Number),
-            generatedAt: expect.any(String),
-          }),
+          suggested_conversations: expect.any(Array),
+          tokenUsage: expect.any(Number),
+          estimatedCost: expect.any(Number),
+          generatedAt: expect.any(String),
         })
       );
 
@@ -306,12 +303,12 @@ describe('AISummaryGenerator', () => {
     });
 
     it('should calculate costs correctly', async () => {
-      const result = await generator.generateSummary(mockWeeklyData, 8);
+      const result = await generator.generateSummary(mockWeeklyData, 8) as any;
 
       // Based on mock usage: 500 input tokens, 200 output tokens
       // GPT-4o-mini: $0.15/1K input, $0.6/1K output
       const expectedCost = (500 / 1000) * 0.00015 + (200 / 1000) * 0.0006;
-      expect(result.metadata.estimatedCost).toBeCloseTo(expectedCost, 6);
+      expect(result.estimatedCost).toBeCloseTo(expectedCost, 6);
     });
   });
 
@@ -388,9 +385,9 @@ describe('AISummaryGenerator', () => {
       const results = await generator.generateBatchSummaries(requests);
 
       expect(results).toHaveLength(3);
-      expect(results[0].summary).toContain('Success 1');
-      expect(results[1].summary).toContain('Test Child had 2 chat sessions'); // Fallback
-      expect(results[2].summary).toContain('Success 2');
+      expect((results[0] as any).summary).toContain('Success 1');
+      expect((results[1] as any).summary).toContain('Test Child had 2 chat sessions'); // Fallback
+      expect((results[2] as any).summary).toContain('Success 2');
     });
   });
 
@@ -542,11 +539,11 @@ describe('AISummaryGenerator', () => {
     });
 
     it('should track token usage and costs', async () => {
-      const result = await generator.generateSummary(mockWeeklyData, 8);
+      const result = await generator.generateSummary(mockWeeklyData, 8) as any;
 
-      expect(result.metadata.tokenUsage).toBe(700);
-      expect(result.metadata.estimatedCost).toBeGreaterThan(0);
-      expect(result.metadata.generatedAt).toBeDefined();
+      expect(result.tokenUsage).toBe(700);
+      expect(result.estimatedCost).toBeGreaterThan(0);
+      expect(result.generatedAt).toBeDefined();
     });
 
     it('should use cost-effective model (gpt-4o-mini)', async () => {

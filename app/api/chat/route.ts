@@ -239,7 +239,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Step 5.5: Perform advanced content monitoring (async to not block response)
-    const contentMonitoringPromise = RealTimeContentMonitor.monitorMessage(
+    // Intentionally not awaited to avoid blocking the response
+    RealTimeContentMonitor.monitorMessage(
       child.parentClerkUserId,
       child.id,
       conversation.id,
@@ -266,7 +267,7 @@ export async function POST(request: NextRequest) {
 
     // Step 6: Detect potential sibling interactions (async, don't block response)
     const allTopics = conversation.messages
-      .flatMap(m => (conversation as any).topics || [])
+      .flatMap(_m => (conversation as any).topics || [])
       .concat(
         recentMessages.flatMap(msg => {
           // Extract topics from message content (simplified)

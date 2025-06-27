@@ -104,7 +104,7 @@ export class AdvancedFilteringEngine {
   static async analyzeContent(
     content: string,
     childAge: number,
-    context?: string
+    _context?: string
   ): Promise<ContentAnalysis> {
     try {
       // Extract topics from content using AI analysis
@@ -338,7 +338,7 @@ export class AdvancedFilteringEngine {
 
   private static async categorizeContent(
     content: string,
-    topics: string[]
+    _topics: string[]
   ): Promise<ContentCategory> {
     // Simple categorization logic - would be enhanced with AI
     const educationalKeywords = [
@@ -370,7 +370,7 @@ export class AdvancedFilteringEngine {
   private static async scoreContent(
     content: string,
     category: ContentCategory,
-    childAge: number
+    _childAge: number
   ): Promise<ContentScore> {
     // Basic scoring logic - would be enhanced with AI
     if (category === ContentCategory.EDUCATIONAL) return ContentScore.EXCELLENT;
@@ -423,7 +423,7 @@ export class AdvancedFilteringEngine {
   private static async assessEducationalValue(
     content: string,
     category: ContentCategory,
-    childAge: number
+    _childAge: number
   ): Promise<number> {
     // Educational value scoring (0-1)
     if (category === ContentCategory.EDUCATIONAL) return 0.9;
@@ -499,7 +499,7 @@ export class AdvancedFilteringEngine {
 
   private static async getEducationalResources(
     topic: string,
-    childAge: number
+    _childAge: number
   ): Promise<string[]> {
     // This would fetch curated educational resources
     return [
@@ -511,14 +511,14 @@ export class AdvancedFilteringEngine {
 
   private static async generateRelatedEducationalContent(
     topic: string,
-    childAge: number
+    _childAge: number
   ): Promise<string> {
     return `Build on interest in ${topic} with educational activities`;
   }
 
   private static async getRelatedResources(
     topic: string,
-    childAge: number
+    _childAge: number
   ): Promise<string[]> {
     return [
       `Related educational content for ${topic}`,

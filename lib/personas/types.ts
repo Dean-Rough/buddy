@@ -253,7 +253,7 @@ export interface PersonaEvent {
 }
 
 // Error types
-export interface PersonaError {
+export interface PersonaErrorInterface {
   code:
     | 'INVALID_PERSONA'
     | 'SWITCH_TOO_FREQUENT'
@@ -263,4 +263,21 @@ export interface PersonaError {
   personaId?: PersonaId;
   childAccountId?: string;
   details?: Record<string, any>;
+}
+
+// Error class implementation
+export class PersonaError extends Error {
+  code: PersonaErrorInterface['code'];
+  personaId?: PersonaId;
+  childAccountId?: string;
+  details?: Record<string, any>;
+
+  constructor(error: PersonaErrorInterface) {
+    super(error.message);
+    this.name = 'PersonaError';
+    this.code = error.code;
+    this.personaId = error.personaId;
+    this.childAccountId = error.childAccountId;
+    this.details = error.details;
+  }
 }

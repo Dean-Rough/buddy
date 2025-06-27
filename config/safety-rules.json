@@ -7,9 +7,9 @@
     "description": "Immediate escalation to parents - severity 3",
     "patterns": [
       {
-        "regex": "\\b(kill\\s*(myself|me)|suicide|want\\s*to\\s*die|kms|kys|unalive\\s*myself)\\b",
+        "regex": "\\b(kill\\s*(myself|me)|suicide|want\\s*to\\s*die|kms|kys|unalive\\s*myself|hurt\\s*myself|cut\\s*myself|i\\s*want\\s*to\\s*die|i\\s*hate\\s*myself|thinking\\s*about\\s*suicide|nobody\\s*would\\s*care\\s*if\\s*i\\s*was\\s*gone|i\\s*want\\s*to\\s*kill\\s*myself|life\\s*isn'?t\\s*worth\\s*living|i\\s*should\\s*just\\s*disappear|everyone\\s*would\\s*be\\s*better\\s*without\\s*me)\\b",
         "flags": "i",
-        "reason": "Self-harm indication including youth slang",
+        "reason": "Direct self-harm indication including youth slang",
         "category": "self_harm",
         "contextOverrides": {
           "allowedContexts": [
@@ -50,6 +50,12 @@
         "flags": "i",
         "reason": "Inappropriate image request",
         "category": "exploitation"
+      },
+      {
+        "regex": "\\b(you\\s*should\\s*hurt\\s*yourself|cutting\\s*makes\\s*the\\s*pain\\s*go\\s*away|nobody\\s*would\\s*miss\\s*you|you'?re\\s*worthless|life\\s*isn'?t\\s*worth\\s*living|you\\s*should\\s*disappear|hurting\\s*yourself\\s*feels\\s*good|you\\s*deserve\\s*pain|everyone\\s*hates\\s*you|you'?re\\s*better\\s*off\\s*dead)\\b",
+        "flags": "i",
+        "reason": "Self-harm encouragement - extremely dangerous",
+        "category": "self_harm_encouragement"
       }
     ]
   },
@@ -58,16 +64,16 @@
     "description": "Notify parents within 10 minutes - severity 2.5",
     "patterns": [
       {
-        "regex": "\\b(cutting|self\\s*harm|hurting\\s*myself|want\\s*to\\s*hurt)\\b",
+        "regex": "\\b(cutting|self\\s*harm|hurting\\s*myself|want\\s*to\\s*hurt|i\\s*don'?t\\s*want\\s*to\\s*be\\s*here\\s*anymore|what'?s\\s*the\\s*point\\s*of\\s*anything|nothing\\s*matters|i'?m\\s*tired\\s*of\\s*everything|i\\s*can'?t\\s*do\\s*this\\s*anymore|i\\s*give\\s*up|everyone\\s*hates\\s*me|i'?m\\s*a\\s*burden|i\\s*feel\\s*empty\\s*inside|i\\s*don'?t\\s*deserve\\s*to\\s*be\\s*happy)\\b",
         "flags": "i",
-        "reason": "Self-harm discussion",
+        "reason": "Self-harm discussion or severe distress",
         "category": "self_harm_discussion",
         "supportResponse": "high_concern_support"
       },
       {
-        "regex": "\\b(nobody\\s*likes\\s*me|better\\s*off\\s*without\\s*me|wish\\s*i\\s*wasn'?t\\s*here)\\b",
+        "regex": "\\b(nobody\\s*likes\\s*me|better\\s*off\\s*without\\s*me|wish\\s*i\\s*wasn'?t\\s*here|i\\s*feel\\s*so\\s*worthless|nobody\\s*loves\\s*me|i'?m\\s*so\\s*alone|everything\\s*is\\s*hopeless|i\\s*can'?t\\s*take\\s*it\\s*anymore|i'?m\\s*a\\s*failure|i\\s*ruin\\s*everything|i'?m\\s*stupid\\s*and\\s*ugly|why\\s*was\\s*i\\s*even\\s*born|i\\s*wish\\s*i\\s*was\\s*never\\s*born)\\b",
         "flags": "i",
-        "reason": "Severe emotional distress",
+        "reason": "Severe emotional distress with self-harm risk",
         "category": "emotional_crisis",
         "supportResponse": "crisis_support"
       },

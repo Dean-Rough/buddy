@@ -301,7 +301,7 @@ export class PersonaSystem {
     currentContext?: Partial<PersonaContext>
   ): Promise<{
     recommended: PersonaId[];
-    reasons: Record<PersonaId, string>;
+    reasons: Partial<Record<PersonaId, string>>;
     currentEffectiveness: number;
   }> {
     // Get age-appropriate personas
@@ -322,7 +322,7 @@ export class PersonaSystem {
 
     // Generate recommendations based on various factors
     const recommendations: PersonaId[] = [];
-    const reasons: Record<PersonaId, string> = {};
+    const reasons: Partial<Record<PersonaId, string>> = {};
 
     for (const persona of suitablePersonas) {
       if (persona.id === currentPersona) continue;

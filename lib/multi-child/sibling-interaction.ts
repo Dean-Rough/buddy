@@ -4,10 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import {
-  PrivacyIsolationService,
-  DataAccessRequest,
-} from './privacy-isolation';
+import { PrivacyIsolationService } from './privacy-isolation';
 
 export type InteractionType =
   | 'shared_topic_discussion'
@@ -135,7 +132,7 @@ export class SiblingInteractionManager {
     topics: string[],
     child: { id: string; name: string; age: number },
     siblings: { id: string; name: string; age: number }[],
-    context: { messageCount: number; mood?: string; timeOfDay: string }
+    _context: { messageCount: number; mood?: string; timeOfDay: string }
   ): Promise<{
     detected: boolean;
     type: InteractionType;
@@ -460,7 +457,7 @@ export class SiblingInteractionManager {
    */
   static async getFamilyInteractionInsights(
     parentClerkUserId: string,
-    days: number = 7
+    _days: number = 7
   ): Promise<{
     totalInteractions: number;
     interactionTypes: Record<InteractionType, number>;
@@ -480,7 +477,19 @@ export class SiblingInteractionManager {
       // In a real implementation, this would query actual interaction records
       // For now, we'll return mock insights based on the dynamics
 
-      const insights = {
+      const insights: {
+        totalInteractions: number;
+        interactionTypes: Record<InteractionType, number>;
+        familyBenefitScore: number;
+        privacyRiskScore: number;
+        recommendations: string[];
+        siblingPairs: Array<{
+          child1: string;
+          child2: string;
+          compatibilityScore: number;
+          recentInteractions: number;
+        }>;
+      } = {
         totalInteractions: Math.floor(dynamics.familyEngagementScore * 20), // Estimate
         interactionTypes: {
           shared_topic_discussion: 5,

@@ -185,13 +185,13 @@ export class PersonaResponseGenerator {
         baseResponse = await this.generateContextualAnswer(
           input,
           personaConfig,
-          context
+          _context
         );
         break;
     }
 
     // Apply persona communication style
-    return this.applyPersonaStyle(baseResponse, personaConfig, context);
+    return this.applyPersonaStyle(baseResponse, personaConfig, _context);
   }
 
   private async generateContextualAnswer(

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { googleCalendarService } from '@/lib/calendar/google-calendar-service';
+import { getBaseUrl } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Handle OAuth errors
     if (error) {
       console.error('OAuth error:', error);
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4288';
+      const baseUrl = getBaseUrl();
       return NextResponse.redirect(
         `${baseUrl}/parent/dashboard?error=calendar_auth_failed&message=${encodeURIComponent(error)}`
       );

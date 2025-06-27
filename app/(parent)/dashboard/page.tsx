@@ -292,7 +292,7 @@ export default function ParentDashboardOverview() {
                         <span>Active Today:</span>
                         <span className="font-bold">
                           {
-                            children.filter(child =>
+                            children.filter(_child =>
                               getSelectedChildUsage().some(
                                 usage => usage.sessionCount > 0
                               )
@@ -305,7 +305,7 @@ export default function ParentDashboardOverview() {
                         <span>Family Sessions:</span>
                         <span className="font-bold">
                           {children.reduce((total, child) => {
-                            const childUsage = recentUsage.filter(usage =>
+                            const childUsage = recentUsage.filter(_usage =>
                               children.find(c => c.id === child.id)
                             );
                             return (
@@ -331,7 +331,7 @@ export default function ParentDashboardOverview() {
                               <span>{child.name}:</span>
                               <span>
                                 {recentUsage
-                                  .filter(usage =>
+                                  .filter(_usage =>
                                     children.find(c => c.id === child.id)
                                   )
                                   .reduce(

@@ -546,10 +546,14 @@ describe('Persona System', () => {
         expect(config.traits.length).toBeGreaterThan(0);
 
         // Check communication style
-        expect(config.communicationStyle.enthusiasm).toBeBetween(1, 10);
-        expect(config.communicationStyle.formality).toBeBetween(1, 10);
-        expect(config.communicationStyle.wordComplexity).toBeBetween(1, 10);
-        expect(config.communicationStyle.emotionExpression).toBeBetween(1, 10);
+        expect(config.communicationStyle.enthusiasm).toBeGreaterThanOrEqual(1);
+        expect(config.communicationStyle.enthusiasm).toBeLessThanOrEqual(10);
+        expect(config.communicationStyle.formality).toBeGreaterThanOrEqual(1);
+        expect(config.communicationStyle.formality).toBeLessThanOrEqual(10);
+        expect(config.communicationStyle.wordComplexity).toBeGreaterThanOrEqual(1);
+        expect(config.communicationStyle.wordComplexity).toBeLessThanOrEqual(10);
+        expect(config.communicationStyle.emotionExpression).toBeGreaterThanOrEqual(1);
+        expect(config.communicationStyle.emotionExpression).toBeLessThanOrEqual(10);
 
         // Check response patterns
         expect(config.responsePatterns.greetings.length).toBeGreaterThan(0);
@@ -560,11 +564,16 @@ describe('Persona System', () => {
         expect(config.responsePatterns.farewells.length).toBeGreaterThan(0);
 
         // Check behavior characteristics
-        expect(config.behavior.patienceLevel).toBeBetween(1, 10);
-        expect(config.behavior.curiosityLevel).toBeBetween(1, 10);
-        expect(config.behavior.helpfulness).toBeBetween(1, 10);
-        expect(config.behavior.playfulness).toBeBetween(1, 10);
-        expect(config.behavior.empathy).toBeBetween(1, 10);
+        expect(config.behavior.patienceLevel).toBeGreaterThanOrEqual(1);
+        expect(config.behavior.patienceLevel).toBeLessThanOrEqual(10);
+        expect(config.behavior.curiosityLevel).toBeGreaterThanOrEqual(1);
+        expect(config.behavior.curiosityLevel).toBeLessThanOrEqual(10);
+        expect(config.behavior.helpfulness).toBeGreaterThanOrEqual(1);
+        expect(config.behavior.helpfulness).toBeLessThanOrEqual(10);
+        expect(config.behavior.playfulness).toBeGreaterThanOrEqual(1);
+        expect(config.behavior.playfulness).toBeLessThanOrEqual(10);
+        expect(config.behavior.empathy).toBeGreaterThanOrEqual(1);
+        expect(config.behavior.empathy).toBeLessThanOrEqual(10);
       });
     });
   });

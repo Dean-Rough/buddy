@@ -1,4 +1,16 @@
-# Onda - Child AI Chat Platform
+# Onda - Child AI Chat Platform (Web-First PWA)
+
+## 🌐 Platform Strategy - Progressive Web App
+
+**Why Web-First?** Apple's App Store prohibits AI-generated content in kids' apps. This constraint becomes our advantage:
+
+- **🚀 Instant Updates**: Deploy safety improvements in minutes, not weeks
+- **💰 100% Revenue**: No 30% App Store commission
+- **🌍 Universal Access**: Works on every device with a browser
+- **📱 App-Like Experience**: PWA technology provides native feel
+- **🔒 Better Safety**: Real-time updates when threats emerge
+
+**Access from any device** - No downloads required!
 
 ## Tech Stack
 
@@ -75,6 +87,36 @@ npm run test         # Run tests
 npm run test:safety  # Safety validation tests
 npm run lint         # ESLint + Prettier
 npm run type-check   # TypeScript validation
+```
+
+### PWA Setup (NEW)
+
+```bash
+# 1. Create PWA manifest
+cp public/manifest.example.json public/manifest.json
+
+# 2. Generate app icons
+npm run generate-icons  # Creates all required sizes
+
+# 3. Test PWA features
+npm run lighthouse     # Run Lighthouse audit
+
+# 4. Test on mobile
+npm run ngrok         # Expose local dev to mobile
+```
+
+### Mobile Web Testing
+
+```bash
+# iOS Testing
+- Open in Safari
+- Tap Share > Add to Home Screen
+- Test offline functionality
+
+# Android Testing
+- Open in Chrome
+- Tap Menu > Add to Home Screen
+- Test install experience
 ```
 
 ## File Structure

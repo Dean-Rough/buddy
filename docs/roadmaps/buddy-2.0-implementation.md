@@ -1,6 +1,72 @@
-# Buddy 2.0: Organic Nudging Implementation Roadmap
+# Buddy 2.0: Organic Nudging Implementation Roadmap (Web-First Strategy)
 
-## Phase 1: Foundation Enhancement (Weeks 1-4)
+## 🌐 **NEW: Web-First Foundation (Weeks 1-4)**
+
+### Epic 0.1: Progressive Web App Implementation
+
+**Goal**: Transform existing web app into production-ready PWA before organic nudging features
+
+#### **Prompt 0.1.1: Core PWA Setup**
+
+```
+🎯 Implement core Progressive Web App features:
+- Create manifest.json with proper app metadata
+- Add service worker for offline chat functionality
+- Implement install-to-home-screen prompts
+- Add iOS-specific PWA meta tags and optimizations
+
+📁 Deliverables: public/manifest.json, public/sw.js, InstallPrompt component
+✅ Acceptance: Lighthouse PWA score >90, installs on iOS/Android
+🧪 Tests: PWA installation, offline functionality, update mechanisms
+```
+
+#### **Prompt 0.1.2: Mobile Web Optimization**
+
+```
+🎯 Optimize existing interface for mobile-first PWA experience:
+- Add touch-optimized gestures and interactions
+- Implement proper viewport handling and safe areas
+- Optimize performance for 3G networks (<3s interactive)
+- Add offline indicators and sync capabilities
+
+📁 Deliverables: Mobile touch handlers, offline sync, performance optimizations
+✅ Acceptance: <200ms tap response, 95+ mobile Lighthouse score
+🧪 Tests: Touch interaction tests, offline mode validation
+```
+
+#### **Prompt 0.1.3: Parent Onboarding for PWA**
+
+```
+🎯 Update parent onboarding to promote PWA installation:
+- Add install prompts during parent account creation
+- Create iOS/Android installation instruction overlays
+- Implement install success tracking and analytics
+- Add "why web is better" messaging for safety updates
+
+📁 Deliverables: PWA onboarding flow, install instructions
+✅ Acceptance: >30% installation rate from onboarding
+🧪 Tests: Installation flow testing, cross-device compatibility
+```
+
+### Epic 0.2: Web-First Marketing Foundation
+
+**Goal**: Position web-first as premium advantage in all parent-facing content
+
+#### **Prompt 0.2.1: Update Landing Page**
+
+```
+🎯 Redesign landing page to emphasize web-first advantages:
+- Lead with "No downloads required - start in seconds"
+- Highlight instant safety updates vs app store delays
+- Add demo functionality for immediate trial
+- Create compelling PWA installation flow
+
+📁 Deliverables: Updated landing page, demo functionality
+✅ Acceptance: >40% trial-to-signup conversion
+🧪 Tests: A/B test messaging variants, conversion tracking
+```
+
+## Phase 1: Foundation Enhancement (Weeks 5-8)
 
 ### Epic 1.1: Intelligent Email Summary System
 

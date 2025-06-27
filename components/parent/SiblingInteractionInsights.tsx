@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BrutalCard from '@/components/ui/BrutalCard';
 import BrutalButton from '@/components/ui/BrutalButton';
 
@@ -28,7 +28,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
   const [days, setDays] = useState(7);
   const [error, setError] = useState<string | null>(null);
 
-  const loadInsights = async () => {
+  const loadInsights = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -54,11 +54,11 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [days]);
 
   useEffect(() => {
     loadInsights();
-  }, [days]);
+  }, [loadInsights]);
 
   const getInteractionTypeLabel = (type: string): string => {
     switch (type) {
@@ -92,7 +92,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
 
   if (loading) {
     return (
-      <BrutalCard variant="green" className={className}>
+      <BrutalCard variant="blue" className={className}>
         <div className="p-6">
           <h3 className="font-rokano text-xl mb-4">SIBLING INTERACTIONS</h3>
           <div className="flex items-center justify-center h-32">
@@ -105,7 +105,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
 
   if (error) {
     return (
-      <BrutalCard variant="red" className={className}>
+      <BrutalCard variant="pink" className={className}>
         <div className="p-6">
           <h3 className="font-rokano text-xl mb-4">SIBLING INTERACTIONS</h3>
           <div className="text-center">
@@ -133,7 +133,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
   }
 
   return (
-    <BrutalCard variant="green" className={className}>
+    <BrutalCard variant="blue" className={className}>
       <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -142,7 +142,7 @@ export default function SiblingInteractionInsights({ className = '' }: Props) {
             {[7, 14, 30].map(period => (
               <BrutalButton
                 key={period}
-                variant={days === period ? 'black' : 'white'}
+                variant={days === period ? 'blue' : 'white'}
                 size="small"
                 onClick={() => setDays(period)}
               >

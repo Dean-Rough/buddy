@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { PrivacyIsolationService, DataCategory } from './privacy-isolation';
+import { DataCategory } from './privacy-isolation';
 import { SiblingInteractionManager } from './sibling-interaction';
 
 export type AnalyticsTimeframe = 'daily' | 'weekly' | 'monthly' | 'yearly';

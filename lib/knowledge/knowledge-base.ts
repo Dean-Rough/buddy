@@ -594,7 +594,7 @@ export class YouthKnowledgeBase {
   }
 
   private generateFallback(query: string, age: number): string {
-    const fallbacks = {
+    const fallbacks: Record<string, string[]> = {
       gaming: [
         "haven't heard of that game yet - is it new? what's it like?",
         "don't know that one - what kind of game is it?",
@@ -610,6 +610,11 @@ export class YouthKnowledgeBase {
         "haven't heard that one - is it a new thing?",
         "you're teaching me new words - what's that mean?",
       ],
+      general: [
+        'ngl no idea what that is - can you tell me about it?',
+        "that's new to me - what is it?",
+        "haven't come across that - fill me in?",
+      ],
       default: [
         'ngl no idea what that is - can you tell me about it?',
         "that's new to me - what is it?",
@@ -618,7 +623,8 @@ export class YouthKnowledgeBase {
     };
 
     const category = this.categorizeQuery(query);
-    const options = fallbacks[category] || fallbacks.default;
+    const options =
+      fallbacks[category] || fallbacks['general'] || fallbacks.default;
 
     if (age < 9) return options[0];
     if (age < 11) return options[1];

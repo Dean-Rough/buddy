@@ -32,8 +32,6 @@ export default function ChildProfileCreator({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -146,20 +144,6 @@ export default function ChildProfileCreator({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Error message */}
-      {formError && (
-        <div className="p-2 bg-red-100 border border-red-400 rounded mb-4 text-red-700">
-          {formError}
-        </div>
-      )}
-
-      {/* Success message */}
-      {successMessage && (
-        <div className="p-2 bg-green-100 border border-green-400 rounded mb-4 text-green-700">
-          {successMessage}
-        </div>
-      )}
-
       {/* Child Name */}
       <div className="mb-4">
         <label className="block mb-1 font-bold">Child&apos;s Name</label>

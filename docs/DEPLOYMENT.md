@@ -1,4 +1,129 @@
-# Deployment & Environment Setup - Onda Platform
+# Deployment & Environment Setup - Onda Platform (Web-First PWA)
+
+## 🌐 Progressive Web App (PWA) Configuration
+
+### PWA Setup Requirements
+
+Create the following files in your project root:
+
+#### 1. `public/manifest.json`
+
+```json
+{
+  "name": "Onda - Safe AI Chat for Kids",
+  "short_name": "Onda",
+  "description": "A safe AI companion for children aged 6-12",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+#### 2. Service Worker Setup
+
+Create `public/sw.js` for offline capability:
+
+```javascript
+// Basic service worker for offline support
+const CACHE_NAME = 'onda-v1';
+const urlsToCache = ['/', '/offline', '/manifest.json'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches
+      .match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
+```
+
+#### 3. Mobile Web Optimization Checklist
+
+- [ ] Add viewport meta tag in `app/layout.tsx`
+- [ ] Implement touch-friendly tap targets (min 44x44px)
+- [ ] Add iOS-specific meta tags for PWA support
+- [ ] Test on real devices (iOS Safari, Android Chrome)
+- [ ] Implement app install prompt component
+- [ ] Add offline page for graceful degradation
+- [ ] Optimize images for mobile bandwidth
+- [ ] Enable text selection prevention in chat UI
+- [ ] Add pull-to-refresh functionality
+- [ ] Implement smooth scrolling for chat
+
+### Install-to-Home-Screen Implementation
+
+Add to parent onboarding flow:
+
+```typescript
+// components/pwa/InstallPrompt.tsx
+const [installPrompt, setInstallPrompt] = useState(null);
+
+useEffect(() => {
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    setInstallPrompt(e);
+  });
+}, []);
+
+const handleInstall = async () => {
+  installPrompt.prompt();
+  const { outcome } = await installPrompt.userChoice;
+  if (outcome === 'accepted') {
+    // Track successful installation
+  }
+};
+```
 
 ## Environment Configuration
 
@@ -208,6 +333,55 @@ SAFETY_TEST_MODE=true
 MODERATION_QUEUE_PRIORITY=low
 PARENT_NOTIFICATIONS_ENABLED=false
 ```
+
+## Web-First Deployment Strategy
+
+### Why Web-First Wins
+
+1. **Immediate Launch**: Deploy today, not after 2-4 week app review
+2. **Instant Updates**: Push safety fixes immediately when threats emerge
+3. **100% Revenue**: No 30% App Store commission on subscriptions
+4. **Global Reach**: SEO benefits and direct web traffic
+5. **Universal Access**: Works on every device with a browser
+
+### Web Deployment Process
+
+```bash
+# 1. Build for production
+pnpm build
+
+# 2. Test production build locally
+pnpm start
+
+# 3. Deploy to Vercel
+vercel --prod
+
+# 4. Set up custom domain
+# In Vercel dashboard, add your domain
+```
+
+### PWA Deployment Checklist
+
+- [ ] Generate all icon sizes (72x72 to 512x512)
+- [ ] Create apple-touch-icon for iOS
+- [ ] Add manifest.json to public folder
+- [ ] Implement service worker for offline
+- [ ] Test install experience on iOS/Android
+- [ ] Add meta tags for mobile web app
+- [ ] Optimize Critical Rendering Path
+- [ ] Enable HTTPS (required for PWA)
+- [ ] Test offline functionality
+- [ ] Implement update notifications
+
+### Marketing the Web Advantage
+
+**Parent-Facing Benefits**:
+
+- "No app downloads or updates required"
+- "Instantly updated when new safety threats emerge"
+- "Works on all your family's devices"
+- "Takes up zero storage space"
+- "Try it instantly without commitment"
 
 ## Production Deployment
 
