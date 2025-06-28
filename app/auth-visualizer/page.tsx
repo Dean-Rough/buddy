@@ -28,7 +28,7 @@ export default function AuthVisualizerPage() {
     // Additional debugging data
     rawUnsafeMetadata: user?.unsafeMetadata,
     rawPublicMetadata: user?.publicMetadata,
-    sessionId: user?.sessionId,
+    // sessionId: user?.sessionId, // sessionId doesn't exist on UserResource
   };
 
   const middlewareLogic = {
@@ -132,7 +132,7 @@ export default function AuthVisualizerPage() {
             <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
               <div style={{ color: '#4CAF50' }}>user?.unsafeMetadata?.userType</div>
               <div style={{ color: '#fff', marginTop: '5px' }}>
-                Value: <strong>{user?.unsafeMetadata?.userType || 'undefined'}</strong>
+                Value: <strong>{String(user?.unsafeMetadata?.userType || 'undefined')}</strong>
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function AuthVisualizerPage() {
               <div style={{ color: '#FF9800' }}>sessionClaims?.metadata?.userType ||</div>
               <div style={{ color: '#FF9800' }}>sessionClaims?.unsafeMetadata?.userType</div>
               <div style={{ color: '#fff', marginTop: '5px' }}>
-                Simulated: <strong>{user?.unsafeMetadata?.userType || 'undefined'}</strong>
+                Simulated: <strong>{String(user?.unsafeMetadata?.userType || 'undefined')}</strong>
               </div>
               <div style={{ color: '#ccc', fontSize: '10px', marginTop: '5px' }}>
                 (Note: Middleware has different data access)
