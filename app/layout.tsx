@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import '../styles/fonts.css';
 import '../styles/brutalist.css';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ClientClerkProvider from '@/components/ClientClerkProvider';
 
 // Initialize why-did-you-render in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -36,7 +36,7 @@ export default function RootLayout({
   }
 
   return (
-    <ClerkProvider>
+    <ClientClerkProvider>
       <html lang="en">
         <body className="font-avotica">
           <div
@@ -59,6 +59,6 @@ export default function RootLayout({
           </ErrorBoundary>
         </body>
       </html>
-    </ClerkProvider>
+    </ClientClerkProvider>
   );
 }
