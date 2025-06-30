@@ -8,8 +8,10 @@ const nextConfig = {
     // Temporarily ignore ESLint errors to fix deployment
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    swcMinify: false,
+  swcMinify: true,
+  // Ensure Clerk env vars are available
+  env: {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   },
 };
 
