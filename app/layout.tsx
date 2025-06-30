@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProviderWrapper } from '@/components/ClerkProviderWrapper';
 import './globals.css';
 import '../styles/fonts.css';
 import '../styles/brutalist.css';
@@ -36,7 +36,7 @@ export default function RootLayout({
   }
 
   return (
-    <ClerkProvider>
+    <ClerkProviderWrapper>
       <html lang="en">
         <body className="font-avotica">
           <div
@@ -59,6 +59,6 @@ export default function RootLayout({
           </ErrorBoundary>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }
