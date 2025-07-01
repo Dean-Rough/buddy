@@ -9,10 +9,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   swcMinify: true,
-  // Ensure Clerk env vars are available
-  env: {
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-  },
+  // Remove env section - Vercel handles this automatically
 };
 
 module.exports = nextConfig;
