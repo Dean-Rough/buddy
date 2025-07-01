@@ -6,6 +6,8 @@ export default authMiddleware({
   publicRoutes: [
     '/', // Landing page
     '/test', // Test page for debugging
+    '/test-basic', // Basic test page without Clerk
+    '/debug', // Debug diagnostics page
     '/debug-auth', // Auth debug page
     '/debug-deploy', // Deployment debug page
     '/simple-landing', // Simple landing page
